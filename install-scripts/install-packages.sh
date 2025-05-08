@@ -23,5 +23,5 @@ InstallPackages() {
 }
 
 # Software Installs
-core_packages="git gawk curl stow fzf bat bash-completion webp"
+core_packages="git gawk curl stow fzf bat bash-completion webp kitty"
 InstallPackages $core_packages
