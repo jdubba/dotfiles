@@ -6,3 +6,4 @@ chmod +x ./install-scripts/*.sh
 ./install-scripts/ensure-common-directories.sh
 ./install-scripts/stow-config.sh
 ./install-scripts/install-packages.sh
+./install-scripts/install-fastfetch.sh
