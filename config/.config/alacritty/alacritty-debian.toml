@@ -1,0 +1,7 @@
+import = [
+	"~/source/jdubba.shell/.config/alacritty/alacritty.toml"
+]
+
+
+[shell]
+	program="wsl -d Debian"

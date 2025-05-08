@@ -1,0 +1,87 @@
+format = """
+[](bold purple) $time
+[󰄽](bold purple) $localip [/](bold purple) $custom [󰄾](bold purple)
+$os $username[@](purple)$hostname $directory
+$character
+"""
+
+continuation_prompt = '▶▶ '
+
+[character]
+success_symbol = '[❯](bold green)'
+error_symbol = '[](bold red)'
+
+[time]
+disabled = false
+time_format = "%r" # Hour:Minute Format
+style = "bold bright-purple"
+format = "([$time]($style))"
+
+[username]
+show_always = true
+format = "[$user](bold blue)"
+
+[hostname]
+ssh_only = false
+format = "[$hostname](bold bright-blue)"
+
+[directory]
+read_only = " "
+truncation_length = 8
+truncation_symbol = ".../"
+truncate_to_repo = false
+home_symbol = "~"
+format = "[$path](bold white)"
+
+[localip]
+ssh_only = false
+format = "[$localipv4](bold bright-purple)"
+disabled = false
+
+[os]
+disabled = false
+format = "[$symbol](bold purple)"
+
+[os.symbols]
+Alpine = ""
+AlmaLinux = ""
+Amazon = ""
+Android = ""
+Arch = ""
+CentOS = ""
+Debian = ""
+DragonFly = ""
+Emscripten = ""
+EndeavourOS = ""
+Fedora = ""
+FreeBSD = ""
+Garuda = "﯑"
+Gentoo = ""
+HardenedBSD = "ﲊ"
+Illumos = ""
+Linux = ""
+Macos = ""
+Manjaro = ""
+Mariner = ""
+MidnightBSD = ""
+Mint = ""
+NetBSD = ""
+NixOS = ""
+OpenBSD = ""
+openSUSE = ""
+OracleLinux = ""
+Raspbian = ""
+Pop = ''
+Redhat = ""
+RedHatEnterprise = ""
+Redox = ""
+Solus = "ﴱ"
+SUSE = ""
+Ubuntu = ""
+Unknown = ""
+
+[custom.externalip]
+command = "printf $EXTERNAL_IP"
+style = "bold bright-purple"
+format = "[$output]($style)"
+when = "true"
