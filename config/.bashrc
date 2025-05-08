@@ -70,47 +70,36 @@ if [ -f ~/.bash_aliases ]; then
     . ~/.bash_aliases
 fi
 
+# enable programmable completion features (you don't need to enable
+# this, if it's already enabled in /etc/bash.bashrc and /etc/profile
+# sources /etc/bash.bashrc).
+if ! shopt -oq posix; then
+  if [ -f /usr/share/bash-completion/bash_completion ]; then
+    . /usr/share/bash-completion/bash_completion
+  elif [ -f /etc/bash_completion ]; then
+    . /etc/bash_completion
+  fi
+fi
 
-#UNCOMMENT ONCE INSTALLERS CONFIG IS READY
+if [ -f ~/.git-completion.bash ]; then
+  . ~/.git-completion.bash
+fi
 
-#
-# # enable programmable completion features (you don't need to enable
-# # this, if it's already enabled in /etc/bash.bashrc and /etc/profile
-# # sources /etc/bash.bashrc).
-# if ! shopt -oq posix; then
-#   if [ -f /usr/share/bash-completion/bash_completion ]; then
-#     . /usr/share/bash-completion/bash_completion
-#   elif [ -f /etc/bash_completion ]; then
-#     . /etc/bash_completion
-#   fi
-# fi
-#
-# if [ -f ~/.git-completion.bash ]; then
-#   . ~/.git-completion.bash
-# fi
-#
-# # User bin installs
-# export PATH=$PATH:/home/jwilliams/.local/bin
-#
-# # Capture external ip to environment for general usage
-# export EXTERNAL_IP=$(curl -s https://ipinfo.io/ip)
-#
-# # Start the starship shell prompt tool
-# eval "$(starship init bash)"
-#
-# source ~/.local/share/blesh/ble.sh
-#
-# # Custom keybinds
-# bind '"\e[A": history-search-backward'
-# bind '"\e[B": history-search-forward'
-#
-# cd ~
-#
-# export NVM_DIR="$HOME/.nvm"
-# [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-# [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
-#
-# clear &&fastfetch
+# User bin installs
+export PATH=$PATH:/home/jwilliams/.local/bin
 
-#TODO: TEMP message to verify installation, remove once install scripts have been created and tested
-echo "TEMPORARY NEW BASHRC"
+# Capture external ip to environment for general usage
+export EXTERNAL_IP=$(curl -s https://ipinfo.io/ip)
+
+# Start the starship shell prompt tool
+eval "$(starship init bash)"
+
+source ~/.local/share/blesh/ble.sh
+
+# Custom keybinds
+bind '"\e[A": history-search-backward'
+bind '"\e[B": history-search-forward'
+
+cd ~
+
+clear &&fastfetch
