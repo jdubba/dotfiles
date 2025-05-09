@@ -73,3 +73,4 @@ cat > ~/.gitsigning << EOF
 
 [tag]
     gpgsign=true
+EOF

@@ -9,7 +9,7 @@ chmod +x ./install-scripts/*.sh
 sudo apt update
 
 ./install-scripts/install-packages.sh
-./install-scripts/install-bel.sh.sh
+./install-scripts/install-ble.sh.sh
 ./install-scripts/install-starship.sh
 ./install-scripts/install-yai.sh
 
