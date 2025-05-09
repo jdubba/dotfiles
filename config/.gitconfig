@@ -1,29 +1,30 @@
 [core]
-	editor = /usr/bin/nvim
-
-[diff]
-  tool = nvim
-
-[difftool "nvim"]
-  cmd = "/usr/bin/nvim -d \"$LOCAL\" \"$REMOTE\""
-
-[merge]
-  tool = nvim
-
-[mergetool "nvim"]
-  cmd = nvim -f -c \"Gdiffsplit!\" \"$MERGED\"
-
-[mergetool]
-  prompt = false
+    editor = /usr/bin/nvim
 
 [alias]
-	st = status
-  co = checkout
-  d = difftool
-  cm = commit -m
-  lg = lgn -n 15
-  lgn = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an> %ae%Creset' --abbrev-commit
-
+    st = statusco = checkout
+    d = difftool
+    cm = commit -m  
+    lg = lgn -n 15
+    lgn = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an> %ae%Creset' --abbrev-commit
 
 [init]
 	defaultBranch = mainq
+
+[include]
+    path=~/.gitsigning
+
+[diff]
+    tool = nvim
+
+[difftool "nvim"]
+    cmd = "/usr/bin/nvim -d \"$LOCAL\" \"$REMOTE\""
+
+[merge]
+    tool = nvim
+
+[mergetool]
+    prompt = false
+
+[mergetool "nvim"]
+    cmd = nvim -f -c \"Gdiffsplit!\" \"$MERGED\"
