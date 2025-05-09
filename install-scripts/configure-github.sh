@@ -52,14 +52,14 @@ echo "Generated GPG key with fingerprint: $GIT_SIGNING_KEY"
 
 # 5. Authenticate to GitHub (interactive)
 echo "Now logging in to GitHub via GH CLI..."
-gh auth login || {
+gh auth login -s write:gpg_key || {
   echo "GitHub login failed. Make sure gh CLI is installed and configured." >&2
   exit 1
 }
 
 # 6. Export and upload the public key
 echo "Exporting public key and uploading to GitHub..."
-gpg --armor --export "$GIT_SIGNING_KEY" | gh gpg-key add -
+gpg --armor --export "$GIT_SIGNING_KEY" | gh gpg-key add $(hostname)
 
 # 7. Create a helper script for applying Git signing configuration
 cat > ~/.gitsigning <<'HEREDOC'
