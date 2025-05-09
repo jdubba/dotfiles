@@ -1,0 +1,88 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# 1. Prompt for user info
+read -p "Full Name: " FULL_NAME
+export GIT_USERNAME="$FULL_NAME"
+read -p "Email: " EMAIL
+export GIT_EMAIL="$EMAIL"
+read -sp "Passphrase (leave empty for no passphrase): " PASSPHRASE
+echo
+
+# 2. Create a GPG batch file
+BATCH_FILE=$(mktemp)
+cat > "$BATCH_FILE" <<EOF
+%echo Generating a GPG key
+Key-Type: default
+Key-Length: 4096
+Subkey-Type: default
+Name-Real: $FULL_NAME
+Name-Email: $EMAIL
+Expire-Date: 0
+EOF
+
+# Only include Passphrase line if provided
+if [[ -n "$PASSPHRASE" ]]; then
+  cat >> "$BATCH_FILE" <<EOF
+Passphrase: $PASSPHRASE
+EOF
+fi
+
+cat >> "$BATCH_FILE" <<EOF
+%commit
+%echo Key generation complete
+EOF
+
+# 3. Generate the key
+gpg --batch --generate-key "$BATCH_FILE"
+rm -f "$BATCH_FILE"
+
+# 4. Extract the newly generated key’s fingerprint
+KEY_FPR=$(gpg --list-secret-keys --with-colons "$EMAIL" \
+           | awk -F: '/^sec/ {print $5; exit}')
+
+if [[ -z "$KEY_FPR" ]]; then
+  echo "ERROR: Could not find GPG key fingerprint for $EMAIL" >&2
+  exit 1
+fi
+
+export GIT_SIGNING_KEY="$KEY_FPR"
+echo "Generated GPG key with fingerprint: $GIT_SIGNING_KEY"
+
+# 5. Authenticate to GitHub (interactive)
+echo "Now logging in to GitHub via GH CLI..."
+gh auth login || {
+  echo "GitHub login failed. Make sure gh CLI is installed and configured." >&2
+  exit 1
+}
+
+# 6. Export and upload the public key
+echo "Exporting public key and uploading to GitHub..."
+gpg --armor --export "$GIT_SIGNING_KEY" | gh gpg-key add -
+
+# 7. Create a helper script for applying Git signing configuration
+cat > ~/.gitsigning <<'HEREDOC'
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Environment variables for Git identity and signing key
+export GIT_USERNAME="$FULL_NAME"
+export GIT_EMAIL="$EMAIL"
+export GIT_SIGNING_KEY="$KEY_FPR"
+
+# Configure Git to sign commits and tags
+git config --global user.name "$GIT_USERNAME"
+git config --global user.email "$GIT_EMAIL"
+git config --global user.signingkey "$GIT_SIGNING_KEY"
+git config --global commit.gpgsign true
+git config --global tag.gpgsign true
+
+cat <<EOF
+Git signing configuration applied:
+  user.name       = $GIT_USERNAME
+  user.email      = $GIT_EMAIL
+  signing key     = $GIT_SIGNING_KEY
+EOF
+HEREDOC
+
+chmod +x ~/.gitsigning

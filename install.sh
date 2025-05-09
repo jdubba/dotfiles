@@ -5,5 +5,12 @@ chmod +x ./install-scripts/*.sh
 
 ./install-scripts/ensure-common-directories.sh
 ./install-scripts/stow-config.sh
+
+./install-scripts/add-repos.sh
+sudo apt upadate
+
 ./install-scripts/install-packages.sh
-./install-scripts/install-fastfetch.sh
+./install-scripts/install-bel.sh.sh
+./install-scripts/install-starship.sh
+./install-scripts/install-yai.sh
+./install-scripts/configure-github.sh
