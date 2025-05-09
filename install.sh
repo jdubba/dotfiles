@@ -7,7 +7,7 @@ chmod +x ./install-scripts/*.sh
 ./install-scripts/stow-config.sh
 
 ./install-scripts/add-repos.sh
-sudo apt upadate
+sudo apt update
 
 ./install-scripts/install-packages.sh
 ./install-scripts/install-bel.sh.sh
