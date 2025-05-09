@@ -16,7 +16,7 @@ cat > "$BATCH_FILE" <<EOF
 Key-Type: EDDSA
 Key-Curve: ed25519
 Key-Length: 4096
-Key-Usage: S
+Key-Usage: sign
 Name-Real: $FULL_NAME
 Name-Email: $EMAIL 
 Expire-Date: 0
