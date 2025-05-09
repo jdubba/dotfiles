@@ -61,29 +61,15 @@ gh auth login -s write:gpg_key || {
 echo "Exporting public key and uploading to GitHub..."
 gpg --armor --export "$GIT_SIGNING_KEY" | gh gpg-key add -t $(hostname) -
 
-# 7. Create a helper script for applying Git signing configuration
-cat > ~/.gitsigning <<'HEREDOC'
-#!/usr/bin/env bash
-set -euo pipefail
+# 7. Create a git configuration file with signing rsettings
+cat > ~/.gitsigning << EOF
+[user]
+    name="$FULL_NAME"
+    email="$EMAIL"
+    signingkey="$KEY_FPR"
 
-# Environment variables for Git identity and signing key
-export GIT_USERNAME="$FULL_NAME"
-export GIT_EMAIL="$EMAIL"
-export GIT_SIGNING_KEY="$KEY_FPR"
+[commit]
+    gpgsign=true
 
-# Configure Git to sign commits and tags
-git config --global user.name "$GIT_USERNAME"
-git config --global user.email "$GIT_EMAIL"
-git config --global user.signingkey "$GIT_SIGNING_KEY"
-git config --global commit.gpgsign true
-git config --global tag.gpgsign true
-
-cat <<EOF
-Git signing configuration applied:
-  user.name       = $GIT_USERNAME
-  user.email      = $GIT_EMAIL
-  signing key     = $GIT_SIGNING_KEY
-EOF
-HEREDOC
-
-chmod +x ~/.gitsigning
+[tag]
+    gpgsign=true
