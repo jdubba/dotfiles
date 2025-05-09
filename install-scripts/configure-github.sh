@@ -59,7 +59,7 @@ gh auth login -s write:gpg_key || {
 
 # 6. Export and upload the public key
 echo "Exporting public key and uploading to GitHub..."
-gpg --armor --export "$GIT_SIGNING_KEY" | gh gpg-key add $(hostname)
+gpg --armor --export "$GIT_SIGNING_KEY" | gh gpg-key add -t $(hostname) -
 
 # 7. Create a helper script for applying Git signing configuration
 cat > ~/.gitsigning <<'HEREDOC'
