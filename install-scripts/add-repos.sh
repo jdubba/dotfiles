@@ -9,7 +9,7 @@
 	&& echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null \
 
 # NOTE:  Add the repo for fastfetch
-sudo add-apt-repository ppa:zhangsongcui3371/fastfetch
+sudo add-apt-repository -y ppa:zhangsongcui3371/fastfetch
 
 # NOTE: Add the repo for brave browser
 sudo apt install curl
