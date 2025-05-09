@@ -15,10 +15,10 @@ cat > "$BATCH_FILE" <<EOF
 %echo Generating a GPG key
 Key-Type: EDDSA
 Key-Curve: ed25519
-Subkey-Type: ECDH
-Subkey-Curve: cv25519
-Name-Real: Your Name
-Name-Email: you@example.com
+Key-Length: 4096
+Key-Usage: S
+Name-Real: $FULL_NAME
+Name-Email: $EMAIL 
 Expire-Date: 0
 EOF
 
