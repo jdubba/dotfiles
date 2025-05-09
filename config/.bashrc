@@ -96,6 +96,9 @@ eval "$(starship init bash)"
 
 source ~/.local/share/blesh/ble.sh
 
+# Set Git signing environment variables, and enable commit and tag signing
+source ~/.gitsigning
+
 # Custom keybinds
 bind '"\e[A": history-search-backward'
 bind '"\e[B": history-search-forward'
