@@ -6,7 +6,10 @@ chmod +x ./install-scripts/*.sh
 ./install-scripts/ensure-common-directories.sh
 
 ./install-scripts/add-repos.sh
-sudo apt update
+
+if command -v apt-get >/dev/null 2>&1; then
+    sudo apt update
+fi
 
 ./install-scripts/install-packages.sh
 ./install-scripts/install-ble.sh.sh
