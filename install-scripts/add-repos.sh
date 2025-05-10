@@ -16,18 +16,15 @@ if command -v apt-get >/dev/null 2>&1; then
 
     # NOTE: Add the repo for brave browser
     sudo apt install curl
-    echo "deb [signed-by=/usr/share/keyrings/brave-browser-archive-keyring.gpg] https://brave-browser-apt-release.s3.brave.com/ stable main"|sudo tee /etc/apt/sources.list.d/brave-browser-release.list
+
     sudo curl -fsSLo /usr/share/keyrings/brave-browser-archive-keyring.gpg https://brave-browser-apt-release.s3.brave.com/brave-browser-archive-keyring.gpg
 
-
-    # NOTE: Add repo for xh, bat, ripgrep and others
-    curl -fsSL https://apt.cli.rs/pubkey.asc | sudo tee -a /usr/share/keyrings/rust-tools.asc
-    curl -fsSL https://apt.cli.rs/rust-tools.list | sudo tee /etc/apt/sources.list.d/rust-tools.list
-fi
+    echo "deb [signed-by=/usr/share/keyrings/brave-browser-archive-keyring.gpg] https://brave-browser-apt-release.s3.brave.com/ stable main"|sudo tee /etc/apt/sources.list.d/brave-browser-release.list
+families
 
 
 #NOTE:  Package for Fedora/DNF version 5
-if command -v dnf >/dev/null 2&1; then 
+if command -v dnf >/dev/null 2>&1; then 
     if dnf --version | grep -q 'dnf5 version 5\.'; then
         # NOTE: Github CLI
         sudo dnf install dnf5-plugins
