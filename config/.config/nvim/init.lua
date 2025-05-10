@@ -76,5 +76,3 @@ autocmd('LspAttach', {
 require("vim-options")
 require("vim-remaps")
 require("lazy").setup("plugins")
-
-vim.cmd("colorscheme gruvbox")
