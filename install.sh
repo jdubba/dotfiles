@@ -13,6 +13,7 @@ sudo apt update
 ./install-scripts/install-starship.sh
 ./install-scripts/install-yai.sh
 ./install-scripts/install-neovim.sh
+./install-scripts/install-kitty.sh
 ./install-scripts/install-fonts.sh
 
 ./install-scripts/stow-config.sh
