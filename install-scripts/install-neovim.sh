@@ -16,7 +16,7 @@ else
   pushd .
   cd ~
   curl -LO https://github.com/neovim/neovim/releases/latest/download/nvim-linux-x86_64.tar.gz
-  tar -xzf nvim-linux-x86_64.tar.gz -C /opt --transform='s|^nvim-linux-x86_64|nvim|'
+  sudo tar -xzf nvim-linux-x86_64.tar.gz -C /opt --transform='s|^nvim-linux-x86_64|nvim|'
   rm nvim-linux-x86_64.tar.gz
 
   if [ -f "/usr/bin/nvim" ]; then sudo rm /usr/bin/nvim; fi
