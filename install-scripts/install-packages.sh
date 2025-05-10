@@ -23,5 +23,5 @@ InstallPackages() {
 }
 
 # Software Installs
-core_packages="git gawk make curl stow fzf bat bash-completion webp kitty brave-browser gh fastfetch"
+core_packages="git gawk make curl stow fzf bat bash-completion webp kitty brave-browser gh fastfetch build-essential npm xh ripgrep"
 InstallPackages $core_packages

@@ -12,6 +12,8 @@ sudo apt update
 ./install-scripts/install-ble.sh.sh
 ./install-scripts/install-starship.sh
 ./install-scripts/install-yai.sh
+./install-scripts/install-neovim.sh
+./install-scripts/install-fonts.sh
 
 ./install-scripts/stow-config.sh
 ./install-scripts/configure-github.sh
