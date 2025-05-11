@@ -11,7 +11,7 @@ InstallPackages() {
       
     if dnf --version | grep -q 'dnf5 version 5\.'; then
       sudo dnf install -y $*
-      sudo dnf group install c-development development-tools development-libs 
+      sudo dnf group install -y c-development development-tools development-libs 
     fi
 
   elif command -v yum >/dev/null 2>&1; then
