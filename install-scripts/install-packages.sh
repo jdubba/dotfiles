@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# TODO:  Rewrite and test, include dnf4 vs dnf5
+# NOTE:  Rewrite and test, include dnf4 vs dnf5
 InstallPackages() {
 
   if command -v apt-get >/dev/null 2>&1; then
@@ -8,9 +8,12 @@ InstallPackages() {
       sudo apt-get install -y $apt_packages
 
   elif command -v dnf >/dev/null 2>&1; then
+      
+    if dnf --version | grep -q 'dnf5 version 5\.'; then
       sudo dnf install -y $*
-      sudo dnf groupinstall "Development Tools" "Development Libraries"
-  
+      sudo dnf group install c-development development-tools development-libs 
+    fi
+
   elif command -v yum >/dev/null 2>&1; then
       sudo yum install -y $*
   
