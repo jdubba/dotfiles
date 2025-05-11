@@ -28,5 +28,5 @@ InstallPackages() {
 }
 
 # Software Installs
-common_packages ="git gawk make curl stow fzf bat bash-completion kitty brave-browser gh fastfetch npm ripgrep"
-InstallPackages $core_packages
+common_packages="git gawk make curl stow fzf bat bash-completion kitty brave-browser gh fastfetch npm ripgrep"
+InstallPackages $common_packages
