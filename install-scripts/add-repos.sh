@@ -38,7 +38,7 @@ if command -v dnf >/dev/null 2>&1; then
         sudo dnf install dnf-plugins-core
         sudo dnf config-manager addrepo --from-repofile=https://brave-browser-rpm-release.s3.brave.com/brave-browser.repo
    
-    elif if dnf --version | grep -q '4\.'; then
+    elif dnf --version | grep -q '4\.'; then
         #NOTE: Github CLI
         sudo dnf install 'dnf-command(config-manager)'
         sudo dnf config-manager --add-repo https://cli.github.com/packages/rpm/gh-cli.repo
