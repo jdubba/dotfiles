@@ -22,4 +22,4 @@ fi
 ./install-scripts/install-fonts.sh
 
 ./install-scripts/stow-config.sh
-./install-scripts/configure-github.sh
+./install-scripts/link-scripts.sh
