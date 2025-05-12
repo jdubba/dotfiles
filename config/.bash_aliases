@@ -29,6 +29,19 @@ alias ping='ping -c 5'
 # Do not wait interval 1 second, go fast #
 alias fastping='ping -c 100 -s.2'
 
+# Easy kubectl
 alias k=kubectl
 
+# Kitten ssh for remote support of kitty term
 alias kssh="kitten ssh"
+
+# Git related aliases
+alias gst='git status'
+alias ga='git add'
+alias gaa='git add .'
+alias gco='git checkout'
+alias gcm='git commit -m'
+
+# Replace standard cat command
+alias ocat='/usr/bin/cat'
+alias cat='batcat'
