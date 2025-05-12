@@ -13,7 +13,6 @@ if [[ $XDG_CURRENT_DESKTOP == *"GNOME"* ]]; then
         gext install tophat@fflewddur.github.io
         gext install top-bar-organizer@julian.gse.jsts.xyz
     fi
-
-    dconf load ./res/media-keybindings
-    dconf load ./res/wm-keybindings
+    dconf load /org/gnome/settings-daemon/plugins/media-keys/ < ./res/media-keybindings 
+    dconf load /org/gnome/desktop/wm/keybindings/ < ./res/wm-keybindings 
 fi
