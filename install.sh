@@ -23,3 +23,5 @@ fi
 
 ./install-scripts/stow-config.sh
 ./install-scripts/link-scripts.sh
+
+./install-scripts/install-gnome-extras.sh
