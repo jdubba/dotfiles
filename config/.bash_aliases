@@ -44,4 +44,11 @@ alias gcm='git commit -m'
 
 # Replace standard cat command
 alias ocat='/usr/bin/cat'
-alias cat='batcat'
+
+# TODO:  Update install process to install/build latest bat with bat bin naming and remove this
+#        alias logic caused by older bin name on current ubuntu based distros
+if which bat &> /dev/null; then
+    alias cat='bat'
+else
+    alias cat='batcat'
+fi
