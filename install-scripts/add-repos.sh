@@ -1,7 +1,14 @@
 #!/bin/bash
 
-#NOTE:  Package updates for Debian/Ubuntu families
+#       Arch Linux uses official repos + AUR, so no additional repos needed
 
+# Skip repo setup on Arch Linux since packages are available via pacman/AUR
+if command -v pacman >/dev/null 2>&1; then
+    echo "Arch Linux detected - skipping repository setup (using pacman/AUR)"
+    exit 0
+fi
+
+#NOTE:  Package updates for Debian/Ubuntu families
 if command -v apt-get >/dev/null 2>&1; then
     # NOTE:  Add the Github.com package source
     (type -p wget >/dev/null || (sudo apt update && sudo apt-get install wget -y)) \
