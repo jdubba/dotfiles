@@ -1,6 +1,19 @@
 #!/bin/bash
 
-# NOTE:  Use the direct installer to get the lastest stable builds
+# On Arch Linux, prefer package manager installation
+if command -v pacman >/dev/null 2>&1; then
+    echo "Arch Linux detected - installing kitty via package manager"
+    if command -v yay >/dev/null 2>&1; then
+        yay -S --needed --noconfirm kitty
+    elif command -v paru >/dev/null 2>&1; then
+        paru -S --needed --noconfirm kitty
+    else
+        sudo pacman -S --needed --noconfirm kitty
+    fi
+    exit 0
+fi
+
+# NOTE:  Use the direct installer to get the lastest stable builds for other distributions
 curl -L https://sw.kovidgoyal.net/kitty/installer.sh | sh /dev/stdin
 
 # NOTE:  Configure desktop/app launcher

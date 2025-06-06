@@ -9,7 +9,20 @@ if [[ $1 == "-f" || $1 == "--force" ]]; then
     echo "Force flag detected"                                                                                                                                         
 fi
 
-# Install the most recent nvim release
+# On Arch Linux, prefer package manager installation
+if command -v pacman >/dev/null 2>&1; then
+    echo "Arch Linux detected - installing neovim via package manager"
+    if command -v yay >/dev/null 2>&1; then
+        yay -S --needed --noconfirm neovim
+    elif command -v paru >/dev/null 2>&1; then
+        paru -S --needed --noconfirm neovim
+    else
+        sudo pacman -S --needed --noconfirm neovim
+    fi
+    exit 0
+fi
+
+# Install the most recent nvim release for other distributions
 if [ -d /opt/nvim ]; then
   echo "Neovim already installed, use -f or --force to force reinstall"
 else

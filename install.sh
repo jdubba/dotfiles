@@ -11,6 +11,7 @@ if command -v apt-get >/dev/null 2>&1; then
     sudo apt update
 fi
 
+./install-scripts/install-aur-helper.sh
 ./install-scripts/install-packages.sh
 ./install-scripts/install-ble.sh.sh
 ./install-scripts/install-starship.sh
