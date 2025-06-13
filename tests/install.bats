@@ -6,8 +6,13 @@ load 'lib/bats-assert/load'
 
 # Setup test environment before each test
 setup() {
-  # Create a temporary test environment
-  export TEST_DIR="$(mktemp -d)"
+  # Create a temporary test directory
+  if ! TEST_DIR=$(mktemp -d); then
+    echo "Failed to create temp directory" >&2
+    return 1
+  fi
+  
+  # Export variables for test
   export HOME="${TEST_DIR}/home"
   export REPO_DIR="${TEST_DIR}/repo"
   
@@ -23,7 +28,7 @@ setup() {
   echo "alias ll='ls -la'" > "${REPO_DIR}/config/.bash_aliases"
   
   # Initialize git repo
-  cd "${REPO_DIR}"
+  cd "${REPO_DIR}" || return 1
   git init -q
   git config --local user.email "test@example.com"
   git config --local user.name "Test User"
@@ -38,14 +43,14 @@ teardown() {
 }
 
 @test "install script runs without errors" {
-  cd "${REPO_DIR}"
+  cd "${REPO_DIR}" || skip "Could not change to repo directory"
   run ./install.sh
   assert_success
   assert_output --partial "Configuration files have been successfully linked"
 }
 
 @test "install creates symlinks correctly" {
-  cd "${REPO_DIR}"
+  cd "${REPO_DIR}" || skip "Could not change to repo directory"
   run ./install.sh
   assert_success
   
@@ -67,7 +72,7 @@ teardown() {
 }
 
 @test "install detects uncommitted changes" {
-  cd "${REPO_DIR}"
+  cd "${REPO_DIR}" || skip "Could not change to repo directory"
   # Create an uncommitted change
   echo "modified content" > "${REPO_DIR}/config/.testrc"
   
@@ -89,7 +94,7 @@ teardown() {
   git commit -q -m "Add .bashrc"
   
   # Run install
-  cd "${REPO_DIR}"
+  cd "${REPO_DIR}" || skip "Could not change to repo directory"
   run ./install.sh
   assert_success
   
@@ -102,7 +107,7 @@ teardown() {
 
 @test "install is idempotent" {
   # Run install once
-  cd "${REPO_DIR}"
+  cd "${REPO_DIR}" || skip "Could not change to repo directory"
   ./install.sh
   
   # Run install again

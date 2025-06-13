@@ -23,7 +23,7 @@ fi
 echo "No pending changes detected in config folder. Proceeding with stow..."
 
 # Establish config symlinks, using --adopt followed by targeted git restore
-stow -v --adopt -d $stow_directory -t $stow_target_directory config
+stow -v --adopt -d "$stow_directory" -t "$stow_target_directory" config
 
 # Only restore the config directory, preserving other changes
 git restore config/
