@@ -28,23 +28,43 @@ teardown() {
   rm -rf "${TEST_DIR}"
 }
 
-@test "stow creates proper symlinks" {
-  # Skip this test for now as stow behavior can vary between versions
-  skip "Stow behavior varies between versions"
-  
+@test "stow creates accessible content regardless of symlink structure" {
   # Run stow directly
   run stow -v -d "${STOW_DIR}" -t "${HOME}" config
   assert_success
   
-  # Check that symlinks were created
-  [ -L "${HOME}/.testrc" ]
-  [ -d "${HOME}/.config" ]
-  [ -d "${HOME}/.config/app" ]
-  [ -L "${HOME}/.config/app/settings" ]
+  # Check that content is accessible, regardless of how symlinks are structured
+  [ -e "${HOME}/.testrc" ]
+  [ -e "${HOME}/.config/app/settings" ]
   
-  # Check content is correct
+  # Verify content is correct
   assert_equal "$(cat "${HOME}/.testrc")" "test content"
   assert_equal "$(cat "${HOME}/.config/app/settings")" "app config"
+}
+
+@test "stow creates symlinks appropriate for the installed version" {
+  # Get stow version
+  local stow_version=$(stow --version | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1)
+  
+  # Run stow
+  run stow -v -d "${STOW_DIR}" -t "${HOME}" config
+  assert_success
+  
+  # Check that root level symlink was created (consistent across versions)
+  [ -L "${HOME}/.testrc" ]
+  
+  # For nested directories, check based on version
+  if [[ "$stow_version" == "2.3."* ]]; then
+    # For newer versions, check that the app directory exists
+    [ -d "${HOME}/.config" ]
+    [ -d "${HOME}/.config/app" ]
+    # And that the settings file is a symlink
+    [ -L "${HOME}/.config/app/settings" ]
+  else
+    # For all versions, verify the content is accessible
+    [ -e "${HOME}/.config/app/settings" ]
+    assert_equal "$(cat "${HOME}/.config/app/settings")" "app config"
+  fi
 }
 
 @test "stow handles conflicts with --adopt" {
