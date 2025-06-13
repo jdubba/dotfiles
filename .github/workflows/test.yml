@@ -7,16 +7,41 @@ on:
     branches: [ main, master ]
 
 jobs:
-  test:
+  lint:
+    name: Lint
     runs-on: ubuntu-latest
     
     steps:
     - uses: actions/checkout@v3
     
-    - name: Install dependencies
+    - name: Install ShellCheck
+      run: sudo apt-get update && sudo apt-get install -y shellcheck
+    
+    - name: Run linting
+      run: ./lint.sh
+
+  test:
+    name: Test
+    needs: lint
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+      fail-fast: false
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Install dependencies (Ubuntu)
+      if: matrix.os == 'ubuntu-latest'
       run: |
         sudo apt-get update
         sudo apt-get install -y stow
+    
+    - name: Install dependencies (macOS)
+      if: matrix.os == 'macos-latest'
+      run: |
+        brew install stow
     
     - name: Install BATS
       run: |
@@ -25,3 +50,31 @@ jobs:
     - name: Run tests
       run: |
         ./test.sh
+    
+    - name: Test actual installation
+      run: |
+        # Create a test user home directory
+        mkdir -p /tmp/home
+        export HOME=/tmp/home
+        
+        # Run the install script
+        ./install.sh
+        
+        # Verify symlinks were created
+        echo "Checking created symlinks:"
+        ls -la /tmp/home
+        
+        # Check that config directory was linked if it exists
+        if [ -d "config/.config" ]; then
+          echo "Checking .config directory:"
+          ls -la /tmp/home/.config
+        fi
+        
+        # Verify a few specific files
+        for file in .bashrc .bash_aliases .profile .gitconfig; do
+          if [ -f "config/$file" ]; then
+            echo "Checking $file..."
+            test -L "/tmp/home/$file" || (echo "$file symlink not created" && exit 1)
+            echo "$file correctly linked"
+          fi
+        done
