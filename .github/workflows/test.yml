@@ -72,6 +72,9 @@ jobs:
       run: |
         brew install bash git stow bats-core 
         
+        echo "Working directory"
+        echo $(pwd)
+        
         # Create lib directory for BATS helpers
         mkdir -p tests/lib
         
