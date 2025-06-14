@@ -1,28 +1,31 @@
 #!/bin/bash
 
-## NOTE: Enable execution on installation helper scripts  
-chmod +x ./install-scripts/*.sh
+set -e
 
-./install-scripts/ensure-common-directories.sh
+stow_directory=$(pwd)
+stow_target_directory=$HOME
 
-./install-scripts/add-repos.sh
-
-if command -v apt-get >/dev/null 2>&1; then
-    sudo apt update
+# Check for untracked or staged changes in the config folder
+if [[ -n $(git status --porcelain config/) ]]; then
+    echo "ERROR: Detected untracked or staged changes in the config folder."
+    echo ""
+    echo "The following files have changes:"
+    git status --porcelain config/
+    echo ""
+    echo "INSTRUCTIONS TO RESOLVE:"
+    echo "1. Either commit your changes: git add config/ && git commit -m 'Update config files'"
+    echo "2. Or discard your changes: git restore config/ && git clean -fd config/"
+    echo ""
+    echo "After resolving the changes, run this script again."
+    exit 1
 fi
 
-./install-scripts/install-aur-helper.sh
-./install-scripts/install-packages.sh
-./install-scripts/install-ble.sh.sh
-./install-scripts/install-starship.sh
-./install-scripts/install-yai.sh
-./install-scripts/install-neovim.sh
-./install-scripts/install-kitty.sh
-./install-scripts/install-webp.sh
-./install-scripts/install-xh.sh
-./install-scripts/install-fonts.sh
+echo "No pending changes detected in config folder. Proceeding with stow..."
 
-./install-scripts/stow-config.sh
-./install-scripts/link-scripts.sh
+# Establish config symlinks, using --adopt followed by targeted git restore
+stow -v --adopt -d "$stow_directory" -t "$stow_target_directory" config
 
-./install-scripts/install-gnome-extras.sh
+# Only restore the config directory, preserving other changes
+git restore config/
+
+echo "Configuration files have been successfully linked."
