@@ -68,6 +68,7 @@ export GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quo
 # See /usr/share/doc/bash-doc/examples in the bash-doc package.
 
 if [ -f ~/.bash_aliases ]; then
+    # shellcheck source=./.bash_aliases
     . ~/.bash_aliases
 fi
 
@@ -78,11 +79,13 @@ if ! shopt -oq posix; then
   if [ -f /usr/share/bash-completion/bash_completion ]; then
     . /usr/share/bash-completion/bash_completion
   elif [ -f /etc/bash_completion ]; then
+    # shellcheck source=/dev/null
     . /etc/bash_completion
   fi
 fi
 
 if [ -f ~/.git-completion.bash ]; then
+  # shellcheck source=/dev/null
   . ~/.git-completion.bash
 fi
 
@@ -95,6 +98,7 @@ export EXTERNAL_IP=$(curl -s https://ipinfo.io/ip)
 # Start the starship shell prompt tool
 eval "$(starship init bash)"
 
+# shellcheck source=/dev/null
 source ~/.local/share/blesh/ble.sh
 
 # Custom keybinds
