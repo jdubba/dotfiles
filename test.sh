@@ -7,14 +7,16 @@ set -e
 find_bats() {
   # Check if system bats is available
   if command -v bats &>/dev/null; then
-    echo "Using system bats: $(command -v bats)"
+    # Print info message to stderr so it doesn't affect the return value
+    echo "Using system bats: $(command -v bats)" >&2
     command -v bats
     return 0
   fi
   
   # Check if our local bats is available
   if [ -f "tests/lib/bats-core/bin/bats" ]; then
-    echo "Using local bats: $(pwd)/tests/lib/bats-core/bin/bats"
+    # Print info message to stderr
+    echo "Using local bats: $(pwd)/tests/lib/bats-core/bin/bats" >&2
     echo "$(pwd)/tests/lib/bats-core/bin/bats"
     return 0
   fi
