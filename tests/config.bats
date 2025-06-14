@@ -1,6 +1,7 @@
 #!/usr/bin/env bats
 
 # Load our custom helper that can find libraries in multiple locations
+# shellcheck source=./helper.bash
 source "$(dirname "$BATS_TEST_FILENAME")/helper.bash"
 load_all_helpers
 
