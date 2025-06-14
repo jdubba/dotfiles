@@ -13,6 +13,7 @@ debug() {
 
 # Determine the directory where this script is located
 TESTS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+debug "BASH_SOURCE[0] = ${BASH_SOURCE[0]}"
 debug "TESTS_DIR = $TESTS_DIR"
 
 # Load bats-support
