@@ -41,7 +41,7 @@ jobs:
     - name: Install dependencies (macOS)
       if: matrix.os == 'macos-latest'
       run: |
-        brew install stow
+        brew install stow bats-core
     
     - name: Debug environment
       run: |
@@ -49,12 +49,32 @@ jobs:
         echo "Current directory: $(pwd)"
         echo "Git version: $(git --version)"
         ls -la
+        if command -v bats &>/dev/null; then
+          echo "System bats found: $(which bats)"
+          bats --version
+        else
+          echo "System bats not found"
+        fi
     
     - name: Install BATS
       run: |
         chmod +x tests/install_bats.sh
         ./tests/install_bats.sh
-        ls -la tests/lib/bats-core/bin
+        
+        # If system bats is available on macOS, create a symlink
+        if [ "${{ matrix.os }}" = "macos-latest" ] && command -v bats &>/dev/null; then
+          echo "Creating symlink to system bats"
+          mkdir -p tests/lib/bats-core/bin
+          ln -sf $(which bats) tests/lib/bats-core/bin/bats
+        fi
+        
+        # Show the bats installation
+        echo "BATS installation:"
+        ls -la tests/lib/bats-core
+        if [ -d "tests/lib/bats-core/bin" ]; then
+          echo "BATS bin directory:"
+          ls -la tests/lib/bats-core/bin
+        fi
     
     - name: Run tests
       run: |
