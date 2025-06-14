@@ -43,12 +43,22 @@ jobs:
       run: |
         brew install stow
     
+    - name: Debug environment
+      run: |
+        echo "OS: ${{ matrix.os }}"
+        echo "Current directory: $(pwd)"
+        echo "Git version: $(git --version)"
+        ls -la
+    
     - name: Install BATS
       run: |
+        chmod +x tests/install_bats.sh
         ./tests/install_bats.sh
+        ls -la tests/lib/bats-core/bin
     
     - name: Run tests
       run: |
+        chmod +x test.sh
         ./test.sh
     
     - name: Test actual installation
