@@ -1,3 +1,4 @@
+#!/bin/bash
 # ~/.bashrc: executed by bash(1) for non-login shells.
 # see /usr/share/doc/bash/examples/startup-files (in the package bash-doc)
 # for examples
@@ -67,6 +68,7 @@ export GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quo
 # See /usr/share/doc/bash-doc/examples in the bash-doc package.
 
 if [ -f ~/.bash_aliases ]; then
+    # shellcheck source=./.bash_aliases
     . ~/.bash_aliases
 fi
 
@@ -77,11 +79,13 @@ if ! shopt -oq posix; then
   if [ -f /usr/share/bash-completion/bash_completion ]; then
     . /usr/share/bash-completion/bash_completion
   elif [ -f /etc/bash_completion ]; then
+    # shellcheck source=/dev/null
     . /etc/bash_completion
   fi
 fi
 
 if [ -f ~/.git-completion.bash ]; then
+  # shellcheck source=/dev/null
   . ~/.git-completion.bash
 fi
 
@@ -89,17 +93,30 @@ fi
 export PATH=$PATH:/home/jwilliams/.local/bin
 
 # Capture external ip to environment for general usage
-export EXTERNAL_IP=$(curl -s https://ipinfo.io/ip)
+# Split declaration and assignment to avoid masking curl's return value
+export EXTERNAL_IP
+if command -v curl &> /dev/null; then
+  EXTERNAL_IP=$(curl -s https://ipinfo.io/ip)
+else
+  EXTERNAL_IP="unknown"
+fi
 
 # Start the starship shell prompt tool
-eval "$(starship init bash)"
+if command -v starship &> /dev/null; then
+  eval "$(starship init bash)"
+fi
 
-source ~/.local/share/blesh/ble.sh
+# Source ble.sh if it exists
+if [ -f ~/.local/share/blesh/ble.sh ]; then
+  # shellcheck source=/dev/null
+  source ~/.local/share/blesh/ble.sh
+fi
 
 # Custom keybinds
 bind '"\e[A": history-search-backward'
 bind '"\e[B": history-search-forward'
 
-cd ~
+# Change to home directory with error handling
+cd ~ || return
 
 clear &&fastfetch

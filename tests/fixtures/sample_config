@@ -1,0 +1,4 @@
+# Sample configuration file for testing
+# This is used to verify the stow functionality works correctly
+
+sample_setting="test_value"
