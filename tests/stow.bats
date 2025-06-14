@@ -1,8 +1,8 @@
 #!/usr/bin/env bats
 
-# Load test helpers
-load 'lib/bats-support/load'
-load 'lib/bats-assert/load'
+# Load our custom helper that can find libraries in multiple locations
+source "$(dirname "$BATS_TEST_FILENAME")/helper.bash"
+load_all_helpers
 
 # Setup test environment before each test
 setup() {

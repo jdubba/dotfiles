@@ -41,7 +41,7 @@ jobs:
     - name: Install dependencies (macOS)
       if: matrix.os == 'macos-latest'
       run: |
-        brew install stow bats-core
+        brew install stow bats-core bats-support bats-assert
     
     - name: Debug environment
       run: |
@@ -55,22 +55,24 @@ jobs:
         else
           echo "System bats not found"
         fi
+        
+        # Check for Homebrew bats libraries on macOS
+        if [ "${{ matrix.os }}" = "macos-latest" ]; then
+          echo "Checking for Homebrew bats libraries:"
+          ls -la /opt/homebrew/lib/bats-* || echo "No Homebrew bats libraries found"
+        fi
     
     - name: Install BATS
       run: |
         chmod +x tests/install_bats.sh
         ./tests/install_bats.sh
         
-        # If system bats is available on macOS, create a symlink
-        if [ "${{ matrix.os }}" = "macos-latest" ] && command -v bats &>/dev/null; then
-          echo "Creating symlink to system bats"
-          mkdir -p tests/lib/bats-core/bin
-          ln -sf $(which bats) tests/lib/bats-core/bin/bats
-        fi
-        
         # Show the bats installation
         echo "BATS installation:"
-        ls -la tests/lib/bats-core
+        ls -la tests/lib/bats-core || echo "bats-core not found"
+        ls -la tests/lib/bats-support || echo "bats-support not found"
+        ls -la tests/lib/bats-assert || echo "bats-assert not found"
+        
         if [ -d "tests/lib/bats-core/bin" ]; then
           echo "BATS bin directory:"
           ls -la tests/lib/bats-core/bin
