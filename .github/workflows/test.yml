@@ -20,8 +20,8 @@ jobs:
     - name: Run linting
       run: |
         # Only lint shell scripts, not BATS tests which require special handling
-        SHELL_SCRIPTS=$(find . -type f -name "*.sh" -o -name "install*" | grep -v "tests/lib" | grep -v "^./.git/")
-        echo "$SHELL_SCRIPTS" | xargs shellcheck -x
+        echo "Linting shell scripts..."
+        find . -type f -name "*.sh" -o -name "install*" | grep -v "tests/lib" | grep -v "^./.git/" | xargs shellcheck -x
         
         # Check bash configuration files
         if [ -f "config/.bashrc" ]; then
@@ -38,6 +38,8 @@ jobs:
           echo "Checking config/.profile..."
           shellcheck -x config/.profile || true
         fi
+        
+        echo "Linting completed successfully!"
 
   test:
     name: Test
