@@ -107,6 +107,7 @@ source ~/.local/share/blesh/ble.sh
 bind '"\e[A": history-search-backward'
 bind '"\e[B": history-search-forward'
 
-cd ~
+# Change to home directory with error handling
+cd ~ || return
 
 clear &&fastfetch
