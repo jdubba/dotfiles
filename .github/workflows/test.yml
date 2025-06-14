@@ -168,13 +168,6 @@ jobs:
     container:
       image: ${{ matrix.distro }}
     
-    env:
-      # Disable Git safe directory checks completely
-      GIT_CONFIG_GLOBAL: /dev/null
-      GIT_CONFIG_SYSTEM: /dev/null
-      GIT_CEILING_DIRECTORIES: /__w
-      GIT_DISCOVERY_ACROSS_FILESYSTEM: 1
-    
     steps:
     - name: Install Git and other dependencies (Fedora)
       if: contains(matrix.distro, 'fedora')
@@ -194,26 +187,39 @@ jobs:
         # Install BATS dependencies
         pacman -S --noconfirm bats
     
-    - name: Checkout repository
-      uses: actions/checkout@v3
-    
-    - name: Fix permissions and Git configuration
+    - name: Set Git safe directory (pre-checkout)
       run: |
-        # Show current Git configuration
-        echo "Current Git configuration:"
-        git config --list
-        
-        # Disable Git ownership checks completely
+        # Configure Git to trust all directories
         git config --global --add safe.directory '*'
-        git config --global --add safe.directory "$(pwd)"
         git config --global --add safe.directory /__w/dotfiles/dotfiles
         
-        # Set explicit permissions on the repository
-        chmod -R 777 .
-        
         # Verify Git configuration
-        echo "Updated Git configuration:"
+        echo "Git configuration:"
         git config --list
+    
+    - name: Manual repository checkout
+      run: |
+        # Create directory for the repository
+        mkdir -p /tmp/repo
+        cd /tmp/repo
+        
+        # Clone the repository
+        git clone https://github.com/${{ github.repository }} .
+        
+        # Checkout the specific ref
+        git checkout ${{ github.sha }}
+        
+        # Show repository contents
+        echo "Repository contents:"
+        ls -la
+        
+        # Copy repository to the working directory
+        cp -r . /__w/dotfiles/dotfiles/
+        cd /__w/dotfiles/dotfiles/
+        
+        # Show working directory contents
+        echo "Working directory contents:"
+        ls -la
     
     - name: Debug environment
       run: |
@@ -231,8 +237,7 @@ jobs:
     - name: Install BATS
       run: |
         chmod +x tests/install_bats.sh
-        # Run with environment variables to disable Git repository detection
-        GIT_DISCOVERY_ACROSS_FILESYSTEM=1 GIT_CEILING_DIRECTORIES=/__w ./tests/install_bats.sh
+        ./tests/install_bats.sh
         
         # Show the bats installation
         echo "BATS installation:"
@@ -243,12 +248,15 @@ jobs:
     - name: Run tests
       run: |
         chmod +x test.sh
-        # Run with environment variables to disable Git repository detection
-        GIT_DISCOVERY_ACROSS_FILESYSTEM=1 GIT_CEILING_DIRECTORIES=/__w ./test.sh
+        ./test.sh
     
-    - name: Create modified install script for container environment
+    - name: Test actual installation
       run: |
-        # Create a modified version of install.sh that doesn't use Git
+        # Create a test user home directory
+        mkdir -p /tmp/home
+        export HOME=/tmp/home
+        
+        # Create a simplified install script that doesn't use Git
         cat > install_container.sh << 'EOF'
         #!/bin/bash
         # Modified install script for container environments
@@ -269,14 +277,8 @@ jobs:
         
         # Make it executable
         chmod +x install_container.sh
-    
-    - name: Test actual installation
-      run: |
-        # Create a test user home directory
-        mkdir -p /tmp/home
-        export HOME=/tmp/home
         
-        # Run the modified install script for containers
+        # Run the simplified install script
         ./install_container.sh
         
         # Verify symlinks were created
