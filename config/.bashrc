@@ -93,7 +93,9 @@ fi
 export PATH=$PATH:/home/jwilliams/.local/bin
 
 # Capture external ip to environment for general usage
-export EXTERNAL_IP=$(curl -s https://ipinfo.io/ip)
+# Split declaration and assignment to avoid masking curl's return value
+export EXTERNAL_IP
+EXTERNAL_IP=$(curl -s https://ipinfo.io/ip)
 
 # Start the starship shell prompt tool
 eval "$(starship init bash)"
