@@ -70,7 +70,7 @@ jobs:
     - name: Install dependencies (macOS)
       if: matrix.os == 'macos-latest'
       run: |
-        brew install bash git stow bats-core
+        brew install bash git stow bats-core bats-support bats-assert
         
         # Create lib directory for BATS helpers
         mkdir -p tests/lib
