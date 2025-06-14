@@ -190,6 +190,12 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v3
     
+    - name: Configure Git for container environment
+      run: |
+        # Fix "dubious ownership" issue in container environments
+        git config --global --add safe.directory "$(pwd)"
+        git config --global --add safe.directory /__w/dotfiles/dotfiles
+    
     - name: Debug environment
       run: |
         echo "Distro: ${{ matrix.distro }}"
@@ -225,8 +231,8 @@ jobs:
         mkdir -p /tmp/home
         export HOME=/tmp/home
         
-        # Run the install script
-        ./install.sh
+        # Run the install script with GIT_DISCOVERY_ACROSS_FILESYSTEM=1 to avoid Git repository issues
+        GIT_DISCOVERY_ACROSS_FILESYSTEM=1 ./install.sh
         
         # Verify symlinks were created
         echo "Checking created symlinks:"
