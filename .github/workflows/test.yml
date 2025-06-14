@@ -49,8 +49,8 @@ jobs:
         
         echo "Linting completed successfully!"
 
-  test:
-    name: Test
+  test-standard:
+    name: Test on Standard Platforms
     needs: lint
     runs-on: ${{ matrix.os }}
     strategy:
@@ -122,6 +122,97 @@ jobs:
           echo "BATS bin directory:"
           ls -la tests/lib/bats-core/bin
         fi
+    
+    - name: Run tests
+      run: |
+        chmod +x test.sh
+        ./test.sh
+    
+    - name: Test actual installation
+      run: |
+        # Create a test user home directory
+        mkdir -p /tmp/home
+        export HOME=/tmp/home
+        
+        # Run the install script
+        ./install.sh
+        
+        # Verify symlinks were created
+        echo "Checking created symlinks:"
+        ls -la /tmp/home
+        
+        # Check that config directory was linked if it exists
+        if [ -d "config/.config" ]; then
+          echo "Checking .config directory:"
+          ls -la /tmp/home/.config
+        fi
+        
+        # Verify a few specific files
+        for file in .bashrc .bash_aliases .profile .gitconfig; do
+          if [ -f "config/$file" ]; then
+            echo "Checking $file..."
+            test -L "/tmp/home/$file" || (echo "$file symlink not created" && exit 1)
+            echo "$file correctly linked"
+          fi
+        done
+
+  test-additional:
+    name: Test on Additional Linux Distributions
+    needs: lint
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        distro: ['fedora:latest', 'archlinux:latest']
+      fail-fast: false
+    
+    container:
+      image: ${{ matrix.distro }}
+    
+    steps:
+    - name: Install Git and other dependencies (Fedora)
+      if: contains(matrix.distro, 'fedora')
+      run: |
+        dnf -y update
+        dnf -y install git make stow findutils which procps-ng
+        
+        # Install BATS dependencies
+        dnf -y install bats
+    
+    - name: Install Git and other dependencies (Arch Linux)
+      if: contains(matrix.distro, 'archlinux')
+      run: |
+        pacman -Syu --noconfirm
+        pacman -S --noconfirm git make stow findutils which procps
+        
+        # Install BATS dependencies
+        pacman -S --noconfirm bats
+    
+    - name: Checkout repository
+      uses: actions/checkout@v3
+    
+    - name: Debug environment
+      run: |
+        echo "Distro: ${{ matrix.distro }}"
+        echo "Current directory: $(pwd)"
+        echo "Git version: $(git --version)"
+        ls -la
+        if command -v bats &>/dev/null; then
+          echo "System bats found: $(which bats)"
+          bats --version
+        else
+          echo "System bats not found"
+        fi
+    
+    - name: Install BATS
+      run: |
+        chmod +x tests/install_bats.sh
+        ./tests/install_bats.sh
+        
+        # Show the bats installation
+        echo "BATS installation:"
+        ls -la tests/lib/bats-core || echo "bats-core not found"
+        ls -la tests/lib/bats-support || echo "bats-support not found"
+        ls -la tests/lib/bats-assert || echo "bats-assert not found"
     
     - name: Run tests
       run: |
