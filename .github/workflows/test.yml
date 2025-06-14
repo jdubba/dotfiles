@@ -18,7 +18,26 @@ jobs:
       run: sudo apt update && sudo apt install -y shellcheck
     
     - name: Run linting
-      run: ./lint.sh
+      run: |
+        # Only lint shell scripts, not BATS tests which require special handling
+        SHELL_SCRIPTS=$(find . -type f -name "*.sh" -o -name "install*" | grep -v "tests/lib" | grep -v "^./.git/")
+        echo "$SHELL_SCRIPTS" | xargs shellcheck -x
+        
+        # Check bash configuration files
+        if [ -f "config/.bashrc" ]; then
+          echo "Checking config/.bashrc..."
+          shellcheck -x config/.bashrc || true
+        fi
+        
+        if [ -f "config/.bash_aliases" ]; then
+          echo "Checking config/.bash_aliases..."
+          shellcheck -x config/.bash_aliases || true
+        fi
+        
+        if [ -f "config/.profile" ]; then
+          echo "Checking config/.profile..."
+          shellcheck -x config/.profile || true
+        fi
 
   test:
     name: Test

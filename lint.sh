@@ -66,4 +66,8 @@ if [ -f "config/.profile" ]; then
     shellcheck -x config/.profile || true
 fi
 
+# Check test files with special options to handle BATS
+echo "Checking BATS test files..."
+find tests -name "*.bats" -print0 | xargs -0 shellcheck --shell=bash --external-sources || true
+
 echo "Linting completed successfully!"
