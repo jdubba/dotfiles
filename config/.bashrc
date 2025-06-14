@@ -95,13 +95,22 @@ export PATH=$PATH:/home/jwilliams/.local/bin
 # Capture external ip to environment for general usage
 # Split declaration and assignment to avoid masking curl's return value
 export EXTERNAL_IP
-EXTERNAL_IP=$(curl -s https://ipinfo.io/ip)
+if command -v curl &> /dev/null; then
+  EXTERNAL_IP=$(curl -s https://ipinfo.io/ip)
+else
+  EXTERNAL_IP="unknown"
+fi
 
 # Start the starship shell prompt tool
-eval "$(starship init bash)"
+if command -v starship &> /dev/null; then
+  eval "$(starship init bash)"
+fi
 
-# shellcheck source=/dev/null
-source ~/.local/share/blesh/ble.sh
+# Source ble.sh if it exists
+if [ -f ~/.local/share/blesh/ble.sh ]; then
+  # shellcheck source=/dev/null
+  source ~/.local/share/blesh/ble.sh
+fi
 
 # Custom keybinds
 bind '"\e[A": history-search-backward'
