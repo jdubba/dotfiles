@@ -21,7 +21,15 @@ jobs:
       run: |
         # Only lint shell scripts, not BATS tests which require special handling
         echo "Linting shell scripts..."
-        find . -type f -name "*.sh" -o -name "install*" | grep -v "tests/lib" | grep -v "^./.git/" | xargs shellcheck -x
+        
+        # Find shell scripts (excluding .bats files)
+        SHELL_SCRIPTS=$(find . -type f -name "*.sh" | grep -v "tests/lib" | grep -v "^./.git/")
+        
+        # Find install script separately
+        INSTALL_SCRIPT=$(find . -type f -name "install" -not -path "*/\.*")
+        
+        # Combine and lint
+        echo "$SHELL_SCRIPTS $INSTALL_SCRIPT" | xargs shellcheck -x
         
         # Check bash configuration files
         if [ -f "config/.bashrc" ]; then
