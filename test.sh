@@ -8,7 +8,7 @@ find_bats() {
   # Check if system bats is available
   if command -v bats &>/dev/null; then
     echo "Using system bats: $(command -v bats)"
-    echo "$(command -v bats)"
+    command -v bats
     return 0
   fi
   
