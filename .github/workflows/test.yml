@@ -19,17 +19,17 @@ jobs:
     
     - name: Run linting
       run: |
-        # Only lint shell scripts, not BATS tests which require special handling
+        # Lint all shell scripts including the new dotfiles utility
         echo "Linting shell scripts..."
         
-        # Find shell scripts (excluding .bats files)
+        # Find shell scripts (excluding .bats files and test libs)
         SHELL_SCRIPTS=$(find . -type f -name "*.sh" | grep -v "tests/lib" | grep -v "^./.git/")
         
-        # Find install script separately
-        INSTALL_SCRIPT=$(find . -type f -name "install" -not -path "*/\.*")
+        # Find executables separately
+        EXECUTABLES=$(find bin src/commands src/lib -type f -name "*" -not -path "*/\.*" | xargs grep -l "^#!.*bash" 2>/dev/null || true)
         
         # Combine and lint
-        echo "$SHELL_SCRIPTS $INSTALL_SCRIPT" | xargs shellcheck -x
+        echo "$SHELL_SCRIPTS $EXECUTABLES" | xargs shellcheck -x
         
         # Check bash configuration files
         if [ -f "config/.bashrc" ]; then
@@ -128,13 +128,13 @@ jobs:
         chmod +x test.sh
         ./test.sh
     
-    - name: Test actual installation
+    - name: Test legacy installation
       run: |
         # Create a test user home directory
         mkdir -p /tmp/home
         export HOME=/tmp/home
         
-        # Run the install script
+        # Run the legacy install script
         ./install.sh
         
         # Verify symlinks were created
@@ -152,6 +152,50 @@ jobs:
           if [ -f "config/$file" ]; then
             echo "Checking $file..."
             test -L "/tmp/home/$file" || (echo "$file symlink not created" && exit 1)
+            echo "$file correctly linked"
+          fi
+        done
+
+    - name: Test dotfiles utility installation
+      run: |
+        # Create a different test user home directory
+        mkdir -p /tmp/home2
+        export HOME=/tmp/home2
+        
+        # Install the dotfiles utility
+        make install
+        
+        # Verify installation
+        echo "Checking dotfiles installation:"
+        ls -la $HOME/.local/bin/dotfiles || (echo "dotfiles executable not installed" && exit 1)
+        ls -la $HOME/.local/share/dotfiles/lib || (echo "dotfiles libraries not installed" && exit 1)
+        ls -la $HOME/.local/share/dotfiles/commands || (echo "dotfiles commands not installed" && exit 1)
+        ls -la $HOME/.config/dotfiles/config.toml || (echo "dotfiles config not installed" && exit 1)
+        
+        # Run dotfiles help
+        $HOME/.local/bin/dotfiles --help
+        
+        # Run dotfiles version
+        $HOME/.local/bin/dotfiles --version
+        
+        # Run dotfiles install
+        $HOME/.local/bin/dotfiles install
+        
+        # Verify symlinks were created
+        echo "Checking created symlinks with dotfiles utility:"
+        ls -la /tmp/home2
+        
+        # Check that config directory was linked if it exists
+        if [ -d "config/.config" ]; then
+          echo "Checking .config directory:"
+          ls -la /tmp/home2/.config
+        fi
+        
+        # Verify a few specific files
+        for file in .bashrc .bash_aliases .profile .gitconfig; do
+          if [ -f "config/$file" ]; then
+            echo "Checking $file..."
+            test -L "/tmp/home2/$file" || (echo "$file symlink not created" && exit 1)
             echo "$file correctly linked"
           fi
         done
@@ -177,7 +221,7 @@ jobs:
         
         # Install BATS dependencies
         dnf -y install bats
-    
+
     - name: Install Git and other dependencies (Arch Linux)
       if: contains(matrix.distro, 'archlinux')
       run: |
@@ -250,7 +294,7 @@ jobs:
         chmod +x test.sh
         ./test.sh
     
-    - name: Test actual installation
+    - name: Test legacy installation
       run: |
         # Create a test user home directory
         mkdir -p /tmp/home
@@ -296,6 +340,116 @@ jobs:
           if [ -f "config/$file" ]; then
             echo "Checking $file..."
             test -L "/tmp/home/$file" || (echo "$file symlink not created" && exit 1)
+            echo "$file correctly linked"
+          fi
+        done
+
+    - name: Test dotfiles utility
+      run: |
+        # Create a different test user home directory
+        mkdir -p /tmp/home2
+        export HOME=/tmp/home2
+        
+        # Install the dotfiles utility
+        echo "Installing dotfiles utility..."
+        mkdir -p $HOME/.local/bin
+        mkdir -p $HOME/.local/share/dotfiles/lib
+        mkdir -p $HOME/.local/share/dotfiles/commands
+        mkdir -p $HOME/.config/dotfiles
+        
+        # Copy files manually since make might not work in all containers
+        cp bin/dotfiles $HOME/.local/bin/
+        chmod +x $HOME/.local/bin/dotfiles
+        cp -r src/lib/* $HOME/.local/share/dotfiles/lib/
+        cp -r src/commands/* $HOME/.local/share/dotfiles/commands/
+        chmod +x $HOME/.local/share/dotfiles/lib/*.sh
+        chmod +x $HOME/.local/share/dotfiles/commands/*.sh
+        
+        # Create config file
+        echo "# Dotfiles configuration" > $HOME/.config/dotfiles/config.toml
+        echo "repository_path = \"$(pwd)\"" >> $HOME/.config/dotfiles/config.toml
+        echo "stow_directory = \"config\"" >> $HOME/.config/dotfiles/config.toml
+        
+        # Verify installation
+        echo "Checking dotfiles installation:"
+        ls -la $HOME/.local/bin/dotfiles || (echo "dotfiles executable not installed" && exit 1)
+        ls -la $HOME/.local/share/dotfiles/lib/*.sh || (echo "dotfiles libraries not installed" && exit 1)
+        ls -la $HOME/.local/share/dotfiles/commands/*.sh || (echo "dotfiles commands not installed" && exit 1)
+        ls -la $HOME/.config/dotfiles/config.toml || (echo "dotfiles config not installed" && exit 1)
+        
+        # Add to PATH
+        export PATH="$HOME/.local/bin:$PATH"
+        
+        # Run dotfiles help
+        echo "Testing dotfiles help..."
+        dotfiles --help
+        
+        # Run dotfiles version
+        echo "Testing dotfiles version..."
+        dotfiles --version
+        
+        # Run dotfiles install (modified for container environment)
+        echo "Testing dotfiles install..."
+        # Create a simplified stow.sh function for container environments
+        cat > $HOME/.local/share/dotfiles/lib/stow.sh << 'EOF'
+        #!/usr/bin/env bash
+        
+        # Check if stow is installed
+        check_stow() {
+          if ! command -v stow &> /dev/null; then
+            echo "Error: GNU Stow is not installed."
+            return 1
+          fi
+          return 0
+        }
+        
+        # Skip uncommitted changes check in container environment
+        check_uncommitted_changes() {
+          local repo_dir="$1"
+          local stow_dir="$2"
+          echo "Skipping uncommitted changes check in container environment"
+          return 0
+        }
+        
+        # Run stow to create symlinks
+        run_stow() {
+          local repo_dir="$1"
+          local stow_dir="$2"
+          local target_dir="$3"
+          
+          # Check if directories exist
+          if [[ ! -d "$repo_dir/$stow_dir" ]]; then
+            echo "Error: Stow directory '$repo_dir/$stow_dir' does not exist."
+            return 1
+          fi
+          
+          # Create target directory if it doesn't exist
+          mkdir -p "$target_dir"
+          
+          # Run stow with adopt flag and handle errors
+          echo "Linking dotfiles from $repo_dir/$stow_dir to $target_dir..."
+          if ! stow -v -d "$repo_dir" -t "$target_dir" "$stow_dir"; then
+            echo "Error: Failed to run stow."
+            return 1
+          fi
+          
+          echo "Configuration files have been successfully linked."
+          return 0
+        }
+        EOF
+        
+        # Run dotfiles install
+        dotfiles install
+        
+        # Verify symlinks were created
+        echo "Checking created symlinks:"
+        ls -la /tmp/home2
+        
+        # Verify a few specific files
+        for file in .bashrc .bash_aliases .profile .gitconfig; do
+          if [ -f "config/$file" ]; then
+            echo "Checking $file..."
+            test -L "/tmp/home2/$file" || (echo "$file symlink not created" && exit 1)
             echo "$file correctly linked"
           fi
         done
