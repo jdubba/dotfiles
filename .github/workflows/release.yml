@@ -29,7 +29,26 @@ jobs:
           
           - Please update this text with release notes
           
-          ## Installation
+          ## Installation Options
+          
+          ### Option 1: Install dotfiles utility (recommended)
+          
+          ```bash
+          git clone https://github.com/${{ github.repository }}.git
+          cd $(basename ${{ github.repository }})
+          make install    # Install the dotfiles utility
+          dotfiles install  # Set up the dotfiles
+          ```
+          
+          Or in one step:
+          
+          ```bash
+          git clone https://github.com/${{ github.repository }}.git
+          cd $(basename ${{ github.repository }})
+          make setup
+          ```
+          
+          ### Option 2: Legacy installation
           
           ```bash
           git clone https://github.com/${{ github.repository }}.git

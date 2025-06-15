@@ -1,0 +1,119 @@
+#!/usr/bin/env bash
+#
+# Dotfiles utility for managing configuration files
+# 
+
+# Exit on error, undefined variable, or error in pipeline
+set -euo pipefail
+
+# Set version
+VERSION="0.2.0"
+
+# Determine script location and library paths
+SCRIPT_PATH="$(readlink -f "${BASH_SOURCE[0]}")"
+SCRIPT_DIR="$(dirname "$SCRIPT_PATH")"
+
+# Determine library location
+# If running from the repository, use local src directory
+if [[ -d "$SCRIPT_DIR/../src" ]]; then
+  LIB_DIR="$SCRIPT_DIR/../src/lib"
+  COMMANDS_DIR="$SCRIPT_DIR/../src/commands"
+else
+  # Otherwise, use the installed location
+  LIB_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/dotfiles/lib"
+  COMMANDS_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/dotfiles/commands"
+fi
+
+# Determine user config file location
+CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/dotfiles"
+CONFIG_FILE="$CONFIG_DIR/config.toml"
+
+# Source library files
+source "$LIB_DIR/config.sh"
+source "$LIB_DIR/stow.sh"
+
+# Usage information
+show_usage() {
+  cat <<EOF
+dotfiles - Utility for managing configuration files
+
+Usage: 
+  dotfiles <command> [options]
+  dotfiles [--help|--version]
+
+Commands:
+  install            Install dotfiles from repository
+  help               Show this help message
+  version            Show version information
+
+Options:
+  -h, --help         Show this help message
+  -v, --version      Show version information
+
+Examples:
+  dotfiles install   Install dotfiles from repository
+  dotfiles --help    Show help information
+EOF
+}
+
+# Show version
+show_version() {
+  echo "dotfiles version $VERSION"
+}
+
+# Parse arguments
+if [[ $# -eq 0 ]]; then
+  cmd="help"
+else
+  # Check for option-style arguments first
+  case "$1" in
+    -h|--help)
+      show_usage
+      exit 0
+      ;;
+    -v|--version)
+      show_version
+      exit 0
+      ;;
+    -*)
+      echo "Error: Unknown option $1"
+      show_usage
+      exit 1
+      ;;
+    *)
+      # Not an option, treat as command
+      cmd="$1"
+      shift
+      ;;
+  esac
+fi
+
+# Main function
+main() {
+  # Load config if file exists
+  if [[ -f "$CONFIG_FILE" ]]; then
+    load_config "$CONFIG_FILE"
+  fi
+
+  # Process commands
+  case "$cmd" in
+    install)
+      source "$COMMANDS_DIR/install.sh"
+      run_install "$@"
+      ;;
+    help)
+      show_usage
+      ;;
+    version)
+      show_version
+      ;;
+    *)
+      echo "Unknown command: $cmd"
+      show_usage
+      exit 1
+      ;;
+  esac
+}
+
+# Run main function
+main "$@"
