@@ -89,6 +89,11 @@ if [ -f ~/.git-completion.bash ]; then
   . ~/.git-completion.bash
 fi
 
+# source in the nvm utilities for node version management
+if [ -f /usr/share/nvm/init-nvm.sh ]; then
+    source /usr/share/nvm/init-nvm.sh
+fi
+
 # User bin installs
 export PATH=$PATH:/home/jwilliams/.local/bin
 
