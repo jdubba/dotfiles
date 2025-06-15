@@ -1,16 +1,72 @@
 # dotfiles
-Common tool configuration files and simple stow implementation to allow configurations to be saved and managed
+
+Common tool configuration files and management utility to allow configurations to be saved and managed
 in a git repository, and be managed centrally across multiple machines.
 
-All managed configurations will be present and linked with stow, even for software that is not installed.  The extra 
-unused configuration files should not be an issue, but is noted here to for awarness, and that it is expected.
+All managed configurations will be present and linked with stow, even for software that is not installed. The extra 
+unused configuration files should not be an issue, but is noted here for awareness, and that it is expected.
 
 ![Test Dotfiles](https://github.com/jdubba/dotfiles/workflows/Test%20Dotfiles/badge.svg)
 
 ## Installation
 
+### Quick Installation
+
+```bash
+# Install the dotfiles utility and create symlinks
+make setup
+```
+
+### Manual Installation
+
+You can also install just the utility and then run it separately:
+
+```bash
+# Install the dotfiles utility
+make install
+
+# Use the utility to create symlinks
+dotfiles install
+```
+
+### Legacy Installation
+
+For backward compatibility, you can still use the old method:
+
 ```bash
 ./install.sh
+```
+
+## Configuration
+
+The dotfiles utility uses a TOML configuration file located at `~/.config/dotfiles/config.toml`. This file is automatically created during installation with default values:
+
+```toml
+# Dotfiles configuration
+
+# Path to the dotfiles repository
+repository_path = "/path/to/your/dotfiles"
+
+# Default stow directory within the repository
+stow_directory = "config"
+
+# Target directory (defaults to $HOME)
+# target_directory = "/home/username"
+```
+
+## Usage
+
+After installation, you can use the `dotfiles` command:
+
+```bash
+# Install/update dotfiles
+dotfiles install
+
+# Show help information
+dotfiles help
+
+# Show version information
+dotfiles version
 ```
 
 ## Development
@@ -27,8 +83,11 @@ unused configuration files should not be an issue, but is noted here to for awar
 This project uses a Makefile to simplify common tasks:
 
 ```bash
-# Install dotfiles
+# Install dotfiles utility
 make install
+
+# Install utility and run dotfiles install
+make setup
 
 # Run tests
 make test
