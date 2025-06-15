@@ -14,20 +14,29 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
       
+    - name: Extract release notes
+      id: extract_notes
+      run: |
+        VERSION=$(echo "${{ github.ref }}" | sed -e 's/refs\/tags\/v//')
+        if [ -f "CHANGELOG.md" ]; then
+          NOTES=$(awk -v version="$VERSION" '/^## \[/ { if (p) { exit }; if ($0 ~ version) { p=1; next } } p' CHANGELOG.md)
+          # Escape multiline string for GitHub Actions
+          NOTES="${NOTES//'%'/'%25'}"
+          NOTES="${NOTES//$'\n'/'%0A'}"
+          NOTES="${NOTES//$'\r'/'%0D'}"
+          echo "::set-output name=notes::$NOTES"
+        fi
+
     - name: Create Release
       id: create_release
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      uses: softprops/action-gh-release@v1
       with:
-        tag_name: ${{ github.ref }}
-        release_name: Release ${{ github.ref }}
+        token: ${{ secrets.GITHUB_TOKEN }}
+        name: Release ${{ github.ref_name }}
         draft: false
         prerelease: false
         body: |
-          Changes in this release:
-          
-          - Please update this text with release notes
+          ${{ steps.extract_notes.outputs.notes }}
           
           ## Installation Options
           
