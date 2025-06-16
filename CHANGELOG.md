@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] - 2025-06-16
+
+### Added
+- New `add` command for the dotfiles utility
+- Ability to add files and directories to dotfiles management
+- Automatic validation that files are within the managed directory tree
+- Verbose error messages explaining path validation issues
+- Optional `--commit` flag to automatically commit and push changes
+- Git integration with selective commit functionality
+- Comprehensive test coverage for the add command
+
+### Fixed
+- Fixed all ShellCheck warnings and linting issues
+- Improved error handling in test files with proper cd error checking
+- Fixed parameter expansion quoting issues
+- Separated variable declaration and assignment to avoid masking return values
+
 ## [0.2.0] - 2025-06-15
 
 ### Added

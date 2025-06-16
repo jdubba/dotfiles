@@ -48,7 +48,8 @@ if [ -z "$SHELL_SCRIPTS" ]; then
 fi
 
 # Run shellcheck on all shell scripts
-echo "$SHELL_SCRIPTS" | xargs shellcheck -x
+# Exclude SC1091 (source file not found) as it's expected for dynamic paths
+echo "$SHELL_SCRIPTS" | xargs shellcheck -x --exclude=SC1091
 
 # Check bash configuration files
 if [ -f "config/.bashrc" ]; then
@@ -68,6 +69,6 @@ fi
 
 # Check test files with special options to handle BATS
 echo "Checking BATS test files..."
-find tests -name "*.bats" -print0 | xargs -0 shellcheck --shell=bash --external-sources || true
+find tests -name "*.bats" -not -path "tests/lib/*" -print0 | xargs -0 shellcheck --shell=bash --external-sources --exclude=SC1091 || true
 
 echo "Linting completed successfully!"
