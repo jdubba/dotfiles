@@ -62,12 +62,39 @@ After installation, you can use the `dotfiles` command:
 # Install/update dotfiles
 dotfiles install
 
+# Add a file or directory to dotfiles management
+dotfiles add ~/.vimrc
+
+# Add a file and automatically commit the changes
+dotfiles add ~/.config/app --commit
+
 # Show help information
 dotfiles help
 
 # Show version information
 dotfiles version
 ```
+
+### Adding Files to Dotfiles Management
+
+The `add` command allows you to easily add existing configuration files to your dotfiles repository:
+
+```bash
+# Add a single configuration file
+dotfiles add ~/.bashrc
+
+# Add an entire configuration directory
+dotfiles add ~/.config/nvim
+
+# Add and automatically commit/push changes
+dotfiles add ~/.gitconfig --commit
+```
+
+**Important Notes:**
+- Files must be located within your home directory (or configured target directory)
+- The command will move the original file to the repository and create a symlink
+- Use `--commit` to automatically commit and push changes to your git repository
+- Without `--commit`, you'll need to manually commit the changes later
 
 ## Development
 

@@ -7,7 +7,7 @@
 set -euo pipefail
 
 # Set version
-VERSION="0.2.0"
+VERSION="0.3.0"
 
 # Determine script location and library paths
 SCRIPT_PATH="$(readlink -f "${BASH_SOURCE[0]}")"
@@ -31,6 +31,7 @@ CONFIG_FILE="$CONFIG_DIR/config.toml"
 # Source library files
 source "$LIB_DIR/config.sh"
 source "$LIB_DIR/stow.sh"
+source "$LIB_DIR/git.sh"
 
 # Usage information
 show_usage() {
@@ -43,6 +44,7 @@ Usage:
 
 Commands:
   install            Install dotfiles from repository
+  add <path>         Add a file or directory to dotfiles management
   help               Show this help message
   version            Show version information
 
@@ -50,9 +52,14 @@ Options:
   -h, --help         Show this help message
   -v, --version      Show version information
 
+Add Command Options:
+  --commit           Automatically commit and push changes to repository
+
 Examples:
-  dotfiles install   Install dotfiles from repository
-  dotfiles --help    Show help information
+  dotfiles install                    Install dotfiles from repository
+  dotfiles add ~/.vimrc              Add .vimrc to dotfiles management
+  dotfiles add ~/.config/app --commit Add app config and commit changes
+  dotfiles --help                    Show help information
 EOF
 }
 
@@ -100,6 +107,10 @@ main() {
     install)
       source "$COMMANDS_DIR/install.sh"
       run_install "$@"
+      ;;
+    add)
+      source "$COMMANDS_DIR/add.sh"
+      run_add "$@"
       ;;
     help)
       show_usage

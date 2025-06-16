@@ -8,7 +8,8 @@ load_all_helpers
 # Setup test environment before each test
 setup() {
   # Store the project root directory
-  export PROJECT_ROOT="$(cd "$(dirname "$BATS_TEST_FILENAME")/.." && pwd)"
+  export PROJECT_ROOT
+  PROJECT_ROOT="$(cd "$(dirname "$BATS_TEST_FILENAME")/.." && pwd)"
   export CONFIG_DIR="${PROJECT_ROOT}/config"
 }
 

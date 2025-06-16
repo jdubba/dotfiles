@@ -14,7 +14,8 @@ setup() {
   fi
   
   # Store the project root directory
-  export PROJECT_ROOT="$(cd "$(dirname "$BATS_TEST_FILENAME")/.." && pwd)"
+  export PROJECT_ROOT
+  PROJECT_ROOT="$(cd "$(dirname "$BATS_TEST_FILENAME")/.." && pwd)"
   
   # Export variables for test
   export HOME="${TEST_DIR}/home"

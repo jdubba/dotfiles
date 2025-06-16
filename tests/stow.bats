@@ -8,7 +8,8 @@ load_all_helpers
 # Setup test environment before each test
 setup() {
   # Create a temporary test environment
-  export TEST_DIR="$(mktemp -d)"
+  export TEST_DIR
+  TEST_DIR="$(mktemp -d)"
   export HOME="${TEST_DIR}/home"
   export STOW_DIR="${TEST_DIR}/stow"
   export CONFIG_DIR="${STOW_DIR}/config"
@@ -45,7 +46,8 @@ teardown() {
 
 @test "stow creates symlinks appropriate for the installed version" {
   # Get stow version and print for debugging
-  local stow_version=$(stow --version | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1)
+  local stow_version
+  stow_version=$(stow --version | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1)
   echo "Detected stow version: $stow_version"
   
   # Run stow
