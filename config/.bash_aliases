@@ -43,6 +43,9 @@ alias gaa='git add .'
 alias gco='git checkout'
 alias gcm='git commit -m'
 
+# Redirect vim to nvim
+alias vim='/usr/bin/nvim'
+
 # Replace standard cat command
 alias ocat='/usr/bin/cat'
 
