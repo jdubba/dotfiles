@@ -36,3 +36,6 @@ vim.keymap.set({"n", "v"}, "<leader>/", ":CommentToggle<cr>")
 --Indentation
 vim.keymap.set({"n", "v"}, "<leader>>", ":><cr>")
 vim.keymap.set({"n", "v"}, "<leader><", ":<<cr>")
+
+--Word wrap Toggle
+vim.keymap.set({"n", "v"}, "<leader>w", ":set wrap!<cr>", { noremap = true })

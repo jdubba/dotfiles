@@ -56,3 +56,6 @@ if which bat &> /dev/null; then
 else
     alias cat='batcat'
 fi
+
+# Simple AI chat
+alias y='yai -c'
