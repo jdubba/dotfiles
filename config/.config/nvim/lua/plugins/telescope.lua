@@ -6,9 +6,16 @@ return {
       'nvim-lua/plenary.nvim'
     },
     config = function()
+      local telescope = require("telescope")
       local builtin = require("telescope.builtin")
+      local actions = require("telescope.actions")
+      telescope.setup({ pickers = { buffers = { mappings = {
+        i = {["C-d"] = actions.delete_buffer, },
+        n = {["C-d"] = actions.delete_buffer, },
+      }}}})   
       vim.keymap.set('n', '<leader>ff', builtin.find_files, {})
       vim.keymap.set('n', '<leader>fg', builtin.live_grep, {})
+      vim.keymap.set('n', '<leader>bb', builtin.buffers, {})
     end
   },
   {
