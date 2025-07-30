@@ -24,3 +24,7 @@ Thumbs.db
 
 # Logs
 *.log
+
+# Lazy plugin version tracking
+/config/.config/nvim/lazy-lock.json
+*.hhh
