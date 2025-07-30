@@ -9,6 +9,9 @@ case $- in
       *) return;;
 esac
 
+# Amazon Q pre block. Keep at the top of this file.
+[[ -f "${HOME}/.local/share/amazon-q/shell/bashrc.pre.bash" ]] && builtin source "${HOME}/.local/share/amazon-q/shell/bashrc.pre.bash"
+
 # don't put duplicate lines or lines starting with space in the history.
 # See bash(1) for more options
 HISTCONTROL=ignoreboth
@@ -97,6 +100,10 @@ fi
 # User bin installs
 export PATH=$PATH:/home/jwilliams/.local/bin
 
+# Set default cli edit tools
+export EDITOR=/usr/bin/nvim
+export VISUAL=/usr/bin/nvim
+
 # Capture external ip to environment for general usage
 # Split declaration and assignment to avoid masking curl's return value
 export EXTERNAL_IP
@@ -104,11 +111,6 @@ if command -v curl &> /dev/null; then
   EXTERNAL_IP=$(curl -s https://ipinfo.io/ip)
 else
   EXTERNAL_IP="unknown"
-fi
-
-# Start the starship shell prompt tool
-if command -v starship &> /dev/null; then
-  eval "$(starship init bash)"
 fi
 
 # Source ble.sh if it exists
@@ -131,4 +133,15 @@ bind '"\e[B": history-search-forward'
 # Change to home directory with error handling
 cd ~ || return
 
+# Start the starship shell prompt tool
+if command -v starship &> /dev/null; then
+  eval "$(starship init bash)"
+fi
+
+# Amazon Q post block. Keep at the bottom of this file.
+[[ -f "${HOME}/.local/share/amazon-q/shell/bashrc.post.bash" ]] && builtin source "${HOME}/.local/share/amazon-q/shell/bashrc.post.bash"
+
 clear && fastfetch
+
+# opencode
+export PATH=/home/jwilliams/.opencode/bin:$PATH

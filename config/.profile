@@ -9,6 +9,9 @@
 # for ssh logins, install and configure the libpam-umask package.
 #umask 022
 
+# Amazon Q pre block. Keep at the top of this file.
+[[ -f "${HOME}/.local/share/amazon-q/shell/profile.pre.bash" ]] && builtin source "${HOME}/.local/share/amazon-q/shell/profile.pre.bash"
+
 # if running bash
 if [ -n "$BASH_VERSION" ]; then
     # include .bashrc if it exists
@@ -27,3 +30,6 @@ fi
 if [ -d "$HOME/.local/bin" ] ; then
     PATH="$HOME/.local/bin:$PATH"
 fi
+
+# Amazon Q post block. Keep at the bottom of this file.
+[[ -f "${HOME}/.local/share/amazon-q/shell/profile.post.bash" ]] && builtin source "${HOME}/.local/share/amazon-q/shell/profile.post.bash"
