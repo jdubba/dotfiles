@@ -1,12 +1,31 @@
 #!/bin/bash
-## Colorize the ls output ##
-alias ls='ls --color=auto'
 
-## Use a long listing format ##
-alias ll='ls -lah --color=auto'
+# Update ls aliases based on eza installation status
+  if which eza >/dev/null 2>&1; then
+    alias ls='eza --git'
+    alias ll='eza -lah --git'
+    alias l.='eza -d .* --git'
+    alias ld='eza --only-dirs --show-symlinks --git'
+    alias lf='eza --only-files --show-symlinks --git'
+else 
+  ## Colorize the ls output ##
+  alias ls='ls --color=auto'
 
-## Show hidden files ##
-alias l.='ls -d .* --color=auto'
+  ## Use a long listing format ##
+  alias ll='ls -lah --color=auto'
+
+  ## Show hidden files ##
+  alias l.='ls -d .* --color=auto'
+
+  ## Show only directories
+  alias ld='echo "eza not installed"'
+  alias lf='echo "eza not installed"'
+fi
+
+# Alias cd to zoxide if installed
+if which zoxide >/dev/null 2>&1; then
+  alias cd='z'
+fi
 
 ## get rid of command not found ##
 alias cd..='cd ..'
@@ -59,3 +78,6 @@ fi
 
 # Simple AI chat
 alias y='yai -c'
+
+# AWS Profile login
+alias alo='aws sso login --profile '

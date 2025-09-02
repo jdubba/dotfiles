@@ -119,6 +119,11 @@ if [ -f ~/.local/share/blesh/ble.sh ]; then
   source ~/.local/share/blesh/ble.sh
 fi
 
+# Source git bash completion if it exists
+if [ -f ~/.git-prompt.sh ]; then
+  . ~/.git-prompt.sh
+fi
+
 # Source NVM if it exists
 if [ -f ~/.nvm/nvm.sh ]; then
     export NVM_DIR="$HOME/.nvm"
@@ -132,6 +137,11 @@ bind '"\e[B": history-search-forward'
 
 # Change to home directory with error handling
 cd ~ || return
+
+# Start zoxide
+if command -v zoxide &> /dev/null; then
+  eval "$(zoxide init bash)"
+fi
 
 # Start the starship shell prompt tool
 if command -v starship &> /dev/null; then
