@@ -128,10 +128,6 @@ bind '"\e[B": history-search-forward'
 # Change to home directory with error handling
 cd ~ || return
 
-# Start zoxide
-if command -v zoxide &> /dev/null; then
-  eval "$(zoxide init bash)"
-fi
 
 # Start the starship shell prompt tool
 if command -v starship &> /dev/null; then
@@ -140,6 +136,11 @@ fi
 
 # Amazon Q post block. Keep at the bottom of this file.
 [[ -f "${HOME}/.local/share/amazon-q/shell/bashrc.post.bash" ]] && builtin source "${HOME}/.local/share/amazon-q/shell/bashrc.post.bash"
+
+# Start zoxide
+if command -v zoxide &> /dev/null; then
+  eval "$(zoxide init bash)"
+fi
 
 # Alias definitions.
 # You may want to put all your additions into a separate file like
