@@ -1,0 +1,196 @@
+/* CSS HEX */
+@define-color grad-1 #53376A;
+@define-color grad-2 #5C3F74;
+@define-color grad-3 #65487E;
+@define-color grad-4 #6E5087;
+@define-color grad-5 #775991;
+@define-color grad-6 #80619B;
+@define-color grad-7 #896AA5;
+@define-color grad-8 #9272AF;
+@define-color grad-9 #9B7AB8;
+@define-color grad-10 #A483C2;
+@define-color grad-11 #AD8BCC;
+@define-color grad-12 #B694D6;
+@define-color grad-13 #BF9CDF;
+@define-color grad-14 #C8A5E9;
+@define-color grad-15 #D1ADF3;
+
+/* -- Global rules -- */
+* {
+  border: none;
+  font-family: "JetbrainsMono Nerd Font";
+  font-size: 15px;
+  min-height: 10px;
+}
+
+window#waybar {
+  background: rgba(34, 36, 54, 0.6);
+}
+
+window#waybar.hidden {
+  opacity: 0.2;
+}
+
+/* - Genera rules for visible modules -- */
+#custom-archicon,
+#clock,
+#cpu,
+#memory,
+#disk,
+#temperature,
+#idle_inhibitor,
+#backlight,
+#backlight-slider,
+#pulseaudio,
+#pulseaudio-slider,
+#bluetooth,
+#network,
+#language {
+  color: #161320;
+  margin-top: 6px;
+  margin-bottom: 6px;
+  padding-left: 10px;
+  padding-right: 10px;
+  transition: none;
+}
+
+/* Separation to the left */
+#custom-archicon,
+#cpu,
+#idle_inhibitor {
+  margin-left: 5px;
+  border-top-left-radius: 10px;
+  border-bottom-left-radius: 10px;
+}
+
+/* Separation to the rigth */
+#clock,
+#temperature,
+#language {
+  margin-right: 5px;
+  border-top-right-radius: 10px;
+  border-bottom-right-radius: 10px;
+}
+
+/* -- Specific styles -- */
+
+/* Modules left */
+#custom-archicon {
+  font-size: 24px;
+  color: @grad-1;
+  background: #161320;
+  padding-right: 17px;
+}
+
+#clock {
+  background: @grad-1;
+  color: #FFFFFF;
+  font-weight:bold;
+}
+
+#cpu {
+  background: @grad-2;
+  color: #D1ADF3;
+}
+
+#memory {
+  background: @grad-3;
+  color: #D1ADF3;
+}
+
+#disk {
+  background: @grad-4;
+  color: #D1ADF3;
+}
+
+#temperature {
+  background: @grad-5;
+  color: #D1ADF3;
+}
+
+/* Modules center */
+#workspaces {
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 10px;
+  margin: 6px 5px;
+  padding: 0px 6px;
+}
+
+#workspaces button {
+  color: @grad-4;
+  background: transparent;
+  padding: 4px 4px;
+  transition: color 0.3s ease, text-shadow 0.3s ease, transform 0.3s ease;
+}
+
+#workspaces button.occupied {
+  color: @grad-6;
+}
+
+#workspaces button.active {
+  color: @grad-10;
+  text-shadow: 0 0 4px #ABE9B3;
+}
+
+#workspaces button:hover {
+  color: #89B4FA;
+}
+
+#workspaces button.active:hover {}
+
+/* Modules right */
+#idle_inhibitor {
+  background: @grad-6;
+  padding-right: 15px;
+}
+
+#backlight-slider {
+    color: #1A1826;
+    background: @grad-7;
+    min-width: 50px;
+}
+
+#backlight {
+    color: #1A1826;
+    background: @grad-8;
+    min-width:55px;
+}
+
+#pulseaudio-slider {
+  color: #1A1826;
+  background: @grad-9;
+  min-width: 50px;
+}
+
+#pulseaudio {
+  min-width: 55px;
+  color: #1A1826;
+  background: @grad-10;
+}
+
+/* #pulseaudio-slider slider {} */
+
+
+#network {
+  background: @grad-11;
+  padding-right: 13px;
+}
+
+#bluetooth {
+  min-width: 55px;
+  background: @grad-12;
+  padding-right: 13px;
+}
+
+#language {
+  background: @grad-13;
+  padding-right: 15px;
+}
+
+/* === Optional animation === */
+@keyframes blink {
+  to {
+    background-color: #BF616A;
+    color: #B5E8E0;
+  }
+}

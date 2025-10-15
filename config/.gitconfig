@@ -38,3 +38,5 @@
 [mergetool "nvim"]
     cmd = nvim -f -c \"Gdiffsplit!\" \"$MERGED\"
 
+[pager]
+	log = false
