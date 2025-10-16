@@ -90,7 +90,7 @@
   },
   "backlight": {
       "format": "{percent}% {icon}",
-      "format-icons": ["", ""]
+      "format-icons": ["󰃞", "󰃟", ""]
   },
   "backlight/slider": {
       "min": 0,
@@ -109,7 +109,8 @@
     "format-icons": {
       "default": [
         "",
-        ""
+        "",
+        ""
       ]
     },
     "on-click": "exec pavucontrol"
