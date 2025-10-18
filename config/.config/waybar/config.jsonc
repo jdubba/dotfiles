@@ -1,4 +1,5 @@
 {
+
   "layer": "top",
   "position": "top",
   "autohide": true,
@@ -26,7 +27,8 @@
     "pulseaudio",
     "network",
     "bluetooth",
-    "hyprland/language"
+    "hyprland/language",
+    "battery"
   ],
   /* === modules left === */
   "custom/archicon": {
@@ -140,5 +142,14 @@
     "on-click": "hyprctl switchxkblayout at-translated-set-2-keyboard next",
     "format-es": "esp",
     "format-en": "eng"
+  },
+  "battery": {
+    "format": "{capacity}% {icon}",
+    "format-icons": ["\uf244", "\uf243", "\uf242", "\uf241", "\uf240"],
+    "states": {
+      "warning": 30,
+      "critical": 15
+    },
+    "interval": 60
   }
 }

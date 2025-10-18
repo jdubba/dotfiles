@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Update ls aliases based on eza installation status
-  if which eza >/dev/null 2>&1; then
+if which eza >/dev/null 2>&1; then
     alias ls='eza --git'
     alias ll='eza -lah --git'
     alias l.='eza -d .* --git'
@@ -26,6 +26,8 @@ fi
 if which zoxide >/dev/null 2>&1; then
   alias cd='z'
 fi
+
+alias c='clear && fastfetch'
 
 ## get rid of command not found ##
 alias cd..='cd ..'

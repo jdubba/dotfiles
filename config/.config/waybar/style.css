@@ -45,7 +45,8 @@ window#waybar.hidden {
 #pulseaudio-slider,
 #bluetooth,
 #network,
-#language {
+#language, 
+#battery {
   color: #161320;
   margin-top: 6px;
   margin-bottom: 6px;
@@ -57,7 +58,8 @@ window#waybar.hidden {
 /* Separation to the left */
 #custom-archicon,
 #cpu,
-#idle_inhibitor {
+#idle_inhibitor,
+#battery {
   margin-left: 5px;
   border-top-left-radius: 10px;
   border-bottom-left-radius: 10px;
@@ -66,7 +68,8 @@ window#waybar.hidden {
 /* Separation to the rigth */
 #clock,
 #temperature,
-#language {
+#language,
+#battery {
   margin-right: 5px;
   border-top-right-radius: 10px;
   border-bottom-right-radius: 10px;
@@ -150,6 +153,7 @@ window#waybar.hidden {
     min-width: 50px;
 }
 
+
 #backlight {
     color: #1A1826;
     background: @grad-8;
@@ -184,7 +188,12 @@ window#waybar.hidden {
 
 #language {
   background: @grad-13;
-  padding-right: 15px;
+  padding-right: 13px;
+}
+
+#battery {
+    background: @grad-14;
+    padding-right: 15px;
 }
 
 /* === Optional animation === */
