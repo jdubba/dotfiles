@@ -196,6 +196,10 @@ window#waybar.hidden {
     padding-right: 15px;
 }
 
+#battery.charging {
+    background: #33FF33
+}
+
 /* === Optional animation === */
 @keyframes blink {
   to {

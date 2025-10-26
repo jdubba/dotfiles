@@ -120,11 +120,12 @@
   "network": {
     "format": "{ipaddr}",
     "format-ethernet": "{ipaddr} 󰈀",
+    "format-wifi": "{essid} ({signalStrength}%) ",
     "format-disconnected": " ",
     "tooltip-format": " {ifname}:{ipaddr} via {gwaddr}",
     "tooltip-format-ethernet": " {ifname}:{ipaddr} via {gwaddr}",
     "tooltip-format-disconnected": "disconnected",
-    "max-length": 50
+    "on-click": "$HOME/.local/bin/wifimenu" 
   },
   "bluetooth": {
 	"format": " {status}",
@@ -146,6 +147,7 @@
   "battery": {
     "format": "{capacity}% {icon}",
     "format-icons": ["\uf244", "\uf243", "\uf242", "\uf241", "\uf240"],
+    "format-charging": "{capacity}% {icon} ",
     "states": {
       "warning": 30,
       "critical": 15
