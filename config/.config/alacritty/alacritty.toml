@@ -1,7 +1,3 @@
-import = [
-	#"~/.config/alacritty/themes/themes/catppuccin_macchiato.toml"
-  "~/.config/alacritty/themes/themes/iris.toml"
-]
 
 [window]
 #decorations="None"
@@ -16,3 +12,9 @@ dimensions= {columns=120, lines =40}
 
 [cursor]
 	style={shape="Underline", blinking="Off"}
+
+[general]
+import = [
+	#"~/.config/alacritty/themes/themes/catppuccin_macchiato.toml"
+  "~/.config/alacritty/themes/themes/iris.toml"
+]
