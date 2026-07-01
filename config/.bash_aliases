@@ -79,7 +79,10 @@ else
 fi
 
 # Simple AI chat
-alias y='yai -c'
+alias y='claude --prompt'
+
+# XDG Open
+alias x='xdg-open'
 
 # AWS Profile login
 alias alo='aws sso login --profile '
