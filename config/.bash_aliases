@@ -86,3 +86,5 @@ alias x='xdg-open'
 
 # AWS Profile login
 alias alo='aws sso login --profile '
+
+alias es='equery list -p '
