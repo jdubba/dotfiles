@@ -33,7 +33,7 @@
   /* === modules left === */
   "custom/archicon": {
     "format": "󰣨",
-    "on-click": "wofi --show drun",
+    "on-click": "walker -m desktopapplications",
     "tooltip": false
   },
   "clock": {
@@ -76,7 +76,9 @@
       "active": ""
     },
     "persistent-workspaces": {
-      "*": 4
+      "DP-8":  [1, 2, 3, 4, 5, 6, 7, 8],
+      "DP-9":  [1, 2, 3, 4, 5, 6, 7, 8],
+      "eDP-1": [1, 2, 3, 4, 5, 6, 7, 8]
     },
     "disable-scroll": true,
     "all-outputs": true,

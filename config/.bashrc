@@ -1,8 +1,5 @@
 #!/bin/bash
 
-# Kiro CLI pre block. Keep at the top of this file.
-[[ -f "${HOME}/.local/share/kiro-cli/shell/bashrc.pre.bash" ]] && builtin source "${HOME}/.local/share/kiro-cli/shell/bashrc.pre.bash"
-
 # ~/.bashrc: executed by bash(1) for non-login shells.
 # see /usr/share/doc/bash/examples/startup-files (in the package bash-doc)
 # for examples
@@ -90,7 +87,10 @@ if [ -f /usr/share/nvm/init-nvm.sh ]; then
 fi
 
 # User bin installs
-export PATH=$PATH:/home/jwilliams/.local/bin
+export PATH=$PATH:/home/jwilliams/.local/bin:/home/jwilliams/.cargo/bin
+
+# opencode
+export PATH=/home/jwilliams/.opencode/bin:$PATH
 
 # Set default cli edit tools
 export EDITOR=/usr/bin/nvim
@@ -153,11 +153,7 @@ if [ -f ~/.bash_aliases ]; then
     . ~/.bash_aliases
 fi
 
+./.local/app/azure-cli/bin/activate
+export PATH=$PATH:./.local/app/azure-cli/bin
 
 clear && fastfetch
-
-# opencode
-export PATH=/home/jwilliams/.opencode/bin:$PATH
-
-# Kiro CLI post block. Keep at the bottom of this file.
-[[ -f "${HOME}/.local/share/kiro-cli/shell/bashrc.post.bash" ]] && builtin source "${HOME}/.local/share/kiro-cli/shell/bashrc.post.bash"

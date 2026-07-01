@@ -1,41 +1,47 @@
-vim.keymap.set("n", "<leader>ft", vim.cmd.Ex, {})
+local map = vim.keymap.set
 
-vim.keymap.set("v", "J", ":m '>+1<CR>gv=gv")
-vim.keymap.set("v", "K", ":m '<-2<CR>gv=gv")
+-- Visual line movement
+map("v", "J", ":m '>+1<CR>gv=gv", { desc = "Move selection down" })
+map("v", "K", ":m '<-2<CR>gv=gv", { desc = "Move selection up" })
 
-vim.keymap.set("n", "J", "mzJ`z")
-vim.keymap.set("n", "<C-d>", "<C-d>zz")
-vim.keymap.set("n", "<C-u>", "<C-u>zz")
-vim.keymap.set("n", "n", "nzzzv")
-vim.keymap.set("n", "N", "Nzzzv")
+-- Better join (keep cursor position)
+map("n", "J", "mzJ`z", { desc = "Join line, keep cursor" })
 
-vim.keymap.set("x", "<leader>p", "\"_dP")
+-- Centered scroll
+map("n", "<C-d>", "<C-d>zz", { desc = "Half page down, centered" })
+map("n", "<C-u>", "<C-u>zz", { desc = "Half page up, centered" })
 
---Quick copy to system keyboard
-vim.keymap.set("n", "<leader>y", "\"+y")
-vim.keymap.set("v", "<leader>y", "\"+y")
-vim.keymap.set("n", "<leader>Y", "\"+Y")
+-- Centered search results
+map("n", "n", "nzzzv", { desc = "Next result, centered" })
+map("n", "N", "Nzzzv", { desc = "Prev result, centered" })
 
---Split Navigation
-vim.keymap.set("n", "<C-j>", ":wincmd j<cr>")
-vim.keymap.set("n", "<C-k>", ":wincmd k<cr>")
-vim.keymap.set("n", "<C-h>", ":wincmd h<cr>")
-vim.keymap.set("n", "<C-l>", ":wincmd l<cr>")
+-- Paste without clobbering the yank register
+map({ "v", "x" }, "<leader>p", [["_dP]], { desc = "Paste without overwriting register" })
 
---Search
-vim.keymap.set("n", "<leader>s", ":%s/\\<<C-r><C-w>\\>/<C-r><C-w>/gI<Left><Left>")
+-- Yank to system clipboard
+map("n", "<leader>y", [["+y]], { desc = "Yank to clipboard" })
+map("v", "<leader>y", [["+y]], { desc = "Yank selection to clipboard" })
+map("n", "<leader>Y", [["+Y]], { desc = "Yank to end of line to clipboard" })
 
---Buffer Navigation
-vim.keymap.set("n", "<leader>n", ":bn<cr>")
-vim.keymap.set("n", "<leader>p", ":bp<cr>")
-vim.keymap.set("n", "<leader>x", ":bd<cr>")
+-- Split navigation
+map("n", "<C-j>", "<C-w>j", { desc = "Move to split below" })
+map("n", "<C-k>", "<C-w>k", { desc = "Move to split above" })
+map("n", "<C-h>", "<C-w>h", { desc = "Move to split left" })
+map("n", "<C-l>", "<C-w>l", { desc = "Move to split right" })
 
---Comment Toggle
-vim.keymap.set({"n", "v"}, "<leader>/", ":CommentToggle<cr>")
+-- Search and replace word under cursor
+map("n", "<leader>s", [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]], { desc = "Search & replace word under cursor" })
 
---Indentation
-vim.keymap.set({"n", "v"}, "<leader>>", ":><cr>")
-vim.keymap.set({"n", "v"}, "<leader><", ":<<cr>")
+-- Buffer navigation
+map("n", "<leader>n", "<cmd>bnext<cr>", { desc = "Next buffer" })
+map("n", "<leader>p", "<cmd>bprev<cr>", { desc = "Previous buffer" })
+map("n", "<leader>x", "<cmd>bdelete<cr>", { desc = "Close buffer" })
 
---Word wrap Toggle
-vim.keymap.set({"n", "v"}, "<leader>w", ":set wrap!<cr>", { noremap = true })
+-- Indentation
+map({ "n", "v" }, "<leader>>", ">>", { desc = "Indent right" })
+map({ "n", "v" }, "<leader><", "<<", { desc = "Indent left" })
+
+-- Word wrap toggle
+map({ "n", "v" }, "<leader>w", function()
+  vim.opt.wrap = not vim.opt.wrap:get()
+end, { desc = "Toggle word wrap" })

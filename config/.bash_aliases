@@ -83,3 +83,5 @@ alias y='yai -c'
 
 # AWS Profile login
 alias alo='aws sso login --profile '
+
+alias es='equery list -p '
