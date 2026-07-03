@@ -1,4 +1,5 @@
 {
+
   "layer": "top",
   "position": "top",
   "autohide": true,
@@ -44,7 +45,7 @@
       "mode": "month"
     }
   },
-  "cpu": {
+  "cpu": { 
     "format": "{usage}% ",
     "tooltip": true,
     "tooltip-format": "uso de cpu: {usage}%\nnúcleos: {cores}"
@@ -75,9 +76,7 @@
       "active": ""
     },
     "persistent-workspaces": {
-      "DP-8": [1, 2, 3, 4, 5, 6, 7, 8],
-      "DP-9": [1, 2, 3, 4, 5, 6, 7, 8],
-      "eDP-1": [1, 2, 3, 4, 5, 6, 7, 8]
+      "*": 4
     },
     "disable-scroll": true,
     "all-outputs": true,
@@ -92,13 +91,13 @@
     }
   },
   "backlight": {
-    "format": "{percent}% {icon}",
-    "format-icons": ["󰃞", "󰃟", ""]
+      "format": "{percent}% {icon}",
+      "format-icons": ["󰃞", "󰃟", ""]
   },
   "backlight/slider": {
-    "min": 0,
-    "max": 100,
-    "orientation": "horizontal"
+      "min": 0,
+      "max": 100,
+      "orientation": "horizontal"
   },
   "pulseaudio/slider": {
     "format": "{volume}%",
@@ -126,17 +125,17 @@
     "tooltip-format": " {ifname}:{ipaddr} via {gwaddr}",
     "tooltip-format-ethernet": " {ifname}:{ipaddr} via {gwaddr}",
     "tooltip-format-disconnected": "disconnected",
-    "on-click": "$HOME/.local/bin/wifimenu"
+    "on-click": "$HOME/.local/bin/wifimenu" 
   },
   "bluetooth": {
-    "format": " {status}",
-    "format-connected": " {device_alias}",
-    "format-connected-battery": " {device_alias} {device_battery_percentage}%",
-    // "format-device-preference": [ "device1", "device2" ], // preference list deciding the displayed device
-    "tooltip-format": "{controller_alias}\t{controller_address}\n\n{num_connections} connected",
-    "tooltip-format-connected": "{controller_alias}\t{controller_address}\n\n{num_connections} connected\n\n{device_enumerate}",
-    "tooltip-format-enumerate-connected": "{device_alias}\t{device_address}",
-    "tooltip-format-enumerate-connected-battery": "{device_alias}\t{device_address}\t{device_battery_percentage}%",
+	"format": " {status}",
+	"format-connected": " {device_alias}",
+	"format-connected-battery": " {device_alias} {device_battery_percentage}%",
+	// "format-device-preference": [ "device1", "device2" ], // preference list deciding the displayed device
+	"tooltip-format": "{controller_alias}\t{controller_address}\n\n{num_connections} connected",
+	"tooltip-format-connected": "{controller_alias}\t{controller_address}\n\n{num_connections} connected\n\n{device_enumerate}",
+	"tooltip-format-enumerate-connected": "{device_alias}\t{device_address}",
+	"tooltip-format-enumerate-connected-battery": "{device_alias}\t{device_address}\t{device_battery_percentage}%",
     "on-click": "exec blueman-manager"
   },
   "hyprland/language": {

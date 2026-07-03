@@ -18,7 +18,7 @@
 /* -- Global rules -- */
 * {
   border: none;
-  font-family: "JetbrainsMono Nerd Font";
+  font-family: "DM Sans", "JetbrainsMono Nerd Font";
   font-size: 15px;
   min-height: 10px;
 }
@@ -31,7 +31,7 @@ window#waybar.hidden {
   opacity: 0.2;
 }
 
-/* - Genera rules for visible modules -- */
+/* -- General rules for visible modules -- */
 #custom-archicon,
 #clock,
 #cpu,
@@ -45,7 +45,7 @@ window#waybar.hidden {
 #pulseaudio-slider,
 #bluetooth,
 #network,
-#language, 
+#language,
 #battery {
   color: #161320;
   margin-top: 6px;
@@ -65,7 +65,7 @@ window#waybar.hidden {
   border-bottom-left-radius: 10px;
 }
 
-/* Separation to the rigth */
+/* Separation to the right */
 #clock,
 #temperature,
 #language,
@@ -88,7 +88,7 @@ window#waybar.hidden {
 #clock {
   background: @grad-1;
   color: #FFFFFF;
-  font-weight:bold;
+  font-weight: bold;
 }
 
 #cpu {
@@ -148,16 +148,15 @@ window#waybar.hidden {
 }
 
 #backlight-slider {
-    color: #1A1826;
-    background: @grad-7;
-    min-width: 50px;
+  color: #1A1826;
+  background: @grad-7;
+  min-width: 50px;
 }
 
-
 #backlight {
-    color: #1A1826;
-    background: @grad-8;
-    min-width:55px;
+  color: #1A1826;
+  background: @grad-8;
+  min-width: 55px;
 }
 
 #pulseaudio-slider {
@@ -173,7 +172,6 @@ window#waybar.hidden {
 }
 
 /* #pulseaudio-slider slider {} */
-
 
 #network {
   background: @grad-11;
@@ -192,12 +190,12 @@ window#waybar.hidden {
 }
 
 #battery {
-    background: @grad-14;
-    padding-right: 15px;
+  background: @grad-14;
+  padding-right: 15px;
 }
 
 #battery.charging {
-    background: #33FF33
+  background: #33FF33;
 }
 
 /* === Optional animation === */
