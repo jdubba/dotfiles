@@ -8,27 +8,42 @@
   "gtk-layer-shell": true,
   /* === modules order === */
   "modules-left": [
-    "custom/archicon",
-    "clock",
-    "cpu",
-    "memory",
-    "disk",
-    "temperature"
+    "group/left-brand",
+    "group/left-stats"
   ],
   "modules-center": [
     "hyprland/workspaces"
   ],
   "modules-right": [
-    "idle_inhibitor",
-    "backlight/slider",
-    "backlight",
-    "pulseaudio/slider",
-    "pulseaudio",
-    "network",
-    "bluetooth",
-    "hyprland/language",
+    "group/right-controls",
     "battery"
   ],
+  /* === section groups ===
+     Each group is a container widget addressable in style.css by its own
+     ID (e.g. #left-brand). Edge rounding is applied structurally in CSS
+     via :first-child/:last-child, so sections can be reordered or have
+     modules added/removed here without touching the stylesheet. */
+  "group/left-brand": {
+    "orientation": "horizontal",
+    "modules": ["custom/archicon", "clock"]
+  },
+  "group/left-stats": {
+    "orientation": "horizontal",
+    "modules": ["cpu", "memory", "disk", "temperature"]
+  },
+  "group/right-controls": {
+    "orientation": "horizontal",
+    "modules": [
+      "idle_inhibitor",
+      "backlight/slider",
+      "backlight",
+      "pulseaudio/slider",
+      "pulseaudio",
+      "network",
+      "bluetooth",
+      "hyprland/language"
+    ]
+  },
   /* === modules left === */
   "custom/archicon": {
     "format": "󰣨",
