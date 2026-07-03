@@ -48,7 +48,7 @@ window#waybar.hidden {
 #battery {
   color: #161320;
   min-height: 16px;
-  margin: 3px 0;
+  margin: 5px 0;
   padding: 0 8px;
   transition: none;
 }
@@ -76,23 +76,23 @@ window#waybar.hidden {
 #left-stats > *:first-child > *,
 #right-controls > *:first-child > * {
   margin-left: 4px;
-  border-top-left-radius: 10px;
-  border-bottom-left-radius: 10px;
+  border-top-left-radius: 15px;
+  border-bottom-left-radius: 15px;
 }
 
 #left-brand > *:last-child > *,
 #left-stats > *:last-child > *,
 #right-controls > *:last-child > * {
   margin-right: 4px;
-  border-top-right-radius: 10px;
-  border-bottom-right-radius: 10px;
+  border-top-right-radius: 15px;
+  border-bottom-right-radius: 15px;
 }
 
 /* Battery isn't part of a group -- it's a standalone, single-module pill. */
 #battery {
   margin-left: 4px;
   margin-right: 4px;
-  border-radius: 10px;
+  border-radius: 15px;
 }
 
 /* -- Specific styles -- */
@@ -134,8 +134,8 @@ window#waybar.hidden {
 /* Modules center */
 #workspaces {
   background: rgba(0, 0, 0, 0.5);
-  border-radius: 10px;
-  margin: 3px 4px;
+  border-radius: 15px;
+  margin: 5px 4px;
   padding: 0 6px;
 }
 
