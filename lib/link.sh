@@ -91,6 +91,16 @@ df_plan_symlink() {
     df_plan_emit LINK "$rel" "$src" "$kind"
     return 0
   fi
+  # The target may only appear to exist because a parent directory is currently
+  # a folded symlink into the repo that is about to be unfolded (a new layer now
+  # contributes a sibling). That is managed content, not a foreign file, so link
+  # it - after the parent's unfold the path will be empty.
+  local _resolved
+  _resolved=$(readlink -f -- "$target" 2>/dev/null || true)
+  if [[ -n "$_resolved" && "$_resolved" == "$DF_REPO"/* ]]; then
+    df_plan_emit LINK "$rel" "$src" "$kind"
+    return 0
+  fi
   # A real file or directory the repo does not own is present.
   if [[ "$kind" == "dir" && -d "$target" ]]; then
     if _df_dir_is_empty "$target"; then

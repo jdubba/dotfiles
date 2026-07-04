@@ -121,6 +121,20 @@ teardown() { teardown_sandbox; }
   grep -q NEW "$HOME/.bashrc"
 }
 
+@test "a folded directory unfolds cleanly when a new layer adds a sibling" {
+  mk_home ".config/app/a.conf" "A"
+  "$DOTFILES" link
+  [ -L "$HOME/.config/app" ]                                   # folded (home only)
+  mk_host ".config/app/b.conf" "B"                             # host adds a sibling
+  run "$DOTFILES" link
+  [ "$status" -eq 0 ]                                          # no conflicts
+  [ -d "$HOME/.config/app" ] && [ ! -L "$HOME/.config/app" ]   # now a real dir
+  [ -L "$HOME/.config/app/a.conf" ]                            # home file linked
+  [ -L "$HOME/.config/app/b.conf" ]                            # host file linked
+  grep -q A "$HOME/.config/app/a.conf"
+  grep -q B "$HOME/.config/app/b.conf"
+}
+
 @test "a wrong managed symlink is repaired, not treated as a conflict" {
   mk_home ".gitconfig" "REAL"
   # Pre-existing symlink pointing at the wrong place inside the repo.
