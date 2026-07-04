@@ -55,9 +55,12 @@ family, or desktop; extra ones are enabled with `dotfiles profile enable`.
 - `lib/core.sh` — logging, colour, path helpers.
 - `lib/config.sh` — defaults, the container-dir set, repo config, machine state.
 - `lib/identity.sh` — hostname/distro/desktop detection, layer resolution.
-- `lib/link.sh` — the linker: plan building, fold/unfold, apply.
+- `lib/link.sh` — the linker: plan building, fold/unfold, apply. (Content
+  reached *through* a folded parent symlink is treated as managed, so a
+  fold→unfold transition relinks cleanly instead of reporting conflicts.)
+- `lib/machine_env.sh` — machine-specific env registry/host-value parsing + analysis.
 - `lib/commands/*.sh` — one file per subcommand (`link`, `status`, `doctor`,
-  `add`, `sync`, `profile`, `dconf`, `hook`, `info`).
+  `add`, `sync`, `profile`, `env`, `dconf`, `hook`, `info`).
 - `hooks/post-merge` — git hook that re-links after `git pull`.
 - `dotfiles.conf` — optional repo config (extend `DF_CONTAINER_DIRS` / `DF_IGNORE_NAMES`).
 
@@ -101,6 +104,13 @@ and zsh rather than duplicated:
 - **zsh completion:** run `compinit` **once** into `$XDG_CACHE_HOME/zsh/zcompdump`
   with `bashcompinit` *after* it. Do not reintroduce a bare `compinit` — it writes
   a stray `~/.zcompdump` on every startup.
+- **Machine-specific env vars** are declared in
+  `home/.config/shell/machine-env.registry` (`VAR: description`) and given per-host
+  values in `hosts/<host>/.config/shell/machine-env` (`KEY=VALUE`; `@skip` = "not
+  relevant here"). `env.sh` exports the current host's values on startup; manage
+  with `dotfiles env status|set|skip|add|unset`. `doctor` and `sync` report vars
+  that are declared but unset-and-not-skipped on this host (cross-machine
+  reconciliation). Values are committed in the host layer (non-secret only).
 
 ### Monitors / desktop specifics
 
@@ -128,6 +138,7 @@ dotfiles link            # apply
 dotfiles doctor --fix    # detect/repair hazards (folded containers, broken links)
 dotfiles add <path>      # adopt an existing config file/dir (--to home|host|profile:<n>)
 dotfiles profile enable <name>
+dotfiles env set AWS_PROFILE <value>   # machine-specific env vars
 dotfiles dconf dump|load # GNOME settings
 ```
 

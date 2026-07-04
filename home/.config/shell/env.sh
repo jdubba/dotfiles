@@ -52,3 +52,16 @@ _pathadd "$HOME/.opencode/bin"
 _pathadd "$HOME/.local/app/azure-cli/bin"
 export PATH
 unset -f _pathadd
+
+# --- Machine-specific environment ----------------------------------------
+# Per-host values live in the host layer and are linked to
+# ~/.config/shell/machine-env (declared vars are listed in machine-env.registry).
+# Export each KEY=VALUE; a value of "@skip" means "declared but not set here".
+if [ -r "$XDG_CONFIG_HOME/shell/machine-env" ]; then
+    while IFS='=' read -r _df_k _df_v; do
+        case "$_df_k" in ''|\#*) continue ;; esac
+        [ "$_df_v" = "@skip" ] && continue
+        export "$_df_k=$_df_v"
+    done < "$XDG_CONFIG_HOME/shell/machine-env"
+    unset _df_k _df_v
+fi

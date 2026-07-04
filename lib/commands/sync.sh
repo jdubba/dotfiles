@@ -30,4 +30,14 @@ df_cmd_sync() {
   else
     df_ok "pulled; skipping link (--no-link)"
   fi
+
+  # Surface machine-specific env that a pull may have newly declared but which
+  # this host hasn't set or skipped yet.
+  if [[ -f "$(df_menv_registry)" ]]; then
+    local unconf; unconf=$(df_menv_unconfigured | tr '\n' ' ')
+    if [[ -n "${unconf// /}" ]]; then
+      df_warn "machine-specific env needs attention:${unconf:+ }$unconf"
+      df_dim "run 'dotfiles env status' to set or skip them"
+    fi
+  fi
 }

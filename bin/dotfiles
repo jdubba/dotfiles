@@ -34,6 +34,8 @@ source "$DF_LIB/config.sh"
 source "$DF_LIB/identity.sh"
 # shellcheck source=lib/link.sh
 source "$DF_LIB/link.sh"
+# shellcheck source=lib/machine_env.sh
+source "$DF_LIB/machine_env.sh"
 
 df_load_repo_config
 
@@ -54,6 +56,7 @@ Commands:
                           DEST = home (default) | profile:<name> | host
   sync [--no-link]        git pull (fast-forward) then link
   profile <subcommand>    Manage machine-local profiles (list|enable|disable|show)
+  env <subcommand>        Machine-specific env vars (status|set|skip|add|unset)
   dconf dump|load [file]  Snapshot/apply GNOME dconf settings (keyfile in repo)
   hook install|uninstall  Install git hook so 'git pull' auto-links
   info                    Show detected identity and active layers
@@ -81,6 +84,7 @@ case "$cmd" in
   add)                source "$DF_LIB/commands/add.sh";     df_cmd_add "$@" ;;
   sync)               source "$DF_LIB/commands/sync.sh";    df_cmd_sync "$@" ;;
   profile)            source "$DF_LIB/commands/profile.sh"; df_cmd_profile "$@" ;;
+  env)                source "$DF_LIB/commands/env.sh";     df_cmd_env "$@" ;;
   dconf)              source "$DF_LIB/commands/dconf.sh";   df_cmd_dconf "$@" ;;
   hook)               source "$DF_LIB/commands/hook.sh";    df_cmd_hook "$@" ;;
   info)               source "$DF_LIB/commands/info.sh";    df_cmd_info "$@" ;;

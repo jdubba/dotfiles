@@ -94,11 +94,18 @@ df_cmd_doctor() {
     fi
   fi
 
-  df_log ""
-  if (( issues == 0 )); then
-    df_ok "no problems found"
-    return 0
+  # --- Check 4: machine-specific env vars unconfigured on this host --------
+  if [[ -f "$(df_menv_registry)" ]]; then
+    df_info "checking machine-specific env..."
+    local mev
+    while IFS= read -r mev; do
+      [[ -n "$mev" ]] || continue
+      issues=$((issues + 1))
+      df_warn "env $mev is unset here - 'dotfiles env set $mev <value>' or 'dotfiles env skip $mev'"
+    done < <(df_menv_unconfigured)
   fi
+
+  df_log ""
   if (( fix )); then
     df_info "fixed $fixed of $issues issue(s); re-run 'dotfiles link' to finish"
   else

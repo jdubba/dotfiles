@@ -1,0 +1,12 @@
+# Machine-specific environment variables (registry).
+#
+# Declares env vars whose value varies per machine. This file is shared by all
+# machines and is what lets the tooling do cross-machine analysis: each machine
+# provides a value (or marks "@skip") in its host layer at
+#   hosts/<hostname>/.config/shell/machine-env
+# and the shared env.sh loader exports the current host's values on startup.
+#
+# Manage with:  dotfiles env status | set VAR VALUE | skip VAR | add VAR [desc]
+#
+# Format:  VARNAME: human-readable description
+AWS_PROFILE: default AWS profile (SSO/CLI) for this machine

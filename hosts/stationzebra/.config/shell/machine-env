@@ -1,0 +1,4 @@
+# Machine-specific env values for stationzebra.
+# KEY=VALUE, one per line; a value of @skip means "declared but not relevant here".
+# Managed by 'dotfiles env'; declared vars live in the shared machine-env.registry.
+AWS_PROFILE=idkey
