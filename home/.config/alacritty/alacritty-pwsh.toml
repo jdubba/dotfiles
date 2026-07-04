@@ -1,6 +1,0 @@
-import = [
-	"~/source/jdubba.shell/.config/alacritty/alacritty.toml"
-]
-
-[shell]
-	program="pwsh"
