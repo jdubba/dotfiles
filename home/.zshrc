@@ -2,6 +2,7 @@
 # History
 # ========================================
 HISTFILE="$XDG_STATE_HOME/zsh/history"
+[[ -d "${HISTFILE:h}" ]] || mkdir -p "${HISTFILE:h}"   # ensure history dir (first-run safety)
 HISTSIZE=100000
 SAVEHIST=100000
 
@@ -39,6 +40,7 @@ eval "$(zoxide init zsh)"
 autoload -Uz compinit && compinit
 autoload -Uz bashcompinit && bashcompinit
 
+[[ -d "$XDG_CACHE_HOME/zsh" ]] || mkdir -p "$XDG_CACHE_HOME/zsh"   # ensure compdump dir (first-run safety)
 compinit -d "$XDG_CACHE_HOME/zsh/zcompdump"
 
 if command -v aws_completer >/dev/null 2>&1; then
