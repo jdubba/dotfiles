@@ -1,0 +1,177 @@
+#!/usr/bin/env bash
+#
+# wifimenu — manage Wi-Fi via NetworkManager (nmcli) with Walker as the menu.
+# Bound from Waybar's network module on-click.
+#
+# Actions: connect to a scanned SSID, disconnect, toggle radio, manage saved
+# connections (activate / forget). Password entry uses Walker's masked input.
+#
+set -euo pipefail
+
+# --- Walker pickers ----------------------------------------------------------
+# All pickers use the "topright" theme (positions just under Waybar, top
+# right) and -H to hide the F1-F4 quick-activate hint buttons.
+# Plain chooser: reads newline list on stdin, prints the chosen line.
+menu() {
+    walker -d -t topright -H -p "${1:-Select}"
+}
+# Masked password input: prints the typed secret.
+askpass() {
+    walker -x -t topright -H -p "${1:-Password}"
+}
+# Free-text input: no candidate list, just a text field. Prints what was typed.
+askinput() {
+    walker -d -I -t topright -H -p "${1:-Enter text}"
+}
+notify() {
+    command -v notify-send >/dev/null 2>&1 && notify-send -a "Wi-Fi" "$1" "${2:-}" || true
+}
+
+# --- Identify the Wi-Fi device ----------------------------------------------
+WIFI_DEV=$(nmcli -t -f DEVICE,TYPE device 2>/dev/null | awk -F: '$2=="wifi"{print $1; exit}')
+if [[ -z "${WIFI_DEV:-}" ]]; then
+    notify "No Wi-Fi device found"
+    exit 1
+fi
+
+radio_state() { nmcli radio wifi; }   # "enabled" / "disabled"
+
+# --- Connect to a chosen SSID ------------------------------------------------
+connect_to() {
+    local ssid="$1"
+    [[ -z "$ssid" ]] && return 0
+
+    # Already have a saved profile for this SSID? Just bring it up.
+    if nmcli -t -f NAME connection show | grep -Fxq "$ssid"; then
+        if nmcli connection up id "$ssid" >/dev/null 2>&1; then
+            notify "Connected" "$ssid"
+        else
+            notify "Failed to activate saved connection" "$ssid"
+        fi
+        return 0
+    fi
+
+    # Open network — try without a password first.
+    if nmcli device wifi connect "$ssid" ifname "$WIFI_DEV" >/dev/null 2>&1; then
+        notify "Connected" "$ssid"
+        return 0
+    fi
+
+    # Secured network — prompt for a password and retry.
+    local pass
+    pass=$(askpass "Password for $ssid") || return 0
+    [[ -z "$pass" ]] && { notify "No password entered" "$ssid"; return 0; }
+    if nmcli device wifi connect "$ssid" password "$pass" ifname "$WIFI_DEV" >/dev/null 2>&1; then
+        notify "Connected" "$ssid"
+    else
+        notify "Connection failed" "$ssid — wrong password or out of range?"
+    fi
+}
+
+# --- Action: scan & pick an available network --------------------------------
+action_scan() {
+    notify "Scanning…"
+    nmcli device wifi rescan ifname "$WIFI_DEV" >/dev/null 2>&1 || true
+    # IN-USE marker (*) first, then signal-sorted list. Strip the marker for the SSID.
+    local choice ssid
+    choice=$(nmcli --color no -f IN-USE,SIGNAL,SECURITY,SSID device wifi list ifname "$WIFI_DEV" \
+                | sed '1d' \
+                | sort -k2 -nr \
+                | menu "Wi-Fi networks") || return 0
+    [[ -z "${choice:-}" ]] && return 0
+    # Extract SSID: it's the 4th column onward in our chosen format.
+    ssid=$(awk '{ $1=$1; out=$4; for(i=5;i<=NF;i++) out=out" "$i; print out }' <<<"$choice")
+    ssid=$(sed -E 's/[[:space:]]+$//' <<<"$ssid")
+    [[ -z "$ssid" || "$ssid" == "--" ]] && return 0
+    connect_to "$ssid"
+}
+
+# --- Action: connect to a hidden network (manual SSID) -----------------------
+action_hidden() {
+    local ssid pass
+    ssid=$(askinput "Hidden SSID") || return 0
+    ssid=$(sed -E 's/^[[:space:]]+|[[:space:]]+$//g' <<<"$ssid")
+    [[ -z "$ssid" ]] && return 0
+
+    # Reuse an existing saved profile if the SSID is already known.
+    if nmcli -t -f NAME connection show | grep -Fxq "$ssid"; then
+        nmcli connection up id "$ssid" >/dev/null 2>&1 \
+            && notify "Connected" "$ssid" || notify "Failed to activate" "$ssid"
+        return 0
+    fi
+
+    # Try open first; fall back to a masked password prompt.
+    if nmcli device wifi connect "$ssid" hidden yes ifname "$WIFI_DEV" >/dev/null 2>&1; then
+        notify "Connected" "$ssid"
+        return 0
+    fi
+    pass=$(askpass "Password for $ssid") || return 0
+    [[ -z "$pass" ]] && { notify "No password entered" "$ssid"; return 0; }
+    if nmcli device wifi connect "$ssid" password "$pass" hidden yes ifname "$WIFI_DEV" >/dev/null 2>&1; then
+        notify "Connected" "$ssid"
+    else
+        notify "Connection failed" "$ssid — wrong password or out of range?"
+    fi
+}
+
+# --- Action: disconnect the active Wi-Fi -------------------------------------
+action_disconnect() {
+    if nmcli device disconnect "$WIFI_DEV" >/dev/null 2>&1; then
+        notify "Disconnected"
+    else
+        notify "Nothing to disconnect"
+    fi
+}
+
+# --- Action: toggle the radio ------------------------------------------------
+action_toggle() {
+    if [[ "$(radio_state)" == "enabled" ]]; then
+        nmcli radio wifi off && notify "Wi-Fi disabled"
+    else
+        nmcli radio wifi on && notify "Wi-Fi enabled"
+    fi
+}
+
+# --- Action: manage saved connections ----------------------------------------
+action_saved() {
+    local choice
+    choice=$(nmcli -t -f NAME,TYPE connection show \
+                | awk -F: '$2 ~ /wireless/ {print $1}' \
+                | menu "Saved networks") || return 0
+    [[ -z "${choice:-}" ]] && return 0
+
+    local sub
+    sub=$(printf '%s\n' "Connect" "Forget" | menu "$choice") || return 0
+    case "$sub" in
+        Connect)
+            nmcli connection up id "$choice" >/dev/null 2>&1 \
+                && notify "Connected" "$choice" || notify "Failed to connect" "$choice" ;;
+        Forget)
+            nmcli connection delete id "$choice" >/dev/null 2>&1 \
+                && notify "Forgotten" "$choice" || notify "Failed to delete" "$choice" ;;
+    esac
+}
+
+# --- Main menu ---------------------------------------------------------------
+main() {
+    local state choice
+    state=$(radio_state)
+    choice=$(printf '%s\n' \
+        "󰖩  Connect to a network" \
+        "󰗹  Connect to hidden network" \
+        "󰖪  Disconnect" \
+        "󰋙  Saved networks" \
+        "󰐥  Toggle Wi-Fi (currently: $state)" \
+        | menu "Wi-Fi") || exit 0
+
+    case "$choice" in
+        *"Connect to hidden network") action_hidden ;;
+        *"Connect to a network")      action_scan ;;
+        *"Disconnect")                action_disconnect ;;
+        *"Saved networks")            action_saved ;;
+        *"Toggle Wi-Fi"*)             action_toggle ;;
+        *) exit 0 ;;
+    esac
+}
+
+main "$@"

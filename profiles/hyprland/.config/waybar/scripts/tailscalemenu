@@ -1,0 +1,205 @@
+#!/usr/bin/env bash
+#
+# tailscalemenu — manage Tailscale via the `tailscale` CLI with Walker as the
+# menu. Bound from Waybar's custom/tailscale module on-click.
+#
+# Modeled on wifimenu: connect, disconnect, list/ping peers, pick an exit
+# node, and switch between logged-in accounts (tailnets).
+#
+# Requires the local user to be a Tailscale "operator" so these commands
+# don't need sudo:
+#   sudo tailscale set --operator=$USER
+#
+set -euo pipefail
+
+# --- Walker pickers ----------------------------------------------------------
+# "topright" theme positions this just under Waybar, top right; -H hides
+# the F1-F4 quick-activate hint buttons.
+menu() {
+    walker -d -t topright -H -p "${1:-Select}"
+}
+notify() {
+    command -v notify-send >/dev/null 2>&1 && notify-send -a "Tailscale" "$1" "${2:-}" || true
+}
+
+status_json() {
+    tailscale status --json 2>/dev/null
+}
+
+backend_state() {
+    status_json | python3 -c 'import json,sys; print(json.load(sys.stdin).get("BackendState","Unknown"))' 2>/dev/null || echo "Unknown"
+}
+
+# --- Action: connect ----------------------------------------------------------
+action_connect() {
+    if tailscale up >/dev/null 2>&1; then
+        notify "Connected"
+    else
+        notify "Failed to connect" "See: tailscale up"
+    fi
+}
+
+# --- Action: disconnect -------------------------------------------------------
+action_disconnect() {
+    if tailscale down >/dev/null 2>&1; then
+        notify "Disconnected"
+    else
+        notify "Failed to disconnect"
+    fi
+}
+
+# --- Action: list peers, with a ping / set-exit-node sub-action --------------
+action_peers() {
+    local list choice hostname raw
+    raw=$(status_json)
+    list=$(python3 - "$raw" <<'PYEOF'
+import json, sys
+data = json.loads(sys.argv[1])
+for p in (data.get("Peer") or {}).values():
+    marker = "\uf00c" if p.get("Online") else "\uf00d"   # fa-check / fa-times
+    exitflag = "  [exit]" if p.get("ExitNode") else ""
+    print(f"{marker}  {p.get('HostName', '?')}{exitflag}")
+PYEOF
+    ) || true
+
+    if [[ -z "$list" ]]; then
+        notify "No peers found"
+        return 0
+    fi
+
+    choice=$(printf '%s\n' "$list" | menu "Peers") || return 0
+    [[ -z "${choice:-}" ]] && return 0
+    hostname=$(sed -E 's/^\S+\s+//; s/  \[exit\]$//' <<<"$choice")
+    [[ -z "$hostname" ]] && return 0
+
+    local sub
+    sub=$(printf '%s\n' "Ping" "Set as exit node" | menu "$hostname") || return 0
+    case "$sub" in
+        Ping)
+            local result
+            result=$(timeout 5 tailscale ping --c 1 "$hostname" 2>&1 | tail -n1) || true
+            notify "$hostname" "${result:-No response}"
+            ;;
+        "Set as exit node")
+            if tailscale set --exit-node="$hostname" >/dev/null 2>&1; then
+                notify "Exit node set" "$hostname"
+            else
+                notify "Failed to set exit node" "$hostname -- does it advertise exit-node?"
+            fi
+            ;;
+    esac
+}
+
+# --- Action: pick / clear the exit node ---------------------------------------
+action_exit_node() {
+    local list choice none_label raw
+    none_label=$'\uf05e  None (disable exit node)'
+    raw=$(status_json)
+    list=$(python3 - "$raw" <<'PYEOF'
+import json, sys
+data = json.loads(sys.argv[1])
+for p in (data.get("Peer") or {}).values():
+    if p.get("ExitNodeOption"):
+        marker = "\uf05d" if p.get("ExitNode") else "\uf10c"  # fa-check-circle / fa-circle-o
+        print(f"{marker}  {p.get('HostName', '?')}")
+PYEOF
+    ) || true
+
+    if [[ -z "$list" ]]; then
+        notify "No exit-node-capable peers found"
+        return 0
+    fi
+
+    choice=$(printf '%s\n%s\n' "$none_label" "$list" | menu "Exit node") || return 0
+    [[ -z "${choice:-}" ]] && return 0
+
+    if [[ "$choice" == *"None"* ]]; then
+        tailscale set --exit-node= >/dev/null 2>&1 && notify "Exit node disabled"
+        return 0
+    fi
+
+    local hostname
+    hostname=$(sed -E 's/^\S+\s+//' <<<"$choice")
+    [[ -z "$hostname" ]] && return 0
+    if tailscale set --exit-node="$hostname" >/dev/null 2>&1; then
+        notify "Exit node set" "$hostname"
+    else
+        notify "Failed to set exit node" "$hostname"
+    fi
+}
+
+# --- Action: switch between logged-in accounts/tailnets ----------------------
+action_switch_account() {
+    local list choice id
+    list=$(tailscale switch --list 2>/dev/null | tail -n +2) || true
+
+    if [[ -z "$list" ]]; then
+        notify "Only one account configured"
+        return 0
+    fi
+
+    choice=$(printf '%s\n' "$list" | menu "Switch account") || return 0
+    [[ -z "${choice:-}" ]] && return 0
+    id=$(awk '{print $1}' <<<"$choice")
+    [[ -z "$id" ]] && return 0
+
+    if tailscale switch "$id" >/dev/null 2>&1; then
+        notify "Switched account" "$choice"
+    else
+        notify "Failed to switch account" "$choice"
+    fi
+}
+
+# --- Action: show a quick status summary --------------------------------------
+action_status() {
+    local summary raw
+    raw=$(status_json)
+    summary=$(python3 - "$raw" <<'PYEOF'
+import json, sys
+data = json.loads(sys.argv[1])
+lines = [f"State: {data.get('BackendState', 'Unknown')}"]
+tailnet = (data.get("CurrentTailnet") or {}).get("Name")
+if tailnet:
+    lines.append(f"Tailnet: {tailnet}")
+ips = (data.get("Self") or {}).get("TailscaleIPs") or []
+if ips:
+    lines.append(f"IP: {ips[0]}")
+peers = data.get("Peer") or {}
+online = sum(1 for p in peers.values() if p.get("Online"))
+lines.append(f"Peers online: {online}/{len(peers)}")
+print("\n".join(lines))
+PYEOF
+    ) || summary="Unable to read status"
+    notify "Tailscale status" "$summary"
+}
+
+# --- Main menu -----------------------------------------------------------------
+main() {
+    local state choice connect_label
+    state=$(backend_state)
+    if [[ "$state" == "Running" ]]; then
+        connect_label=$'\uf132  Disconnect'
+    else
+        connect_label=$'\uf3ed  Connect'
+    fi
+
+    choice=$(printf '%s\n' \
+        "$connect_label" \
+        $'\uf1e0  Peers' \
+        $'\uf850  Exit node' \
+        $'\uf021  Switch account' \
+        $'\uf05a  Status' \
+        | menu "Tailscale ($state)") || exit 0
+
+    case "$choice" in
+        *"Disconnect")     action_disconnect ;;
+        *"Connect")        action_connect ;;
+        *"Peers")          action_peers ;;
+        *"Exit node")      action_exit_node ;;
+        *"Switch account") action_switch_account ;;
+        *"Status")         action_status ;;
+        *) exit 0 ;;
+    esac
+}
+
+main "$@"

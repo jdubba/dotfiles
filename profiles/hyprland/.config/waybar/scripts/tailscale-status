@@ -1,0 +1,72 @@
+#!/usr/bin/env bash
+#
+# tailscale-status — emit Waybar custom-module JSON describing the current
+# Tailscale state. Polled on an interval from Waybar's custom/tailscale
+# module; the click action lives in tailscalemenu.
+#
+set -euo pipefail
+
+json_escape() {
+    python3 -c 'import json,sys; print(json.dumps(sys.stdin.read().rstrip("\n")))'
+}
+
+status=$(tailscale status --json 2>/dev/null) || status=""
+
+if [[ -z "$status" ]]; then
+    text="\uf132"   # fa-shield (outline) — daemon unreachable
+    class="down"
+    tooltip="Tailscale: daemon unreachable"
+    printf '{"text": %s, "class": "%s", "tooltip": %s}\n' \
+        "$(json_escape <<<"$text")" "$class" "$(json_escape <<<"$tooltip")"
+    exit 0
+fi
+
+python3 - "$status" <<'PYEOF'
+import json, sys
+
+data = json.loads(sys.argv[1])
+backend = data.get("BackendState", "Unknown")
+self_ = data.get("Self", {})
+peers = data.get("Peer", {}) or {}
+
+online = sum(1 for p in peers.values() if p.get("Online"))
+total = len(peers)
+
+exit_node = None
+for p in peers.values():
+    if p.get("ExitNode"):
+        exit_node = p.get("HostName")
+        break
+
+tailnet = (data.get("CurrentTailnet") or {}).get("Name", "")
+self_ip = (self_.get("TailscaleIPs") or [""])[0]
+
+if backend == "Running":
+    icon = "\uf3ed"      # fa-shield-alt (solid) — connected
+    css_class = "up"
+    lines = [f"Tailscale: connected ({tailnet})" if tailnet else "Tailscale: connected"]
+    if self_ip:
+        lines.append(f"IP: {self_ip}")
+    lines.append(f"Peers online: {online}/{total}")
+    if exit_node:
+        lines.append(f"Exit node: {exit_node}")
+elif backend == "Stopped":
+    icon = "\uf132"      # fa-shield (outline) — disconnected
+    css_class = "down"
+    lines = ["Tailscale: disconnected"]
+elif backend in ("NeedsLogin", "NeedsMachineAuth"):
+    icon = "\uf071"      # fa-exclamation-triangle — needs attention
+    css_class = "warn"
+    lines = [f"Tailscale: {backend}", "Click to open the menu"]
+else:
+    icon = "\uf110"      # fa-spinner — starting/transitional
+    css_class = "warn"
+    lines = [f"Tailscale: {backend}"]
+
+out = {
+    "text": icon,
+    "class": css_class,
+    "tooltip": "\n".join(lines),
+}
+print(json.dumps(out))
+PYEOF

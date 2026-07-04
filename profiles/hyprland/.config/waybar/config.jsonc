@@ -147,7 +147,7 @@
     "tooltip-format-wifi": "{essid} ({signalStrength}%)\n{signalStrengthApp}\n{ifname}: {ipaddr}",
     "tooltip-format-ethernet": "{ifname}: {ipaddr} via {gwaddr}",
     "tooltip-format-disconnected": "Disconnected",
-    "on-click": "$HOME/.local/bin/wifimenu"
+    "on-click": "$HOME/.config/waybar/scripts/wifimenu"
   },
   "bluetooth": {
     "format": "{icon}",
@@ -173,10 +173,10 @@
     "format-en": "eng"
   },
   "custom/tailscale": {
-    "exec": "$HOME/.local/bin/tailscale-status",
+    "exec": "$HOME/.config/waybar/scripts/tailscale-status",
     "return-type": "json",
     "interval": 10,
-    "on-click": "$HOME/.local/bin/tailscalemenu",
+    "on-click": "$HOME/.config/waybar/scripts/tailscalemenu",
     "tooltip": true
   },
   "battery": {
