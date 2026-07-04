@@ -48,7 +48,7 @@
   /* === modules left === */
   "custom/archicon": {
     "format": "󰣨",
-    "on-click": "walker -m desktopapplications",
+    "on-click": "walker -m desktopapplications -t topleft",
     "tooltip": false
   },
   "clock": {
