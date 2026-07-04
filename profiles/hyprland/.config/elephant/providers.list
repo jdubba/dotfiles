@@ -1,0 +1,22 @@
+# elephant providers required by this setup.
+#
+# elephant (walker's data backend) loads compiled Go plugins (.so) from
+# ~/.config/elephant/providers/. Those binaries are build artifacts - platform
+# specific and regenerable - so they are NOT tracked in this repo.
+#
+# This file is just the manifest of which providers to build/install on a new
+# machine. elephant itself ignores it (it only scans providers/*.so); it exists
+# for you and the dotfiles workflow.
+#
+# On a fresh machine: install elephant, build/install the providers below, then
+# verify with:  ls ~/.config/elephant/providers/
+#
+# One provider per line:
+calc
+clipboard
+desktopapplications
+files
+providerlist
+runner
+symbols
+websearch
