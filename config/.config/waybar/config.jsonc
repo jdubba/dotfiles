@@ -41,6 +41,7 @@
       "pulseaudio",
       "network",
       "bluetooth",
+      "custom/tailscale",
       "hyprland/language"
     ]
   },
@@ -134,19 +135,30 @@
     "on-click": "exec pavucontrol"
   },
   "network": {
-    "format": "{ipaddr}",
-    "format-ethernet": "{ipaddr} 󰈀",
-    "format-wifi": "{essid} ({signalStrength}%) ",
-    "format-disconnected": " ",
-    "tooltip-format": " {ifname}:{ipaddr} via {gwaddr}",
-    "tooltip-format-ethernet": " {ifname}:{ipaddr} via {gwaddr}",
-    "tooltip-format-disconnected": "disconnected",
+    "format-icons": {
+      "wifi": ["󰤟", "󰤢", "󰤥", "󰤨"],
+      "ethernet": ["󰈀"],
+      "disconnected": ["󰤭"]
+    },
+    "format": "{icon}",
+    "format-wifi": "{icon}",
+    "format-ethernet": "{icon}",
+    "format-disconnected": "{icon}",
+    "tooltip-format-wifi": "{essid} ({signalStrength}%)\n{signalStrengthApp}\n{ifname}: {ipaddr}",
+    "tooltip-format-ethernet": "{ifname}: {ipaddr} via {gwaddr}",
+    "tooltip-format-disconnected": "Disconnected",
     "on-click": "$HOME/.local/bin/wifimenu"
   },
   "bluetooth": {
-    "format": " {status}",
-    "format-connected": " {device_alias}",
-    "format-connected-battery": " {device_alias} {device_battery_percentage}%",
+    "format": "{icon}",
+    "format-icons": {
+      "enabled": "󰂯",
+      "off": "󰂲",
+      "disabled": "󰂲",
+      "no-controller": "󰂲"
+    },
+    "format-connected": "{icon}",
+    "format-connected-battery": "{icon}",
     // "format-device-preference": [ "device1", "device2" ], // preference list deciding the displayed device
     "tooltip-format": "{controller_alias}\t{controller_address}\n\n{num_connections} connected",
     "tooltip-format-connected": "{controller_alias}\t{controller_address}\n\n{num_connections} connected\n\n{device_enumerate}",
@@ -155,10 +167,17 @@
     "on-click": "exec blueman-manager"
   },
   "hyprland/language": {
-    "format": "{} ",
+    "format": "{} ",
     "on-click": "hyprctl switchxkblayout at-translated-set-2-keyboard next",
     "format-es": "esp",
     "format-en": "eng"
+  },
+  "custom/tailscale": {
+    "exec": "$HOME/.local/bin/tailscale-status",
+    "return-type": "json",
+    "interval": 10,
+    "on-click": "$HOME/.local/bin/tailscalemenu",
+    "tooltip": true
   },
   "battery": {
     "format": "{capacity}% {icon}",

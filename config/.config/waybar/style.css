@@ -56,6 +56,7 @@ window#waybar.hidden {
 #pulseaudio-slider,
 #bluetooth,
 #network,
+#custom-tailscale,
 #language,
 #battery {
   background: @bar-bg;
@@ -173,13 +174,25 @@ window#waybar.hidden {
   min-width: 55px;
 }
 
-#network {
-  padding-right: 13px;
+/* network, bluetooth, and custom-tailscale are icon-only now -- padding
+   is a bit above the shared 8px default so the three (and the gap from
+   pulseaudio before them) have a little breathing room without going
+   back to a full text-module's worth of space. */
+#network,
+#bluetooth,
+#custom-tailscale {
+  padding: 0 9px;
 }
 
-#bluetooth {
-  min-width: 55px;
-  padding-right: 13px;
+/* Tailscale's icon tints red/amber when disconnected or needing attention;
+   background stays the shared bar-bg so it doesn't read as a battery-style
+   status pill. */
+#custom-tailscale.down {
+  color: @batt-red;
+}
+
+#custom-tailscale.warn {
+  color: @batt-yellow;
 }
 
 #language {
