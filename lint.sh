@@ -38,9 +38,13 @@ echo "Checking BATS test files..."
 find tests -name '*.bats' -not -path 'tests/lib/*' -print0 \
   | xargs -0 -r shellcheck --shell=bash --external-sources --exclude=SC1091,SC2034 || true
 
-echo "Sanity-checking shipped bash config (non-fatal)..."
-for f in home/.bashrc home/.bash_aliases home/.profile home/.bash_profile; do
-  [[ -f "$f" ]] || continue
+echo "Sanity-checking shipped shell config (non-fatal)..."
+# The dialect is auto-detected from each file's shebang / 'shell=' directive.
+for f in \
+    home/.bashrc home/.bash_profile home/.profile \
+    home/.config/shell/*.sh \
+    home/.config/bash/*.bash; do
+  [ -f "$f" ] || continue
   echo "  $f"
   shellcheck -x -e SC1090,SC1091,SC2148 "$f" || true
 done

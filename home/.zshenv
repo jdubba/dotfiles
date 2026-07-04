@@ -1,25 +1,12 @@
-# ----- XDG BASE DIRECTORIES -----
-export XDG_CONFIG_HOME="$HOME/.config"
-export XDG_CACHE_HOME="$HOME/.cache"
-export XDG_DATA_HOME="$HOME/.local/share"
-export XDG_STATE_HOME="$HOME/.local/state"
-export XDG_BIN_HOME="$HOME/.local/bin"
+# ~/.zshenv - sourced for every zsh invocation (login, interactive, scripts).
 
-# ----- ZSH -----
+# Shared environment (XDG dirs, EDITOR, PAGER, PATH, ...). Explicit path here
+# because XDG_CONFIG_HOME is defined inside it.
+[ -f "$HOME/.config/shell/env.sh" ] && source "$HOME/.config/shell/env.sh"
+
+# zsh configuration directory
 export ZDOTFILES="$XDG_CONFIG_HOME/zsh"
 
-# ----- EDITOR -----
-export EDITOR="nvim"
-export VISUAL="nvim"
-
-# ----- GPG -----
-export GPG_TTY=$(tty)
-
-# ----- PAGER -----
-if command -v bat >/dev/null 2>&1;then
-    export MANPAGER="bat -l man -p"
-elif command -v batcat >/dev/null 2>&1; then
-    export MANPAGER="batcat -l man -p"
-fi
-
-# PATH moved to .zshrc to avoid being wiped by /etc/zsh/zprofile -> /etc/profile.env on login shells
+# Note: PATH additions live in shell/env.sh and are re-asserted from .zshrc,
+# because /etc/zprofile -> /etc/profile.env can reset PATH on login shells
+# after this file runs.

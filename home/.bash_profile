@@ -1,23 +1,10 @@
-# .bash_profile
+# ~/.bash_profile - executed for LOGIN bash shells.
 
-# Get the aliases and functions
-if [ -f ~/.bashrc ]; then
-    . ~/.bashrc
-fi
+# Shared environment first (also covers non-interactive login shells, which
+# do not read ~/.bashrc).
+# shellcheck source=/dev/null
+[ -f "$HOME/.config/shell/env.sh" ] && . "$HOME/.config/shell/env.sh"
 
-# User specific environment and startup programs
-
-# set PATH so it includes user's private bin if it exists
-if [ -d "$HOME/bin" ] ; then
-    PATH="$HOME/bin:$PATH"
-fi
-
-# set PATH so it includes user's private bin if it exists
-if [ -d "$HOME/.local/bin" ] ; then
-    PATH="$HOME/.local/bin:$PATH"
-fi
-
-# set PATH so it includes user's go bin if it exists
-if [ -d "$HOME/go/bin" ] ; then
-    PATH="$HOME/go/bin:$PATH"
-fi
+# Then the interactive configuration.
+# shellcheck source=/dev/null
+[ -f "$HOME/.bashrc" ] && . "$HOME/.bashrc"

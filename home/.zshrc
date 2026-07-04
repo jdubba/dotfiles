@@ -22,9 +22,10 @@ setopt NUMERIC_GLOB_SORT
 
 
 # ========================================
-# PATH (set here after /etc/zsh/zprofile may have wiped it for login shells)
+# PATH / env (re-source shared env because /etc/zprofile may have reset PATH
+# for login shells after .zshenv ran; PATH additions in env.sh are idempotent)
 # ========================================
-export PATH="$PATH:$XDG_BIN_HOME:$HOME/.cargo/bin:$HOME/go/bin:$HOME/.opencode/bin:$HOME/.local/app/azure-cli/bin"
+[ -f "$HOME/.config/shell/env.sh" ] && source "$HOME/.config/shell/env.sh"
 
 # ========================================
 # Init Zoxide
@@ -47,6 +48,9 @@ fi
 zstyle ':completion:*' menu select
 zstyle ':completion:*' matche-list 'm:{a-z}={A-Za-z}'
 
+# Reuse ls completions for eza (the `eza` alias is defined in shell/aliases.sh)
+compdef eza=ls
+
 
 
 # ========================================
@@ -61,8 +65,12 @@ source <(fzf --zsh)
 # ========================================
 # Modular Config Files
 # ========================================
+# Shared core (also used by bash)
+[ -f "$XDG_CONFIG_HOME/shell/aliases.sh" ]     && source "$XDG_CONFIG_HOME/shell/aliases.sh"
+[ -f "$XDG_CONFIG_HOME/shell/interactive.sh" ] && source "$XDG_CONFIG_HOME/shell/interactive.sh"
+
+# zsh-specific
 source "$XDG_CONFIG_HOME/zsh/fzf.zsh"
-source "$XDG_CONFIG_HOME/zsh/aliases.zsh"
 source "$XDG_CONFIG_HOME/zsh/bindings.zsh"
 source "$XDG_CONFIG_HOME/zsh/plugins.zsh"
 source "$XDG_CONFIG_HOME/zsh/prompt.zsh"

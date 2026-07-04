@@ -10,9 +10,25 @@ setup() { load test_helper; }
 }
 
 @test "shipped bash configuration files are syntactically valid" {
-  [ ! -f "$DF_SRC_REPO/home/.bashrc" ]       || bash -n "$DF_SRC_REPO/home/.bashrc"
-  [ ! -f "$DF_SRC_REPO/home/.bash_aliases" ] || bash -n "$DF_SRC_REPO/home/.bash_aliases"
-  [ ! -f "$DF_SRC_REPO/home/.profile" ]      || bash -n "$DF_SRC_REPO/home/.profile"
+  bash -n "$DF_SRC_REPO/home/.bashrc"
+  bash -n "$DF_SRC_REPO/home/.bash_profile"
+  local f
+  for f in "$DF_SRC_REPO"/home/.config/bash/*.bash; do bash -n "$f"; done
+}
+
+@test "shared POSIX shell files are syntactically valid" {
+  local f
+  for f in "$DF_SRC_REPO"/home/.profile "$DF_SRC_REPO"/home/.config/shell/*.sh; do
+    sh -n "$f"
+  done
+}
+
+@test "zsh files are syntactically valid (when zsh is available)" {
+  command -v zsh >/dev/null 2>&1 || skip "zsh not installed"
+  local f
+  zsh -n "$DF_SRC_REPO/home/.zshenv"
+  zsh -n "$DF_SRC_REPO/home/.zshrc"
+  for f in "$DF_SRC_REPO"/home/.config/zsh/*.zsh; do zsh -n "$f"; done
 }
 
 @test "tool library files are syntactically valid" {
