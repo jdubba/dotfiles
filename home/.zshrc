@@ -37,11 +37,12 @@ eval "$(zoxide init zsh)"
 # ========================================
 # Completion
 # ========================================
-autoload -Uz compinit && compinit
-autoload -Uz bashcompinit && bashcompinit
-
+# Load completion functions, then initialise the completion system once,
+# writing the dump to the XDG cache. (bashcompinit must run after compinit.)
+autoload -Uz compinit bashcompinit
 [[ -d "$XDG_CACHE_HOME/zsh" ]] || mkdir -p "$XDG_CACHE_HOME/zsh"   # ensure compdump dir (first-run safety)
 compinit -d "$XDG_CACHE_HOME/zsh/zcompdump"
+bashcompinit
 
 if command -v aws_completer >/dev/null 2>&1; then
     complete -C aws_completer aws
