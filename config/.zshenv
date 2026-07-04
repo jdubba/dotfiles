@@ -15,13 +15,11 @@ export VISUAL="nvim"
 # ----- GPG -----
 export GPG_TTY=$(tty)
 
-# ----- PATH -----
-# User bin installs
-export PATH=$PATH:$XDG_BIN_HOME:$HOME/.cargo/bin:$HOME/go/bin:$HOME/.opencode/bin:$HOME/.local/app/azure-cli/bin
-
 # ----- PAGER -----
 if command -v bat >/dev/null 2>&1;then
     export MANPAGER="bat -l man -p"
-elif comman -v batcat >/dev/null 2>&1; then
+elif command -v batcat >/dev/null 2>&1; then
     export MANPAGER="batcat -l man -p"
 fi
+
+# PATH moved to .zshrc to avoid being wiped by /etc/zsh/zprofile -> /etc/profile.env on login shells

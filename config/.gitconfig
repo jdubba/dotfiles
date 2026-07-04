@@ -40,3 +40,6 @@
 
 [pager]
 	log = false
+[user]
+	email = 148065+jdubba@users.noreply.github.com
+	name = jdubba

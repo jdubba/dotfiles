@@ -22,6 +22,11 @@ setopt NUMERIC_GLOB_SORT
 
 
 # ========================================
+# PATH (set here after /etc/zsh/zprofile may have wiped it for login shells)
+# ========================================
+export PATH="$PATH:$XDG_BIN_HOME:$HOME/.cargo/bin:$HOME/go/bin:$HOME/.opencode/bin:$HOME/.local/app/azure-cli/bin"
+
+# ========================================
 # Init Zoxide
 # ========================================
 eval "$(zoxide init zsh)"
@@ -47,7 +52,8 @@ zstyle ':completion:*' matche-list 'm:{a-z}={A-Za-z}'
 # ========================================
 # Fuzzy Finder
 # ========================================
-source /usr/share/fzf/shell/key-bindings.zsh
+# source /usr/share/fzf/shell/key-bindings.zsh
+source /usr/share/fzf/key-bindings.zsh
 source <(fzf --zsh)
 
 
@@ -61,5 +67,6 @@ source "$ZDOTFILES/bindings.zsh"
 source "$ZDOTFILES/plugins.zsh"
 source "$ZDOTFILES/prompt.zsh"
 
+cd $HOME 
 
 clear && fastfetch
