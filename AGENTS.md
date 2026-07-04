@@ -49,6 +49,48 @@ family, or desktop; extra ones are enabled with `dotfiles profile enable`.
    symlink, and broken links into the repo (incl. stale relative links left by a
    previous tool like Stow).
 
+## Layer placement (what goes where)
+
+- `home/` — universal; applies to every machine. (Configs are symlinked even for
+  software a given machine doesn't run — expected and harmless.)
+- `profiles/<name>/` — shared across a *class* of machines (a desktop or distro):
+  e.g. `hyprland`, `gnome`, `fedora`, `gentoo`. Auto-activates when the name
+  matches the detected distro id/family or `$XDG_CURRENT_DESKTOP`.
+- `hosts/<hostname>/` — one machine only.
+
+**"Shared mechanism + per-host data" pattern** — put the generic, identical part
+in `home/` or a profile; keep only the varying data per host:
+- Monitors: `hyprland.conf` (in `home/`, deliberately **no** monitor/workspace
+  lines) delegates to **kanshi** — whose *service* is shared
+  (`profiles/hyprland`) and whose *config* is per-host (`hosts/<host>/.config/kanshi/`).
+- machine-env: registry in `home/`, values in `hosts/<host>/`.
+
+**Co-locate app-support scripts with the app** when they exist only to serve it
+(waybar's helpers live in `waybar/scripts/`, referenced by absolute path from
+`config.jsonc`) rather than in `~/.local/bin`. `~/.local/bin` is itself a
+container, so adopting genuinely general-purpose scripts there is fine too.
+
+**Do NOT track:**
+- Build artifacts / compiled binaries (e.g. elephant `providers/*.so`). Track a
+  manifest indicator (`providers.list`) and mark the dir a container via
+  `dotfiles.conf` so the binaries can't be folded/adopted.
+- systemd `*.wants/` enablement symlinks (machine-local; some point into
+  `/usr/lib`). Re-enable per machine with `systemctl --user enable <unit>`
+  (and `systemctl --user daemon-reload` after adopting a unit).
+- Secrets (see Environment & scope).
+
+### Current inventory (snapshot)
+
+- `profiles/hyprland/` — `waybar/` (config + style + `scripts/{wifimenu,
+  tailscalemenu,tailscale-status}`); `elephant/providers.list`; systemd
+  `hyprland-session.target` + `kanshi.service`.
+- `hosts/stationzebra/` — `kanshi/` (config + `move-workspaces.sh`); systemd
+  `rclone-onedrive.service` + `rclone-devsite.service`; `shell/machine-env`
+  (`AWS_PROFILE=idkey`).
+- `hyprland.conf` and the rest of `~/.config` still live in `home/`. Only waybar
+  was relocated to `profiles/hyprland`; moving `hypr/` there too is a reasonable
+  future cleanup.
+
 ## Code layout
 
 - `bin/dotfiles` — CLI entrypoint and command dispatch.
@@ -159,6 +201,8 @@ dotfiles dconf dump|load # GNOME settings
 6. Do not run `dotfiles link`/`add` against the real `$HOME` without intent; they
    mutate live symlinks. Tests run entirely in throwaway temp dirs.
 7. CI runs on Ubuntu and Fedora (see `.github/workflows/test.yml`).
+8. Keep commits **focused** (one concern each) and descriptive; use `git mv` for
+   relocations so history is preserved. **Push only when explicitly asked.**
 
 ## Testing
 
