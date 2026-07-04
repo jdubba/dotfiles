@@ -2,454 +2,60 @@ name: Test Dotfiles
 
 on:
   push:
-    branches: [ main, master, feature/* ]
+    branches: [ main, master, 'feature/*' ]
   pull_request:
     branches: [ main, master ]
 
 jobs:
   lint:
-    name: Lint
+    name: Lint (shellcheck)
     runs-on: ubuntu-latest
-    
     steps:
-    - uses: actions/checkout@v3
-    
-    - name: Install ShellCheck
-      run: sudo apt update && sudo apt install -y shellcheck
-    
-    - name: Run linting
-      run: |
-        # Lint all shell scripts including the new dotfiles utility
-        echo "Linting shell scripts..."
-        
-        # Find shell scripts (excluding .bats files and test libs)
-        SHELL_SCRIPTS=$(find . -type f -name "*.sh" | grep -v "tests/lib" | grep -v "^./.git/")
-        
-        # Find executables separately
-        EXECUTABLES=$(find bin src/commands src/lib -type f -name "*" -not -path "*/\.*" | xargs grep -l "^#!.*bash" 2>/dev/null || true)
-        
-        # Combine and lint
-        echo "$SHELL_SCRIPTS $EXECUTABLES" | xargs shellcheck -x
-        
-        # Check bash configuration files
-        if [ -f "config/.bashrc" ]; then
-          echo "Checking config/.bashrc..."
-          shellcheck -x config/.bashrc || true
-        fi
-        
-        if [ -f "config/.bash_aliases" ]; then
-          echo "Checking config/.bash_aliases..."
-          shellcheck -x config/.bash_aliases || true
-        fi
-        
-        if [ -f "config/.profile" ]; then
-          echo "Checking config/.profile..."
-          shellcheck -x config/.profile || true
-        fi
-        
-        echo "Linting completed successfully!"
+      - uses: actions/checkout@v4
+      - name: Install shellcheck
+        run: sudo apt-get update && sudo apt-get install -y shellcheck
+      - name: Lint
+        run: ./lint.sh
 
-  test-standard:
-    name: Test on Standard Platforms
-    needs: lint
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest, macos-latest]
-      fail-fast: false
-    
-    steps:
-    - uses: actions/checkout@v3
-    
-    - name: Install dependencies (Ubuntu)
-      if: matrix.os == 'ubuntu-latest'
-      run: |
-        sudo apt update
-        sudo apt install -y stow
-    
-    - name: Install dependencies (macOS)
-      if: matrix.os == 'macos-latest'
-      run: |
-        brew install bash git stow bats-core 
-        
-        echo "Working directory"
-        echo $(pwd)
-        
-        # Create lib directory for BATS helpers
-        mkdir -p tests/lib
-        
-        # Install bats-support manually
-        if [ ! -d "tests/lib/bats-support" ]; then
-          echo "Installing bats-support..."
-          git clone --depth 1 https://github.com/bats-core/bats-support.git tests/lib/bats-support
-        fi
-        
-        # Install bats-assert manually
-        if [ ! -d "tests/lib/bats-assert" ]; then
-          echo "Installing bats-assert..."
-          git clone --depth 1 https://github.com/bats-core/bats-assert.git tests/lib/bats-assert
-        fi
-    
-    - name: Debug environment
-      run: |
-        echo "OS: ${{ matrix.os }}"
-        echo "Current directory: $(pwd)"
-        echo "Git version: $(git --version)"
-        ls -la
-        if command -v bats &>/dev/null; then
-          echo "System bats found: $(which bats)"
-          bats --version
-        else
-          echo "System bats not found"
-        fi
-        
-        # Check for BATS libraries
-        echo "Checking for BATS libraries:"
-        ls -la tests/lib || echo "No tests/lib directory found"
-    
-    - name: Install BATS
-      run: |
-        chmod +x tests/install_bats.sh
-        ./tests/install_bats.sh
-        
-        # Show the bats installation
-        echo "BATS installation:"
-        ls -la tests/lib/bats-core || echo "bats-core not found"
-        ls -la tests/lib/bats-support || echo "bats-support not found"
-        ls -la tests/lib/bats-assert || echo "bats-assert not found"
-        
-        if [ -d "tests/lib/bats-core/bin" ]; then
-          echo "BATS bin directory:"
-          ls -la tests/lib/bats-core/bin
-        fi
-    
-    - name: Run tests
-      run: |
-        chmod +x test.sh
-        ./test.sh
-    
-    - name: Test legacy installation
-      run: |
-        # Create a test user home directory
-        mkdir -p /tmp/home
-        export HOME=/tmp/home
-        
-        # Run the legacy install script
-        ./install.sh
-        
-        # Verify symlinks were created
-        echo "Checking created symlinks:"
-        ls -la /tmp/home
-        
-        # Check that config directory was linked if it exists
-        if [ -d "config/.config" ]; then
-          echo "Checking .config directory:"
-          ls -la /tmp/home/.config
-        fi
-        
-        # Verify a few specific files
-        for file in .bashrc .bash_aliases .profile .gitconfig; do
-          if [ -f "config/$file" ]; then
-            echo "Checking $file..."
-            test -L "/tmp/home/$file" || (echo "$file symlink not created" && exit 1)
-            echo "$file correctly linked"
-          fi
-        done
-
-    - name: Test dotfiles utility installation
-      run: |
-        # Create a different test user home directory
-        mkdir -p /tmp/home2
-        export HOME=/tmp/home2
-        
-        # Install the dotfiles utility
-        make install
-        
-        # Verify installation
-        echo "Checking dotfiles installation:"
-        ls -la $HOME/.local/bin/dotfiles || (echo "dotfiles executable not installed" && exit 1)
-        ls -la $HOME/.local/share/dotfiles/lib || (echo "dotfiles libraries not installed" && exit 1)
-        ls -la $HOME/.local/share/dotfiles/commands || (echo "dotfiles commands not installed" && exit 1)
-        ls -la $HOME/.config/dotfiles/config.toml || (echo "dotfiles config not installed" && exit 1)
-        
-        # Run dotfiles help
-        $HOME/.local/bin/dotfiles --help
-        
-        # Run dotfiles version
-        $HOME/.local/bin/dotfiles --version
-        
-        # Run dotfiles install
-        $HOME/.local/bin/dotfiles install
-        
-        # Verify symlinks were created
-        echo "Checking created symlinks with dotfiles utility:"
-        ls -la /tmp/home2
-        
-        # Check that config directory was linked if it exists
-        if [ -d "config/.config" ]; then
-          echo "Checking .config directory:"
-          ls -la /tmp/home2/.config
-        fi
-        
-        # Verify a few specific files
-        for file in .bashrc .bash_aliases .profile .gitconfig; do
-          if [ -f "config/$file" ]; then
-            echo "Checking $file..."
-            test -L "/tmp/home2/$file" || (echo "$file symlink not created" && exit 1)
-            echo "$file correctly linked"
-          fi
-        done
-
-  test-additional:
-    name: Test on Additional Linux Distributions
+  test-ubuntu:
+    name: Test on Ubuntu
     needs: lint
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        distro: ['fedora:latest', 'archlinux:latest']
-      fail-fast: false
-    
-    container:
-      image: ${{ matrix.distro }}
-    
     steps:
-    - name: Install Git and other dependencies (Fedora)
-      if: contains(matrix.distro, 'fedora')
-      run: |
-        dnf -y update
-        dnf -y install git make stow findutils which procps-ng
-        
-        # Install BATS dependencies
-        dnf -y install bats
+      - uses: actions/checkout@v4
+      - name: Install bats
+        run: sudo apt-get update && sudo apt-get install -y bats
+      - name: Run test suite
+        run: ./test.sh
+      - name: End-to-end link into a throwaway HOME
+        run: |
+          set -euo pipefail
+          export HOME=/tmp/dfhome
+          mkdir -p "$HOME"
+          ./bin/dotfiles link
+          # Safety property on real shipped config: ~/.config must be a REAL dir.
+          test -d "$HOME/.config" && ! test -L "$HOME/.config"
+          test -L "$HOME/.bashrc"
+          ./bin/dotfiles status
+          ./bin/dotfiles doctor
 
-    - name: Install Git and other dependencies (Arch Linux)
-      if: contains(matrix.distro, 'archlinux')
-      run: |
-        pacman -Syu --noconfirm
-        pacman -S --noconfirm git make stow findutils which procps
-        
-        # Install BATS dependencies
-        pacman -S --noconfirm bats
-    
-    - name: Set Git safe directory (pre-checkout)
-      run: |
-        # Configure Git to trust all directories
-        git config --global --add safe.directory '*'
-        git config --global --add safe.directory /__w/dotfiles/dotfiles
-        
-        # Verify Git configuration
-        echo "Git configuration:"
-        git config --list
-    
-    - name: Manual repository checkout
-      run: |
-        # Create directory for the repository
-        mkdir -p /tmp/repo
-        cd /tmp/repo
-        
-        # Clone the repository
-        git clone https://github.com/${{ github.repository }} .
-        
-        # Checkout the specific ref
-        git checkout ${{ github.sha }}
-        
-        # Show repository contents
-        echo "Repository contents:"
-        ls -la
-        
-        # Copy repository to the working directory
-        cp -r . /__w/dotfiles/dotfiles/
-        cd /__w/dotfiles/dotfiles/
-        
-        # Show working directory contents
-        echo "Working directory contents:"
-        ls -la
-    
-    - name: Debug environment
-      run: |
-        echo "Distro: ${{ matrix.distro }}"
-        echo "Current directory: $(pwd)"
-        echo "Git version: $(git --version)"
-        ls -la
-        if command -v bats &>/dev/null; then
-          echo "System bats found: $(which bats)"
-          bats --version
-        else
-          echo "System bats not found"
-        fi
-    
-    - name: Install BATS
-      run: |
-        chmod +x tests/install_bats.sh
-        ./tests/install_bats.sh
-        
-        # Show the bats installation
-        echo "BATS installation:"
-        ls -la tests/lib/bats-core || echo "bats-core not found"
-        ls -la tests/lib/bats-support || echo "bats-support not found"
-        ls -la tests/lib/bats-assert || echo "bats-assert not found"
-    
-    - name: Run tests
-      run: |
-        chmod +x test.sh
-        ./test.sh
-    
-    - name: Test legacy installation
-      run: |
-        # Create a test user home directory
-        mkdir -p /tmp/home
-        export HOME=/tmp/home
-        
-        # Create a simplified install script that doesn't use Git
-        cat > install_container.sh << 'EOF'
-        #!/bin/bash
-        # Modified install script for container environments
-        
-        # Set default stow directory to current directory
-        STOW_DIR="$(pwd)"
-        
-        # Create target directory if it doesn't exist
-        mkdir -p "$HOME"
-        
-        # Run stow directly without Git checks
-        echo "Running stow in container environment..."
-        stow -v -t "$HOME" -d "$STOW_DIR" config
-        
-        # Exit with stow's exit code
-        exit $?
-        EOF
-        
-        # Make it executable
-        chmod +x install_container.sh
-        
-        # Run the simplified install script
-        ./install_container.sh
-        
-        # Verify symlinks were created
-        echo "Checking created symlinks:"
-        ls -la /tmp/home
-        
-        # Check that config directory was linked if it exists
-        if [ -d "config/.config" ]; then
-          echo "Checking .config directory:"
-          ls -la /tmp/home/.config
-        fi
-        
-        # Verify a few specific files
-        for file in .bashrc .bash_aliases .profile .gitconfig; do
-          if [ -f "config/$file" ]; then
-            echo "Checking $file..."
-            test -L "/tmp/home/$file" || (echo "$file symlink not created" && exit 1)
-            echo "$file correctly linked"
-          fi
-        done
-
-    - name: Test dotfiles utility
-      run: |
-        # Create a different test user home directory
-        mkdir -p /tmp/home2
-        export HOME=/tmp/home2
-        
-        # Install the dotfiles utility
-        echo "Installing dotfiles utility..."
-        mkdir -p $HOME/.local/bin
-        mkdir -p $HOME/.local/share/dotfiles/lib
-        mkdir -p $HOME/.local/share/dotfiles/commands
-        mkdir -p $HOME/.config/dotfiles
-        
-        # Copy files manually since make might not work in all containers
-        cp bin/dotfiles $HOME/.local/bin/
-        chmod +x $HOME/.local/bin/dotfiles
-        cp -r src/lib/* $HOME/.local/share/dotfiles/lib/
-        cp -r src/commands/* $HOME/.local/share/dotfiles/commands/
-        chmod +x $HOME/.local/share/dotfiles/lib/*.sh
-        chmod +x $HOME/.local/share/dotfiles/commands/*.sh
-        
-        # Create config file
-        echo "# Dotfiles configuration" > $HOME/.config/dotfiles/config.toml
-        echo "repository_path = \"$(pwd)\"" >> $HOME/.config/dotfiles/config.toml
-        echo "stow_directory = \"config\"" >> $HOME/.config/dotfiles/config.toml
-        
-        # Verify installation
-        echo "Checking dotfiles installation:"
-        ls -la $HOME/.local/bin/dotfiles || (echo "dotfiles executable not installed" && exit 1)
-        ls -la $HOME/.local/share/dotfiles/lib/*.sh || (echo "dotfiles libraries not installed" && exit 1)
-        ls -la $HOME/.local/share/dotfiles/commands/*.sh || (echo "dotfiles commands not installed" && exit 1)
-        ls -la $HOME/.config/dotfiles/config.toml || (echo "dotfiles config not installed" && exit 1)
-        
-        # Add to PATH
-        export PATH="$HOME/.local/bin:$PATH"
-        
-        # Run dotfiles help
-        echo "Testing dotfiles help..."
-        dotfiles --help
-        
-        # Run dotfiles version
-        echo "Testing dotfiles version..."
-        dotfiles --version
-        
-        # Run dotfiles install (modified for container environment)
-        echo "Testing dotfiles install..."
-        # Create a simplified stow.sh function for container environments
-        cat > $HOME/.local/share/dotfiles/lib/stow.sh << 'EOF'
-        #!/usr/bin/env bash
-        
-        # Check if stow is installed
-        check_stow() {
-          if ! command -v stow &> /dev/null; then
-            echo "Error: GNU Stow is not installed."
-            return 1
-          fi
-          return 0
-        }
-        
-        # Skip uncommitted changes check in container environment
-        check_uncommitted_changes() {
-          local repo_dir="$1"
-          local stow_dir="$2"
-          echo "Skipping uncommitted changes check in container environment"
-          return 0
-        }
-        
-        # Run stow to create symlinks
-        run_stow() {
-          local repo_dir="$1"
-          local stow_dir="$2"
-          local target_dir="$3"
-          
-          # Check if directories exist
-          if [[ ! -d "$repo_dir/$stow_dir" ]]; then
-            echo "Error: Stow directory '$repo_dir/$stow_dir' does not exist."
-            return 1
-          fi
-          
-          # Create target directory if it doesn't exist
-          mkdir -p "$target_dir"
-          
-          # Run stow with adopt flag and handle errors
-          echo "Linking dotfiles from $repo_dir/$stow_dir to $target_dir..."
-          if ! stow -v -d "$repo_dir" -t "$target_dir" "$stow_dir"; then
-            echo "Error: Failed to run stow."
-            return 1
-          fi
-          
-          echo "Configuration files have been successfully linked."
-          return 0
-        }
-        EOF
-        
-        # Run dotfiles install
-        dotfiles install
-        
-        # Verify symlinks were created
-        echo "Checking created symlinks:"
-        ls -la /tmp/home2
-        
-        # Verify a few specific files
-        for file in .bashrc .bash_aliases .profile .gitconfig; do
-          if [ -f "config/$file" ]; then
-            echo "Checking $file..."
-            test -L "/tmp/home2/$file" || (echo "$file symlink not created" && exit 1)
-            echo "$file correctly linked"
-          fi
-        done
+  test-fedora:
+    name: Test on Fedora (container)
+    needs: lint
+    runs-on: ubuntu-latest
+    container: fedora:latest
+    steps:
+      - name: Install dependencies
+        run: dnf -y install git make bats findutils
+      - uses: actions/checkout@v4
+      - name: Run test suite
+        run: ./test.sh
+      - name: End-to-end link + distro detection
+        run: |
+          set -euo pipefail
+          export HOME=/tmp/dfhome
+          mkdir -p "$HOME"
+          ./bin/dotfiles info | grep -qi fedora
+          ./bin/dotfiles link
+          test -d "$HOME/.config" && ! test -L "$HOME/.config"
+          ./bin/dotfiles doctor

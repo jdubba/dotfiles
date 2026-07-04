@@ -5,6 +5,36 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.0] - 2026-07-04
+
+Ground-up rebuild. The GNU Stow-based system is replaced by a custom,
+dependency-free Bash tool that manages a layered symlink farm.
+
+### Added
+- New `bin/dotfiles` tool with a safe, plan-first linker (`lib/`).
+- Three-layer model: `home/` (shared) + `profiles/<name>/` (like machines) +
+  `hosts/<hostname>/` (per-machine), auto-resolved from hostname/distro/desktop.
+- Commands: `link`, `status`, `doctor`, `add`, `sync`, `profile`, `dconf`,
+  `hook`, `info`.
+- `doctor` detects and repairs the folded-container hazard and broken links.
+- `dconf dump`/`load` for GNOME settings (which cannot be symlinked).
+- `git post-merge` hook so `git pull` re-links automatically.
+- BATS coverage for every safety guarantee (container protection, no-adopt,
+  no-clobber, fold/auto-unfold, idempotency, disaster recovery).
+
+### Changed
+- Configuration content moved from `config/` to `home/` (history preserved).
+- CI reworked for the new tool; now runs on Ubuntu and Fedora.
+
+### Removed
+- Legacy `install.sh`, the Stow-based `src/` utility, TOML config, and all
+  GNU Stow usage. Removed tracked backup cruft (`*.bak`).
+
+### Safety
+- Container directories (`~/.config`, `~/.local[/*]`, `~/.cache`, `~/.ssh`, …)
+  are never folded into a symlink; only managed children are linked.
+- Files the repo does not own are never overwritten or implicitly adopted.
+
 ## [0.3.0] - 2025-06-16
 
 ### Added

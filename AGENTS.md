@@ -1,80 +1,81 @@
-# CLAUDE.md
+# AGENTS.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+Guidance for AI agents and contributors working in this repository.
 
 ## Repository Overview
 
-This is a dotfiles repository that uses GNU Stow to manage configuration files across multiple machines. The repository contains configuration files for various tools and applications, organized within the `config` directory.
+This repository is a **dotfiles configuration manager**. It keeps configuration
+consistent across multiple Linux machines using a custom, dependency-free Bash
+tool (`bin/dotfiles`) that manages a **layered symlink farm**.
+
+It replaced an earlier GNU Stow-based system. Stow is no longer used.
+
+## Architecture
+
+Three layers are symlinked into `$HOME`, applied in order (later overrides/adds):
+
+- `home/` — shared configuration (the 90%+ that does not vary between machines)
+- `profiles/<name>/` — shared across like machines (e.g. `hyprland`, `gnome`, `fedora`)
+- `hosts/<hostname>/` — truly per-machine configuration
+
+A path under a layer mirrors its `$HOME` destination
+(`home/.config/nvim` → `~/.config/nvim`; `home/.gitconfig` → `~/.gitconfig`).
+
+### Key safety invariants (do not regress these)
+
+1. **Container directories are never symlinked.** `~/.config`, `~/.local[/*]`,
+   `~/.cache`, `~/.ssh`, `~/.gnupg`, etc. (see `DF_CONTAINER_DIRS` in
+   `lib/config.sh`) are always materialised as real directories; only managed
+   children are linked. This prevents the folding-`~/.config` disaster.
+2. **No implicit adoption.** `link`/`sync` never move target files into the repo.
+   Only `dotfiles add` adopts, explicitly and per-path.
+3. **Never clobber.** Real files the repo does not own are reported as CONFLICTs.
+4. **Plan-first, idempotent.** Mutating commands are previewable and safe to rerun.
+
+## Code layout
+
+- `bin/dotfiles` — CLI entrypoint and command dispatch.
+- `lib/core.sh` — logging, colour, path helpers.
+- `lib/config.sh` — defaults, the container-dir set, repo config, machine state.
+- `lib/identity.sh` — hostname/distro/desktop detection, layer resolution.
+- `lib/link.sh` — the linker: plan building, fold/unfold, apply.
+- `lib/commands/*.sh` — one file per subcommand (`link`, `status`, `doctor`,
+  `add`, `sync`, `profile`, `dconf`, `hook`, `info`).
+- `hooks/post-merge` — git hook that re-links after `git pull`.
+- `dotfiles.conf` — optional repo config (extend `DF_CONTAINER_DIRS` / `DF_IGNORE_NAMES`).
 
 ## Common Commands
 
-### Installation
-
 ```bash
-# Install dotfiles (creates symlinks in home directory)
-./install.sh
-# or
-make install
+make test     # run the BATS suite (./test.sh)
+make lint     # run shellcheck (./lint.sh)
+make all      # lint + test
+make install  # symlink `dotfiles` onto PATH + install git hook
 ```
 
-### Testing
+The tool itself:
 
 ```bash
-# Run the test suite (uses BATS)
-./test.sh
-# or
-make test
+dotfiles status          # read-only preview
+dotfiles link            # apply
+dotfiles doctor --fix    # detect/repair hazards
+dotfiles add <path>      # adopt an existing config file/dir
 ```
-
-### Linting
-
-```bash
-# Lint shell scripts with ShellCheck
-./lint.sh
-# or
-make lint
-```
-
-### Other Commands
-
-```bash
-# Show all available commands
-make help
-
-# Clean up test artifacts
-make clean
-```
-
-## Repository Structure
-
-- `/config`: Contains all dotfiles to be symlinked to the user's home directory
-  - Shell configurations (`.bashrc`, `.bash_aliases`, `.profile`)
-  - Git configuration (`.gitconfig`)
-  - `.config/` directory with app-specific configurations:
-    - `hypr/`: Hyprland window manager configuration
-    - `nvim/`: Neovim editor configuration
-    - `kitty/`: Kitty terminal emulator configuration
-    - `alacritty/`: Alacritty terminal emulator configuration
-
-- `/tests`: Contains BATS test files and helpers
-  - `*.bats`: Test files
-  - `install_bats.sh`: Script to install BATS testing framework
-
-## Installation Process
-
-The `install.sh` script:
-1. Checks for uncommitted changes in the config folder
-2. Uses GNU Stow with the `--adopt` flag to create symlinks
-3. Restores any changes that might have been adopted during the process
 
 ## Development Guidelines
 
-1. All configuration files should be placed in the `config` directory
-2. Test any changes with the test suite before committing
-3. Run linting to ensure shell scripts follow best practices
-4. The repository uses GitHub Actions for continuous integration on both Ubuntu and macOS
+1. Shell is **Bash**; keep scripts `shellcheck`-clean (`./lint.sh` must pass).
+   Libraries are sourced, so guard against `set -euo pipefail` foot-guns
+   (e.g. `shopt -p` returns non-zero when an option is off).
+2. Add BATS coverage in `tests/*.bats` for any new behavior, and especially for
+   anything touching the linker — the safety invariants above must stay tested.
+3. Configuration content lives under `home/`, `profiles/`, `hosts/`. Managed
+   configs are symlinked even for software that isn't installed; that's expected.
+4. Machine-local state (enabled profiles) lives under `$XDG_STATE_HOME/dotfiles`
+   and is never committed.
+5. CI runs on Ubuntu and Fedora (see `.github/workflows/test.yml`).
 
-## Notes
+## Testing
 
-- All managed configurations will be symbolically linked even if the corresponding software is not installed
-- Changes to configuration files should be committed to the repository to be properly tracked
+BATS (Bash Automated Testing System). `./test.sh` bootstraps `bats-core` locally
+if it isn't already installed, then runs `tests/*.bats`.

@@ -5,31 +5,32 @@ on:
     tags:
       - 'v*'
 
+permissions:
+  contents: write
+
 jobs:
   release:
     name: Create Release
     runs-on: ubuntu-latest
-    
+
     steps:
     - name: Checkout code
-      uses: actions/checkout@v3
-      
+      uses: actions/checkout@v4
+
     - name: Extract release notes
       id: extract_notes
       run: |
-        VERSION=$(echo "${{ github.ref }}" | sed -e 's/refs\/tags\/v//')
-        if [ -f "CHANGELOG.md" ]; then
-          NOTES=$(awk -v version="$VERSION" '/^## \[/ { if (p) { exit }; if ($0 ~ version) { p=1; next } } p' CHANGELOG.md)
-          # Escape multiline string for GitHub Actions
-          NOTES="${NOTES//'%'/'%25'}"
-          NOTES="${NOTES//$'\n'/'%0A'}"
-          NOTES="${NOTES//$'\r'/'%0D'}"
-          echo "::set-output name=notes::$NOTES"
-        fi
+        VERSION="${GITHUB_REF_NAME#v}"
+        {
+          echo "notes<<RELEASE_NOTES_EOF"
+          if [ -f CHANGELOG.md ]; then
+            awk -v version="$VERSION" '/^## \[/ { if (p) exit; if ($0 ~ version) { p=1; next } } p' CHANGELOG.md
+          fi
+          echo "RELEASE_NOTES_EOF"
+        } >> "$GITHUB_OUTPUT"
 
     - name: Create Release
-      id: create_release
-      uses: softprops/action-gh-release@v1
+      uses: softprops/action-gh-release@v2
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
         name: Release ${{ github.ref_name }}
@@ -37,30 +38,13 @@ jobs:
         prerelease: false
         body: |
           ${{ steps.extract_notes.outputs.notes }}
-          
-          ## Installation Options
-          
-          ### Option 1: Install dotfiles utility (recommended)
-          
+
+          ## Installation
+
           ```bash
           git clone https://github.com/${{ github.repository }}.git
           cd $(basename ${{ github.repository }})
-          make install    # Install the dotfiles utility
-          dotfiles install  # Set up the dotfiles
-          ```
-          
-          Or in one step:
-          
-          ```bash
-          git clone https://github.com/${{ github.repository }}.git
-          cd $(basename ${{ github.repository }})
-          make setup
-          ```
-          
-          ### Option 2: Legacy installation
-          
-          ```bash
-          git clone https://github.com/${{ github.repository }}.git
-          cd $(basename ${{ github.repository }})
-          ./install.sh
+          make install        # put `dotfiles` on your PATH + install the git hook
+          dotfiles status      # preview what will be linked (read-only)
+          dotfiles link        # apply
           ```

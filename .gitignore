@@ -22,9 +22,14 @@ Thumbs.db
 *.sublime-workspace
 *.sublime-project
 
+# Agent tooling working directory (node_modules, plans, local state)
+/.opencode/
+
 # Logs
 *.log
 
-# Lazy plugin version tracking
-/config/.config/nvim/lazy-lock.json
-*.hhh
+# Lazy plugin version tracking (intentionally not pinned in the repo)
+/home/.config/nvim/lazy-lock.json
+
+# Machine-local dotfiles state (never committed)
+/.local/state/

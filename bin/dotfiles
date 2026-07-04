@@ -1,130 +1,92 @@
 #!/usr/bin/env bash
 #
-# Dotfiles utility for managing configuration files
-# 
+# dotfiles - a small, safe, layered symlink manager.
+#
+# Model:
+#   home/                shared configuration (the 90%+ that never varies)
+#   profiles/<name>/     shared across like machines (e.g. hyprland, gnome, fedora)
+#   hosts/<hostname>/    truly per-machine bits (e.g. monitor layout)
+#
+# Layers are symlinked into $HOME in order (home -> profiles -> host), so a
+# `git pull` applies instantly and editing a linked file edits the repo file.
+# Container directories such as ~/.config are never folded, and files the
+# repo does not own are never adopted implicitly.
+#
+# shellcheck disable=SC2031  # VERSION is not modified in a subshell (false
+# positive from -x source-following through subshell helpers in lib/).
 
-# Exit on error, undefined variable, or error in pipeline
 set -euo pipefail
 
-# Set version
-VERSION="0.3.0"
+VERSION="1.0.0"
 
-# Determine script location and library paths
+# --- Locate the repository (this script lives in <repo>/bin/dotfiles) --------
 SCRIPT_PATH="$(readlink -f "${BASH_SOURCE[0]}")"
-SCRIPT_DIR="$(dirname "$SCRIPT_PATH")"
+DF_REPO="$(cd "$(dirname "$SCRIPT_PATH")/.." && pwd)"
+DF_LIB="$DF_REPO/lib"
+export DF_REPO
 
-# Determine library location
-# If running from the repository, use local src directory
-if [[ -d "$SCRIPT_DIR/../src" ]]; then
-  LIB_DIR="$SCRIPT_DIR/../src/lib"
-  COMMANDS_DIR="$SCRIPT_DIR/../src/commands"
-else
-  # Otherwise, use the installed location
-  LIB_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/dotfiles/lib"
-  COMMANDS_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/dotfiles/commands"
-fi
+# --- Load libraries ----------------------------------------------------------
+# shellcheck source=lib/core.sh
+source "$DF_LIB/core.sh"
+# shellcheck source=lib/config.sh
+source "$DF_LIB/config.sh"
+# shellcheck source=lib/identity.sh
+source "$DF_LIB/identity.sh"
+# shellcheck source=lib/link.sh
+source "$DF_LIB/link.sh"
 
-# Determine user config file location
-CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/dotfiles"
-CONFIG_FILE="$CONFIG_DIR/config.toml"
+df_load_repo_config
 
-# Source library files
-source "$LIB_DIR/config.sh"
-source "$LIB_DIR/stow.sh"
-source "$LIB_DIR/git.sh"
+DF_LAYERS=()
 
-# Usage information
-show_usage() {
+usage() {
   cat <<EOF
-dotfiles - Utility for managing configuration files
+dotfiles $VERSION - layered symlink manager
 
-Usage: 
+Usage:
   dotfiles <command> [options]
-  dotfiles [--help|--version]
 
 Commands:
-  install            Install dotfiles from repository
-  add <path>         Add a file or directory to dotfiles management
-  help               Show this help message
-  version            Show version information
-
-Options:
-  -h, --help         Show this help message
-  -v, --version      Show version information
-
-Add Command Options:
-  --commit           Automatically commit and push changes to repository
+  link [--dry-run] [-v]   Create/repair symlinks for this machine's layers
+  status [-v]             Show what link would do, plus drift (no changes)
+  doctor [--fix]          Detect and optionally repair hazards & broken links
+  add <path> [--to DEST]  Adopt an existing file/dir into the repo and link it
+                          DEST = home (default) | profile:<name> | host
+  sync [--no-link]        git pull (fast-forward) then link
+  profile <subcommand>    Manage machine-local profiles (list|enable|disable|show)
+  dconf dump|load [file]  Snapshot/apply GNOME dconf settings (keyfile in repo)
+  hook install|uninstall  Install git hook so 'git pull' auto-links
+  info                    Show detected identity and active layers
+  help                    Show this help
+  version                 Show version
 
 Examples:
-  dotfiles install                    Install dotfiles from repository
-  dotfiles add ~/.vimrc              Add .vimrc to dotfiles management
-  dotfiles add ~/.config/app --commit Add app config and commit changes
-  dotfiles --help                    Show help information
+  dotfiles status
+  dotfiles link
+  dotfiles add ~/.config/foot
+  dotfiles add ~/.config/hypr/monitors.conf --to host
+  dotfiles profile enable hyprland
 EOF
 }
 
-# Show version
-show_version() {
-  echo "dotfiles version $VERSION"
-}
+cmd=${1:-help}
+[[ $# -gt 0 ]] && shift || true
 
-# Parse arguments
-if [[ $# -eq 0 ]]; then
-  cmd="help"
-else
-  # Check for option-style arguments first
-  case "$1" in
-    -h|--help)
-      show_usage
-      exit 0
-      ;;
-    -v|--version)
-      show_version
-      exit 0
-      ;;
-    -*)
-      echo "Error: Unknown option $1"
-      show_usage
-      exit 1
-      ;;
-    *)
-      # Not an option, treat as command
-      cmd="$1"
-      shift
-      ;;
-  esac
-fi
-
-# Main function
-main() {
-  # Load config if file exists
-  if [[ -f "$CONFIG_FILE" ]]; then
-    load_config "$CONFIG_FILE"
-  fi
-
-  # Process commands
-  case "$cmd" in
-    install)
-      source "$COMMANDS_DIR/install.sh"
-      run_install "$@"
-      ;;
-    add)
-      source "$COMMANDS_DIR/add.sh"
-      run_add "$@"
-      ;;
-    help)
-      show_usage
-      ;;
-    version)
-      show_version
-      ;;
-    *)
-      echo "Unknown command: $cmd"
-      show_usage
-      exit 1
-      ;;
-  esac
-}
-
-# Run main function
-main "$@"
+case "$cmd" in
+  -h|--help|help)    usage ;;
+  -v|--version|version) printf 'dotfiles %s\n' "$VERSION" ;;
+  link|apply|install) source "$DF_LIB/commands/link.sh";    df_cmd_link "$@" ;;
+  status|st)          source "$DF_LIB/commands/status.sh";  df_cmd_status "$@" ;;
+  doctor)             source "$DF_LIB/commands/doctor.sh";  df_cmd_doctor "$@" ;;
+  add)                source "$DF_LIB/commands/add.sh";     df_cmd_add "$@" ;;
+  sync)               source "$DF_LIB/commands/sync.sh";    df_cmd_sync "$@" ;;
+  profile)            source "$DF_LIB/commands/profile.sh"; df_cmd_profile "$@" ;;
+  dconf)              source "$DF_LIB/commands/dconf.sh";   df_cmd_dconf "$@" ;;
+  hook)               source "$DF_LIB/commands/hook.sh";    df_cmd_hook "$@" ;;
+  info)               source "$DF_LIB/commands/info.sh";    df_cmd_info "$@" ;;
+  *)
+    df_error "unknown command: $cmd"
+    usage
+    exit 1
+    ;;
+esac

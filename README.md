@@ -1,157 +1,147 @@
 # dotfiles
 
-Common tool configuration files and management utility to allow configurations to be saved and managed
-in a git repository, and be managed centrally across multiple machines.
-
-All managed configurations will be present and linked with stow, even for software that is not installed. The extra 
-unused configuration files should not be an issue, but is noted here for awareness, and that it is expected.
+A small, safe, **layered symlink manager** for keeping configuration consistent
+across machines. Pure Bash, no runtime dependencies beyond `git` and coreutils.
 
 ![Test Dotfiles](https://github.com/jdubba/dotfiles/workflows/Test%20Dotfiles/badge.svg)
 
-## Installation
+## Why this instead of GNU Stow / chezmoi?
 
-### Quick Installation
+- **Changes apply by syncing.** Managed files are symlinks into the repo, so
+  `git pull` takes effect immediately (a git hook re-links when new files
+  appear). No separate "apply" step.
+- **Live edits are already staged.** Editing `~/.config/nvim/init.lua` edits the
+  repo file directly; `git add` stages it. No "re-add" step.
+- **Machine-specific config without a sledgehammer.** 90%+ of config is shared
+  and costs zero ceremony; only what actually differs goes in a profile or host
+  layer.
+- **It cannot eat your `~/.config`.** The failure mode that motivated this tool
+  (Stow folding `~/.config` into one symlink and absorbing every app's writes)
+  is structurally impossible here — see [Safety](#safety-guarantees).
+
+## The model
+
+Three layers are linked into `$HOME`, in order (later layers add to / override
+earlier ones). Only `home/` is required; the others exist only where you
+actually diverge.
+
+```
+home/                 shared config - the 90%+ that never varies
+profiles/<name>/      shared across LIKE machines (e.g. hyprland, gnome, fedora)
+hosts/<hostname>/     truly per-machine bits (e.g. monitor layout)
+```
+
+A file's path under a layer mirrors its destination under `$HOME`:
+`home/.config/nvim/init.lua` → `~/.config/nvim/init.lua`, `home/.gitconfig` →
+`~/.gitconfig` (files outside `~/.config` are handled identically).
+
+## Install
 
 ```bash
-# Install the dotfiles utility and create symlinks
-make setup
+git clone https://github.com/jdubba/dotfiles.git ~/source/dotfiles
+cd ~/source/dotfiles
+make install          # symlink `dotfiles` onto your PATH + install the git hook
+dotfiles status       # preview what will be linked (read-only, no changes)
+dotfiles link         # apply
 ```
 
-### Manual Installation
+`dotfiles` runs from the repo checkout; `make install` just adds a convenience
+symlink at `~/.local/bin/dotfiles`. Ensure `~/.local/bin` is on your `PATH`.
 
-You can also install just the utility and then run it separately:
+## Commands
+
+| Command | Description |
+|---|---|
+| `dotfiles status [-v]` | Show what `link` would do, plus drift. **Read-only.** |
+| `dotfiles link [--dry-run] [-v]` | Create/repair symlinks for this machine. Idempotent. |
+| `dotfiles doctor [--fix]` | Detect/repair hazards (folded containers, broken links). |
+| `dotfiles add <path> [--to home\|host\|profile:<name>]` | Adopt an existing file/dir into the repo and link it back. |
+| `dotfiles sync [--no-link]` | `git pull --ff-only` then `link`. |
+| `dotfiles profile list\|enable\|disable <name>` | Manage machine-local profile selection. |
+| `dotfiles dconf dump\|load [keyfile]` | Snapshot/apply GNOME dconf settings. |
+| `dotfiles hook install\|uninstall` | Manage the `git pull` auto-link hook. |
+| `dotfiles info` | Show detected identity and active layers. |
+
+### Adding a config
 
 ```bash
-# Install the dotfiles utility
-make install
-
-# Use the utility to create symlinks
-dotfiles install
+dotfiles add ~/.config/foot                 # -> home/ (shared), symlinked back
+dotfiles add ~/.config/hypr/monitors.conf --to host      # -> hosts/<hostname>/
+dotfiles add ~/.tmux.conf                   # files outside ~/.config work too
+git -C ~/source/dotfiles add -A && git commit
 ```
 
-### Legacy Installation
+`add` is the **only** operation that moves files into the repo, and it is always
+explicit. `link`/`sync` never adopt anything.
 
-For backward compatibility, you can still use the old method:
+## Machine-specific configuration
+
+Two lightweight mechanisms, used only where needed:
+
+**1. Layers.** Put shared config in `home/`. Put config common to a class of
+machines in `profiles/<name>/` (auto-activated when the name matches your distro
+id, distro family, or desktop — e.g. `fedora`, `hyprland`, `gnome` — or enable
+it explicitly with `dotfiles profile enable <name>`). Put per-machine files in
+`hosts/<hostname>/`. When two layers contribute to the same directory, that
+directory is kept real and each file is linked individually.
+
+**2. Native includes** for a single file that is *mostly* shared. Instead of
+templating, have the shared file pull in a small per-host fragment:
+
+```ini
+# home/.config/hypr/hyprland.conf  (shared, identical everywhere)
+source = ~/.config/hypr/monitors.conf
+```
+```ini
+# hosts/<hostname>/.config/hypr/monitors.conf  (this machine only)
+monitor = DP-1, 3840x2160@144, 0x0, 1
+```
+
+The same pattern works for git `[include]`, SSH `Include`, etc.
+
+## GNOME / dconf
+
+GNOME settings live in dconf, not files, so they can't be symlinked. Keep a
+keyfile in the repo instead:
 
 ```bash
-./install.sh
+dotfiles dconf dump                 # snapshot live settings -> profiles/gnome/dconf/user.ini
+git -C ~/source/dotfiles commit -am 'update gnome dconf'
+dotfiles dconf load                 # on another machine: apply the keyfile
 ```
 
-## Configuration
+## Safety guarantees
 
-The dotfiles utility uses a TOML configuration file located at `~/.config/dotfiles/config.toml`. This file is automatically created during installation with default values:
+Each is covered by the test suite (`tests/link.bats`):
 
-```toml
-# Dotfiles configuration
-
-# Path to the dotfiles repository
-repository_path = "/path/to/your/dotfiles"
-
-# Default stow directory within the repository
-stow_directory = "config"
-
-# Target directory (defaults to $HOME)
-# target_directory = "/home/username"
-```
-
-## Usage
-
-After installation, you can use the `dotfiles` command:
-
-```bash
-# Install/update dotfiles
-dotfiles install
-
-# Add a file or directory to dotfiles management
-dotfiles add ~/.vimrc
-
-# Add a file and automatically commit the changes
-dotfiles add ~/.config/app --commit
-
-# Show help information
-dotfiles help
-
-# Show version information
-dotfiles version
-```
-
-### Adding Files to Dotfiles Management
-
-The `add` command allows you to easily add existing configuration files to your dotfiles repository:
-
-```bash
-# Add a single configuration file
-dotfiles add ~/.bashrc
-
-# Add an entire configuration directory
-dotfiles add ~/.config/nvim
-
-# Add and automatically commit/push changes
-dotfiles add ~/.gitconfig --commit
-```
-
-**Important Notes:**
-- Files must be located within your home directory (or configured target directory)
-- The command will move the original file to the repository and create a symlink
-- Use `--commit` to automatically commit and push changes to your git repository
-- Without `--commit`, you'll need to manually commit the changes later
+1. **Container directories are never folded.** `~/.config`, `~/.local[/*]`,
+   `~/.cache`, `~/.ssh`, `~/.gnupg`, … are always real directories; only their
+   managed children are linked. (Extend the list in `dotfiles.conf`.)
+2. **No implicit adoption.** `link` only creates links the repo defines; it
+   never pulls target files into the repo. Adoption is `add`-only.
+3. **Never clobbers.** A real file/dir the repo doesn't own is reported as a
+   CONFLICT and left untouched — nothing is overwritten.
+4. **Plan-first & idempotent.** Every change is previewable (`status` /
+   `--dry-run`); re-running is a no-op.
+5. **`doctor` repairs the classic hazard** — a container that became a repo
+   symlink is restored to a real directory.
 
 ## Development
 
-### Prerequisites
-
-- GNU Stow
-- Git
-- Bash
-- ShellCheck (for linting)
-
-### Commands
-
-This project uses a Makefile to simplify common tasks:
-
 ```bash
-# Install dotfiles utility
-make install
-
-# Install utility and run dotfiles install
-make setup
-
-# Run tests
-make test
-
-# Run linting
-make lint
-
-# Show all available commands
-make help
+make test     # BATS suite (auto-installs bats-core locally if needed)
+make lint     # shellcheck
+make all      # lint + test
 ```
 
-## Testing
+## Repository layout
 
-This project uses BATS (Bash Automated Testing System) for testing.
-
-### Running Tests
-
-To run the test suite:
-
-```bash
-./test.sh
 ```
-
-This will automatically install BATS and its helper libraries if they're not already installed.
-
-### Linting
-
-To check shell scripts for syntax and best practices:
-
-```bash
-./lint.sh
+bin/dotfiles          CLI entrypoint
+lib/*.sh              core, config, identity, linker
+lib/commands/*.sh     one file per subcommand
+hooks/post-merge      git hook (installed via `dotfiles hook install`)
+dotfiles.conf         optional repo config (extend container set, ignore names)
+home/ profiles/ hosts/ the layers
+tests/*.bats          test suite
 ```
-
-## Continuous Integration
-
-This project uses GitHub Actions for continuous integration:
-
-- Linting is performed on all shell scripts
-- Tests are run on both Ubuntu and macOS
-- Installation is verified in a clean environment

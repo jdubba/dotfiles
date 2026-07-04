@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+#
+# post-merge - git hook. After a successful `git pull`/merge in the dotfiles
+# repo, re-link so new/changed managed paths are applied automatically.
+#
+# Install with:  dotfiles hook install   (or: make install-hooks)
+#
+# Only NEW or moved links require action; edits to already-linked files are
+# live through the symlink and need nothing. Linking is idempotent and never
+# adopts or overwrites unmanaged files.
+
+set -euo pipefail
+
+repo="$(git rev-parse --show-toplevel 2>/dev/null || true)"
+[[ -n "$repo" && -x "$repo/bin/dotfiles" ]] || exit 0
+
+exec "$repo/bin/dotfiles" link
