@@ -28,10 +28,23 @@ fi
 # ========================================
 # History
 # ========================================
+HISTFILE="$XDG_STATE_HOME/bash/history"
+[ -d "${HISTFILE%/*}" ] || mkdir -p "${HISTFILE%/*}"
 HISTCONTROL=ignoreboth
 HISTSIZE=100000
 HISTFILESIZE=200000
 shopt -s histappend
+
+# Share history across concurrent sessions (bash equivalent of zsh
+# SHARE_HISTORY): flush this session's new lines and import other sessions'
+# before each prompt. Hooked via starship's precmd (which owns PROMPT_COMMAND),
+# with a PROMPT_COMMAND fallback when starship isn't present.
+_df_share_history() { history -a; history -n; }
+if command -v starship >/dev/null 2>&1; then
+    starship_precmd_user_func="_df_share_history"
+else
+    PROMPT_COMMAND="_df_share_history${PROMPT_COMMAND:+; $PROMPT_COMMAND}"
+fi
 
 # ========================================
 # Shell Behavior
