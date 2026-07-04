@@ -1,0 +1,21 @@
+[Unit]
+Description=rclone mount: OneDrive
+Documentation=https://rclone.org/onedrive/
+Wants=network-online.target
+After=network-online.target
+BindsTo=hyprland-session.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/rclone mount onedrive: /home/jwilliams/onedrive \
+    --config=/home/jwilliams/.config/rclone/rclone.conf \
+    --vfs-cache-mode=full \
+    --dir-cache-time=5m \
+    --poll-interval=10s \
+    --umask 0022
+ExecStop=/usr/bin/fusermount3 -uz /home/jwilliams/onedrive
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=hyprland-session.target

@@ -1,0 +1,14 @@
+[Unit]
+Description=Kanshi output management daemon
+Documentation=man:kanshi(1) man:kanshi(5)
+PartOf=graphical-session.target
+After=graphical-session.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/kanshi -c %h/.config/kanshi/config
+Restart=on-failure
+RestartSec=3
+
+[Install]
+WantedBy=graphical-session.target
