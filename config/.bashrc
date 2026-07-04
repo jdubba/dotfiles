@@ -87,10 +87,10 @@ if [ -f /usr/share/nvm/init-nvm.sh ]; then
 fi
 
 # User bin installs
-export PATH=$PATH:/home/jwilliams/.local/bin:/home/jwilliams/.cargo/bin
+export PATH=$PATH:$HOME/.local/bin:$HOME/.cargo/bin
 
 # opencode
-export PATH=/home/jwilliams/.opencode/bin:$PATH
+export PATH=$HOME/.opencode/bin:$PATH
 
 # Set default cli edit tools
 export EDITOR=/usr/bin/nvim
@@ -153,7 +153,10 @@ if [ -f ~/.bash_aliases ]; then
     . ~/.bash_aliases
 fi
 
-./.local/app/azure-cli/bin/activate
-export PATH=$PATH:./.local/app/azure-cli/bin
+# Azure CLI activation (optional)
+if [ -d "./.local/app/azure-cli" ]; then
+    . ./.local/app/azure-cli/bin/activate
+    export PATH=$PATH:./.local/app/azure-cli/bin
+fi
 
 clear && fastfetch

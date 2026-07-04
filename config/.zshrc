@@ -61,11 +61,11 @@ source <(fzf --zsh)
 # ========================================
 # Modular Config Files
 # ========================================
-source "$ZDOTFILES/fzf.zsh"
-source "$ZDOTFILES/aliases.zsh"
-source "$ZDOTFILES/bindings.zsh"
-source "$ZDOTFILES/plugins.zsh"
-source "$ZDOTFILES/prompt.zsh"
+source "$XDG_CONFIG_HOME/zsh/fzf.zsh"
+source "$XDG_CONFIG_HOME/zsh/aliases.zsh"
+source "$XDG_CONFIG_HOME/zsh/bindings.zsh"
+source "$XDG_CONFIG_HOME/zsh/plugins.zsh"
+source "$XDG_CONFIG_HOME/zsh/prompt.zsh"
 
 cd $HOME 
 
