@@ -1,19 +1,28 @@
-/* CSS HEX */
-@define-color grad-1 #53376A;
-@define-color grad-2 #5C3F74;
-@define-color grad-3 #65487E;
-@define-color grad-4 #6E5087;
-@define-color grad-5 #775991;
-@define-color grad-6 #80619B;
-@define-color grad-7 #896AA5;
-@define-color grad-8 #9272AF;
-@define-color grad-9 #9B7AB8;
-@define-color grad-10 #A483C2;
-@define-color grad-11 #AD8BCC;
-@define-color grad-12 #B694D6;
-@define-color grad-13 #BF9CDF;
-@define-color grad-14 #C8A5E9;
-@define-color grad-15 #D1ADF3;
+/* ===== Color palette =====
+   Derived from the desktop wallpaper (~/pictures/temp-wallpaper.jpg -- a
+   foggy, blue-teal magnolia photo). Deliberately just two sets so adding,
+   removing, or reordering widgets never requires touching colors again:
+     - bar-*  : every module in modules-left / modules-right
+     - ws-*   : the center workspaces widget
+   Battery uses the bar-* look when full, and a fixed traffic-light scale
+   for every other charge level (see batt-* below, at the bottom of the
+   file) -- the one intentional color exception. */
+@define-color bar-bg          #1B3A42; /* muted slate-teal pill background */
+@define-color bar-fg          #D7E9F5; /* icy-blue text/icon color on bar-bg */
+
+@define-color ws-bg           #0B2A28; /* near-black teal, the darkest tone in the photo */
+@define-color ws-fg           #3D6475; /* inactive workspace dot */
+@define-color ws-fg-occupied  #85AAC1; /* occupied workspace dot */
+@define-color ws-fg-active    #F2F8FC; /* active workspace dot, echoes the magnolia blossoms */
+
+/* Battery level indicator -- fixed traffic-light colors on purpose, so the
+   charge level always reads the same regardless of any palette change
+   above. Text stays dark for contrast against all four bright tones. */
+@define-color batt-green      #2ECC71; /* 60-99% */
+@define-color batt-yellow     #F1C40F; /* 40-59% */
+@define-color batt-orange     #E67E22; /* 20-39% */
+@define-color batt-red        #E74C3C; /* below 20% */
+@define-color batt-state-fg   #1B2024;
 
 /* -- Global rules -- */
 * {
@@ -30,7 +39,10 @@ window#waybar.hidden {
   opacity: 0.2;
 }
 
-/* -- General rules for visible modules -- */
+/* -- General rules for visible modules --
+   Background and font color for every bar module live in exactly one
+   place. Modules can be added, removed, or reordered freely without ever
+   touching color here again. */
 #custom-archicon,
 #clock,
 #cpu,
@@ -46,7 +58,8 @@ window#waybar.hidden {
 #network,
 #language,
 #battery {
-  color: #161320;
+  background: @bar-bg;
+  color: @bar-fg;
   min-height: 16px;
   margin: 5px 0;
   padding: 0 8px;
@@ -95,127 +108,112 @@ window#waybar.hidden {
   border-radius: 15px;
 }
 
-/* -- Specific styles -- */
+/* -- Specific styles --
+   Layout-only tweaks (sizing/spacing). No color lives below this point,
+   except the battery level exception. */
 
 /* Modules left */
 #custom-archicon {
   font-size: 24px;
-  color: @grad-1;
-  background: #161320;
   padding-right: 17px;
 }
 
 #clock {
-  background: @grad-1;
-  color: #FFFFFF;
   font-weight: bold;
-}
-
-#cpu {
-  background: @grad-2;
-  color: #D1ADF3;
-}
-
-#memory {
-  background: @grad-3;
-  color: #D1ADF3;
-}
-
-#disk {
-  background: @grad-4;
-  color: #D1ADF3;
-}
-
-#temperature {
-  background: @grad-5;
-  color: #D1ADF3;
 }
 
 /* Modules center */
 #workspaces {
-  background: rgba(0, 0, 0, 0.5);
+  background: @ws-bg;
   border-radius: 15px;
   margin: 5px 4px;
   padding: 0 6px;
 }
 
 #workspaces button {
-  color: @grad-4;
+  color: @ws-fg;
   background: transparent;
   padding: 2px 4px;
   transition: color 0.3s ease, text-shadow 0.3s ease, transform 0.3s ease;
 }
 
 #workspaces button.occupied {
-  color: @grad-6;
+  color: @ws-fg-occupied;
 }
 
 #workspaces button.active {
-  color: @grad-10;
-  text-shadow: 0 0 4px #ABE9B3;
+  color: @ws-fg-active;
+  text-shadow: 0 0 4px @ws-fg-active;
 }
 
 #workspaces button:hover {
-  color: #89B4FA;
+  color: @bar-fg;
 }
 
 #workspaces button.active:hover {}
 
 /* Modules right */
 #idle_inhibitor {
-  background: @grad-6;
   padding-right: 15px;
 }
 
 #backlight-slider {
-  color: #1A1826;
-  background: @grad-7;
   min-width: 50px;
 }
 
 #backlight {
-  color: #1A1826;
-  background: @grad-8;
   min-width: 55px;
 }
 
 #pulseaudio-slider {
-  color: #1A1826;
-  background: @grad-9;
   min-width: 50px;
 }
 
 #pulseaudio {
   min-width: 55px;
-  color: #1A1826;
-  background: @grad-10;
 }
 
-/* #pulseaudio-slider slider {} */
-
 #network {
-  background: @grad-11;
   padding-right: 13px;
 }
 
 #bluetooth {
   min-width: 55px;
-  background: @grad-12;
   padding-right: 13px;
 }
 
 #language {
-  background: @grad-13;
   padding-right: 13px;
 }
 
 #battery {
-  background: @grad-14;
   padding-right: 15px;
 }
 
-#battery.charging {
-  background: #33FF33;
+/* Battery charge-level colors. At 100% (status "Full") none of these
+   thresholds match, so it falls through to the plain bar-bg/bar-fg look
+   above -- exactly matching every other pill. Below that, capacity <= the
+   threshold activates a class (see config.jsonc "states"); rules are
+   ordered least-to-most severe so a lower level always wins the cascade
+   when multiple thresholds match at once. */
+#battery.green {
+  background: @batt-green;
+  color: @batt-state-fg;
+}
+
+#battery.yellow {
+  background: @batt-yellow;
+  color: @batt-state-fg;
+}
+
+#battery.orange {
+  background: @batt-orange;
+  color: @batt-state-fg;
+}
+
+#battery.red {
+  background: @batt-red;
+  color: @batt-state-fg;
 }
 
 /* === Optional animation === */

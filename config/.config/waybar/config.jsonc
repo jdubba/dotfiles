@@ -165,8 +165,10 @@
     "format-icons": ["\uf244", "\uf243", "\uf242", "\uf241", "\uf240"],
     "format-charging": "{capacity}% {icon} ",
     "states": {
-      "warning": 30,
-      "critical": 15
+      "green": 99,
+      "yellow": 59,
+      "orange": 39,
+      "red": 19
     },
     "interval": 60
   }
