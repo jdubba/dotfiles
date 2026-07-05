@@ -43,7 +43,7 @@ window#waybar.hidden {
    Background and font color for every bar module live in exactly one
    place. Modules can be added, removed, or reordered freely without ever
    touching color here again. */
-#custom-archicon,
+#custom-oslogo,
 #clock,
 #cpu,
 #memory,
@@ -114,7 +114,7 @@ window#waybar.hidden {
    except the battery level exception. */
 
 /* Modules left */
-#custom-archicon {
+#custom-oslogo {
   font-size: 24px;
   padding-right: 17px;
 }

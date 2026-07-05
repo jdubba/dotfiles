@@ -11,7 +11,7 @@
 /* topleft theme: identical to default, except layout.xml aligns the
    box-wrapper to the top-left instead of centering it, and this margin
    nudges it out from under Waybar (43px tall) and off the screen edge.
-   Used for the app launcher (custom/archicon) invocation only. */
+   Used for the app launcher (custom/oslogo) invocation only. */
 .box-wrapper {
   margin-top: 46px;
   margin-left: 12px;

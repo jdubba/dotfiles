@@ -1,0 +1,53 @@
+#!/usr/bin/env bash
+#
+# oslogo — print the Nerd Font distro/OS logo glyph for the running system, for
+# Waybar's custom/oslogo module (the app-launcher button on the far left).
+#
+# Detects the OS from /etc/os-release ($ID, then $ID_LIKE) and maps it to a
+# "Font Logos" (nf-linux-*) glyph; unknown systems fall back to a generic Tux.
+# Every glyph used here exists in all Nerd Fonts, so it renders identically on
+# any host (Fedora, Gentoo, ...) that has a Nerd Font configured.
+#
+set -euo pipefail
+
+# os-release ID (or ID_LIKE token) -> Font Logos codepoint (hex, BMP plane).
+declare -A LOGO=(
+    [alpine]=f300         [almalinux]=f31d      [arch]=f303
+    [archlabs]=f31e       [arcolinux]=f346      [artix]=f31f
+    [centos]=f304         [debian]=f306         [deepin]=f321
+    [devuan]=f307         [elementary]=f309     [endeavouros]=f322
+    [fedora]=f30a         [freebsd]=f30c        [garuda]=f337
+    [gentoo]=f30d         [guix]=f325           [kali]=f327
+    [linuxmint]=f30e      [mageia]=f310         [mandriva]=f311
+    [manjaro]=f312        [mx]=f33f             [nixos]=f313
+    [nobara]=f380         [openbsd]=f328        [opensuse]=f314
+    [opensuse-leap]=f37e  [opensuse-tumbleweed]=f37d
+    [leap]=f37e           [tumbleweed]=f37d     [parrot]=f329
+    [pop]=f32a            [qubes]=f342          [raspbian]=f315
+    [redhat]=f316         [rhel]=f316           [rocky]=f32b
+    [slackware]=f318      [solus]=f32d          [suse]=f314
+    [tails]=f343          [trisquel]=f344       [ubuntu]=f31b
+    [void]=f32e           [zorin]=f32f
+)
+fallback=f31a   # nf-linux-tux (generic)
+
+osid="" oslike=""
+os_release=${OS_RELEASE:-/etc/os-release}
+if [[ -r "$os_release" ]]; then
+    # shellcheck disable=SC1090,SC1091
+    . "$os_release"
+    osid=${ID:-} oslike=${ID_LIKE:-}
+fi
+
+code=""
+if [[ -n "$osid" ]]; then
+    code=${LOGO[$osid]:-}
+fi
+if [[ -z "$code" ]]; then
+    for token in $oslike; do
+        code=${LOGO[$token]:-}
+        [[ -n "$code" ]] && break
+    done
+fi
+
+printf '%b\n' "\\u${code:-$fallback}"

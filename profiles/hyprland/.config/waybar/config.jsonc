@@ -25,7 +25,7 @@
      modules added/removed here without touching the stylesheet. */
   "group/left-brand": {
     "orientation": "horizontal",
-    "modules": ["custom/archicon", "clock"]
+    "modules": ["custom/oslogo", "clock"]
   },
   "group/left-stats": {
     "orientation": "horizontal",
@@ -46,8 +46,10 @@
     ]
   },
   /* === modules left === */
-  "custom/archicon": {
-    "format": "󰣨",
+  "custom/oslogo": {
+    "exec": "$HOME/.config/waybar/scripts/oslogo",
+    "interval": "once",
+    "format": "{}",
     "on-click": "walker -m desktopapplications -t topleft",
     "tooltip": false
   },
