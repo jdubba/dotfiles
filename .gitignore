@@ -33,3 +33,9 @@ Thumbs.db
 
 # Machine-local dotfiles state (never committed)
 /.local/state/
+
+# elephant provider build artifacts: platform-specific compiled Go plugins
+# (.so) that get built into ~/.config/elephant/providers/, which resolves into
+# this repo because ~/.config/elephant symlinks here. Regenerable; keep them
+# out. (See profiles/hyprland/.config/elephant/providers.list for the manifest.)
+/profiles/hyprland/.config/elephant/providers/
