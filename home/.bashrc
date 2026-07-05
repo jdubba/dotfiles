@@ -76,10 +76,27 @@ command -v zoxide >/dev/null 2>&1 && eval "$(zoxide init bash)"
 # ========================================
 # Fuzzy Finder keybindings
 # ========================================
-# shellcheck source=/dev/null
-[ -f /usr/share/fzf/key-bindings.bash ] && . /usr/share/fzf/key-bindings.bash
-# shellcheck source=/dev/null
-[ -f /usr/share/fzf/completion.bash ] && . /usr/share/fzf/completion.bash
+# Prefer `fzf --bash` (fzf >= 0.48 emits key-bindings + completion itself, so
+# it's distro-agnostic). Fall back to sourcing the shipped scripts, whose
+# location varies by distro (Gentoo/Arch: /usr/share/fzf/; Fedora:
+# /usr/share/fzf/shell/; Debian/Ubuntu: /usr/share/doc/fzf/examples/).
+if command -v fzf >/dev/null 2>&1; then
+    if fzf --bash >/dev/null 2>&1; then
+        eval "$(fzf --bash)"
+    else
+        for _fzf_src in \
+            /usr/share/fzf/key-bindings.bash \
+            /usr/share/fzf/completion.bash \
+            /usr/share/fzf/shell/key-bindings.bash \
+            /usr/share/fzf/shell/completion.bash \
+            /usr/share/doc/fzf/examples/key-bindings.bash \
+            /usr/share/doc/fzf/examples/completion.bash; do
+            # shellcheck source=/dev/null
+            [ -f "$_fzf_src" ] && . "$_fzf_src"
+        done
+        unset _fzf_src
+    fi
+fi
 
 # ========================================
 # Modular Config Files (shared core + bash-specific)

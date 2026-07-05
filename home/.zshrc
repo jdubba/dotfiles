@@ -59,9 +59,28 @@ compdef eza=ls
 # ========================================
 # Fuzzy Finder
 # ========================================
-# source /usr/share/fzf/shell/key-bindings.zsh
-source /usr/share/fzf/key-bindings.zsh
-source <(fzf --zsh)
+# fzf integration. Prefer `fzf --zsh` (fzf >= 0.48 emits key-bindings +
+# completion itself, so it's distro-agnostic). Fall back to sourcing the
+# shipped scripts, whose location varies by distro:
+#   Gentoo/Arch  : /usr/share/fzf/{key-bindings,completion}.zsh
+#   Fedora       : /usr/share/fzf/shell/{key-bindings,completion}.zsh
+#   Debian/Ubuntu: /usr/share/doc/fzf/examples/{key-bindings,completion}.zsh
+if command -v fzf >/dev/null 2>&1; then
+    if fzf --zsh >/dev/null 2>&1; then
+        source <(fzf --zsh)
+    else
+        for _fzf_src in \
+            /usr/share/fzf/key-bindings.zsh \
+            /usr/share/fzf/completion.zsh \
+            /usr/share/fzf/shell/key-bindings.zsh \
+            /usr/share/fzf/shell/completion.zsh \
+            /usr/share/doc/fzf/examples/key-bindings.zsh \
+            /usr/share/doc/fzf/examples/completion.zsh; do
+            [ -f "$_fzf_src" ] && source "$_fzf_src"
+        done
+        unset _fzf_src
+    fi
+fi
 
 
 
