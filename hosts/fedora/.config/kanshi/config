@@ -1,0 +1,21 @@
+# Kanshi configuration for the "fedora" laptop.
+# See man 5 kanshi for syntax.
+#
+# Minimal single-display setup: internal panel (eDP-1) only. When this machine
+# is docked with external monitors, add a second `profile` block here listing
+# eDP-1 + the external outputs (see hosts/stationzebra/.config/kanshi/config for
+# a multi-output example, including per-monitor workspace placement via
+# move-workspaces.sh). kanshi auto-selects the profile whose connected-output
+# set matches the current hardware.
+
+profile laptop-only {
+    # Internal panel: 2880x1800 native @ 60Hz.
+    # scale 1.6 -> 1800x1125 logical px. GNOME measured this panel at ~1.75;
+    # Hyprland-clean alternatives (integer logical size): 1.5 (1920), 1.6 (1800),
+    # 1.8 (1600), 2.0 (1440). Adjust to taste.
+    output eDP-1 {
+        mode 2880x1800@60Hz
+        position 0,0
+        scale 1.6
+    }
+}
