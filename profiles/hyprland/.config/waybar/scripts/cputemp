@@ -1,0 +1,87 @@
+#!/usr/bin/env python3
+"""cputemp — Waybar custom-module JSON for the CPU package temperature.
+
+Portable across hardware: probes /sys/class/hwmon for the CPU sensor by driver
+name (Intel coretemp, AMD k10temp/zenpower, ARM/SoC cpu_thermal) and uses that
+chip's primary input (temp1 = Package id 0 / Tctl / Tdie). Falls back to the
+x86_pkg_temp thermal zone, then any sane non-acpitz zone. This deliberately
+avoids waybar's default thermal_zone0, which is acpitz -- a bogus -273200
+(absolute zero) sensor on some machines (e.g. Intel Lunar Lake).
+"""
+import glob
+import json
+import os
+
+ICON = "\uf2c9"  # nf-fa-thermometer (matches the previous module's icon)
+HWMON = os.environ.get("HWMON_ROOT", "/sys/class/hwmon")
+THERMAL = os.environ.get("THERMAL_ROOT", "/sys/class/thermal")
+# CPU hwmon driver names, most-specific first.
+CPU_CHIPS = ("coretemp", "k10temp", "zenpower", "cpu_thermal", "cpu")
+
+
+def _read(path):
+    try:
+        with open(path) as fh:
+            return fh.read().strip()
+    except OSError:
+        return None
+
+
+def _millideg(path):
+    try:
+        return int(_read(path))
+    except (TypeError, ValueError):
+        return None
+
+
+def _primary_input(hwmon_dir):
+    """Lowest-numbered tempN_input (temp1 = package / Tctl / Tdie)."""
+    def idx(p):
+        n = os.path.basename(p)[4:-6]  # "tempN_input" -> "N"
+        return int(n) if n.isdigit() else 9999
+    inputs = sorted(glob.glob(os.path.join(hwmon_dir, "temp*_input")), key=idx)
+    return inputs[0] if inputs else None
+
+
+def _sane(milli):
+    return milli is not None and -40000 <= milli <= 200000
+
+
+def find_temp():
+    chips = {}
+    for d in glob.glob(os.path.join(HWMON, "hwmon*")):
+        name = _read(os.path.join(d, "name"))
+        if name:
+            chips.setdefault(name, d)
+    for chip in CPU_CHIPS:
+        if chip in chips:
+            milli = _millideg(_primary_input(chips[chip]) or "")
+            if _sane(milli):
+                return milli
+    # Thermal-zone fallbacks: prefer x86_pkg_temp, then any non-acpitz zone.
+    zones = [(_read(os.path.join(z, "type")) or "", os.path.join(z, "temp"))
+             for z in glob.glob(os.path.join(THERMAL, "thermal_zone*"))]
+    for ztype, temp in zones:
+        if ztype == "x86_pkg_temp" and _sane(_millideg(temp)):
+            return _millideg(temp)
+    for ztype, temp in zones:
+        if ztype != "acpitz" and _sane(_millideg(temp)):
+            return _millideg(temp)
+    return None
+
+
+def main():
+    milli = find_temp()
+    if milli is None:
+        out = {"text": f"n/a {ICON}", "tooltip": "CPU temperature unavailable"}
+    else:
+        c = round(milli / 1000)
+        out = {"text": f"{c}°c {ICON}",
+               "tooltip": f"Temperatura actual: {c}°c\nCrítico si > 80°c"}
+        if c >= 80:
+            out["class"] = "critical"
+    print(json.dumps(out, ensure_ascii=False))
+
+
+if __name__ == "__main__":
+    main()

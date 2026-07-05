@@ -29,7 +29,7 @@
   },
   "group/left-stats": {
     "orientation": "horizontal",
-    "modules": ["cpu", "memory", "disk", "temperature"]
+    "modules": ["cpu", "memory", "disk", "custom/temperature"]
   },
   "group/right-controls": {
     "orientation": "horizontal",
@@ -77,13 +77,15 @@
     "tooltip": true,
     "tooltip-format": "espacio libre: {free} / {total} ({percentage_free}%)"
   },
-  "temperature": {
-    "format": "{temperatureC}°c {icon}",
-    "tooltip": true,
-    "tooltip-format": "Temperatura actual: {temperatureC}°c\nCrítico si > 80°c",
-    "format-icons": [
-      ""
-    ]
+  "custom/temperature": {
+    // CPU package temp via scripts/cputemp, which probes hwmon for the CPU
+    // sensor by driver (Intel coretemp / AMD k10temp / ...). Portable across
+    // hardware, and avoids waybar's default thermal_zone0 (acpitz reports a
+    // bogus -273200 on this box).
+    "exec": "$HOME/.config/waybar/scripts/cputemp",
+    "return-type": "json",
+    "interval": 10,
+    "tooltip": true
   },
   /* === modules center === */
   "hyprland/workspaces": {

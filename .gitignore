@@ -28,6 +28,10 @@ Thumbs.db
 # Logs
 *.log
 
+# Python bytecode (e.g. from waybar helper scripts such as scripts/cputemp)
+__pycache__/
+*.pyc
+
 # Lazy plugin version tracking (intentionally not pinned in the repo)
 /home/.config/nvim/lazy-lock.json
 

@@ -48,7 +48,7 @@ window#waybar.hidden {
 #cpu,
 #memory,
 #disk,
-#temperature,
+#custom-temperature,
 #idle_inhibitor,
 #backlight,
 #backlight-slider,
