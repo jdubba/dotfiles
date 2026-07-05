@@ -1,5 +1,10 @@
 return {
   "nvim-treesitter/nvim-treesitter",
+  -- Pin the v1.x rewrite. Upstream's default branch is still the (now archived)
+  -- master branch, and lazy-lock.json is not tracked in this repo, so without
+  -- this pin a fresh machine installs master -- whose module has no `.install`
+  -- (exactly the error this avoids). Requires a recent Neovim (0.11+).
+  branch = "main",
   build = ":TSUpdate",
   lazy = false, -- v1.x does not support lazy-loading
   config = function()
