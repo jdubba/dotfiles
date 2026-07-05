@@ -37,19 +37,25 @@ export GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quo
 # --- Wayland hint for kitty -----------------------------------------------
 export KITTY_ENABLE_WAYLAND=1
 
-# --- PATH (idempotent; append only if the dir exists and is not present) ---
+# --- PATH (additive & idempotent) ----------------------------------------
+# PATH is never rewritten - it is built additively. `_pathadd` appends a dir
+# only if it exists and isn't already present. The entries themselves live in
+# layered fragments under ~/.config/shell/path.d/ (core from home/, plus any
+# per-profile and per-host additions the linker merges in), so this stays a
+# core PATH + per-machine/per-platform additions.
 _pathadd() {
     case ":$PATH:" in
         *":$1:"*) : ;;                       # already present
         *) [ -d "$1" ] && PATH="$PATH:$1" ;;
     esac
 }
-_pathadd "$XDG_BIN_HOME"
-_pathadd "$HOME/.local/bin"
-_pathadd "$HOME/.cargo/bin"
-_pathadd "$HOME/go/bin"
-_pathadd "$HOME/.opencode/bin"
-_pathadd "$HOME/.local/app/azure-cli/bin"
+if [ -d "$XDG_CONFIG_HOME/shell/path.d" ]; then
+    for _df_p in "$XDG_CONFIG_HOME/shell/path.d"/*.sh; do
+        # shellcheck source=/dev/null
+        [ -r "$_df_p" ] && . "$_df_p"
+    done
+    unset _df_p
+fi
 export PATH
 unset -f _pathadd
 

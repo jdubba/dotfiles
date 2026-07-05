@@ -3,10 +3,6 @@ Description=Kanshi output management daemon
 Documentation=man:kanshi(1) man:kanshi(5)
 PartOf=graphical-session.target
 After=graphical-session.target
-# graphical-session.target is also reached under GNOME (dual-session box), so
-# gate this to the Hyprland session only. Requires the session env to be
-# imported into the systemd --user manager (hyprland.conf does this on start).
-ConditionEnvironment=XDG_CURRENT_DESKTOP=Hyprland
 
 [Service]
 Type=simple

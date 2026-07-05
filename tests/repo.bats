@@ -18,7 +18,9 @@ setup() { load test_helper; }
 
 @test "shared POSIX shell files are syntactically valid" {
   local f
-  for f in "$DF_SRC_REPO"/home/.profile "$DF_SRC_REPO"/home/.config/shell/*.sh; do
+  for f in "$DF_SRC_REPO"/home/.profile \
+           "$DF_SRC_REPO"/home/.config/shell/*.sh \
+           "$DF_SRC_REPO"/home/.config/shell/path.d/*.sh; do
     sh -n "$f"
   done
 }

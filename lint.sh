@@ -43,6 +43,7 @@ echo "Sanity-checking shipped shell config (non-fatal)..."
 for f in \
     home/.bashrc home/.bash_profile home/.profile \
     home/.config/shell/*.sh \
+    home/.config/shell/path.d/*.sh \
     home/.config/bash/*.bash; do
   [ -f "$f" ] || continue
   echo "  $f"
