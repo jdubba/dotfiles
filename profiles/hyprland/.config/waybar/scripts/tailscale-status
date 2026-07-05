@@ -7,13 +7,13 @@
 set -euo pipefail
 
 json_escape() {
-    python3 -c 'import json,sys; print(json.dumps(sys.stdin.read().rstrip("\n")))'
+    python3 -c 'import json,sys; print(json.dumps(sys.stdin.read().rstrip("\n"), ensure_ascii=False))'
 }
 
 status=$(tailscale status --json 2>/dev/null) || status=""
 
 if [[ -z "$status" ]]; then
-    text="\uf132"   # fa-shield (outline) — daemon unreachable
+    text=$'\U000f099c'   # nf-md-shield-off — daemon unreachable
     class="down"
     tooltip="Tailscale: daemon unreachable"
     printf '{"text": %s, "class": "%s", "tooltip": %s}\n' \
@@ -42,7 +42,7 @@ tailnet = (data.get("CurrentTailnet") or {}).get("Name", "")
 self_ip = (self_.get("TailscaleIPs") or [""])[0]
 
 if backend == "Running":
-    icon = "\uf3ed"      # fa-shield-alt (solid) — connected
+    icon = "\U000f0565"  # nf-md-shield-check — connected
     css_class = "up"
     lines = [f"Tailscale: connected ({tailnet})" if tailnet else "Tailscale: connected"]
     if self_ip:
@@ -51,7 +51,7 @@ if backend == "Running":
     if exit_node:
         lines.append(f"Exit node: {exit_node}")
 elif backend == "Stopped":
-    icon = "\uf132"      # fa-shield (outline) — disconnected
+    icon = "\U000f099c"  # nf-md-shield-off — disconnected
     css_class = "down"
     lines = ["Tailscale: disconnected"]
 elif backend in ("NeedsLogin", "NeedsMachineAuth"):
@@ -68,5 +68,5 @@ out = {
     "class": css_class,
     "tooltip": "\n".join(lines),
 }
-print(json.dumps(out))
+print(json.dumps(out, ensure_ascii=False))
 PYEOF
