@@ -16,6 +16,9 @@ It replaced an earlier GNU Stow-based system. Stow is no longer used.
   **Hyprland** and **GNOME**. No macOS/Windows/WSL support is maintained.
 - Primary machine: **`stationzebra`** (Gentoo, Hyprland, laptop + dual external
   displays via a dock).
+- Second machine: **`fedora`** (Fedora 43 Workstation, Intel Lunar Lake/Arc). GNOME
+  is the default DE with **Hyprland added alongside it** — both selectable at
+  **GDM**; single internal display (`eDP-1`). GNOME is never modified.
 - **No secrets in the repo.** Machine-specific private values stay in untracked
   local includes (e.g. `~/.gitsigning` referenced from `.gitconfig`). Do not add
   encryption or commit credentials.
@@ -82,11 +85,15 @@ container, so adopting genuinely general-purpose scripts there is fine too.
 ### Current inventory (snapshot)
 
 - `profiles/hyprland/` — `waybar/` (config + style + `scripts/{wifimenu,
-  tailscalemenu,tailscale-status}`); `elephant/providers.list`; systemd
-  `hyprland-session.target` + `kanshi.service`.
+  tailscalemenu,tailscale-status}`); `walker/themes/{default,topleft,topright}`;
+  `elephant/providers.list`; systemd `hyprland-session.target` + (guard-free)
+  `kanshi.service`.
 - `hosts/stationzebra/` — `kanshi/` (config + `move-workspaces.sh`); systemd
   `rclone-onedrive.service` + `rclone-devsite.service`; `shell/machine-env`
-  (`AWS_PROFILE=idkey`).
+  (`AWS_PROFILE=idkey`); empty `hypr/local.conf` stub.
+- `hosts/fedora/` — `kanshi/config` (single `eDP-1`); `hypr/local.conf` (GDM
+  session glue); `systemd/user/{kanshi,waybar}.service.d/hyprland-only.conf`
+  (dual-session guards); `shell/machine-env`.
 - `hyprland.conf` and the rest of `~/.config` still live in `home/`. Only waybar
   was relocated to `profiles/hyprland`; moving `hypr/` there too is a reasonable
   future cleanup.
@@ -112,9 +119,15 @@ The shell config is itself modular, and the common parts are shared between bash
 and zsh rather than duplicated:
 
 - `home/.config/shell/` — **POSIX sh, shared by both shells**:
-  - `env.sh` — XDG dirs, `EDITOR`/`VISUAL`, pager, `GCC_COLORS`, and an
-    **idempotent PATH** builder. Sourced from `.zshenv` and from bash
-    (`.bash_profile`/`.profile`/`.bashrc`). Must have **no side effects** (no
+  - `env.sh` — XDG dirs, `EDITOR`/`VISUAL`, pager, `GCC_COLORS`, and the
+    **idempotent PATH** builder (`_pathadd` = append IFF the dir exists and isn't
+    already on `PATH`). It sources `~/.config/shell/path.d/*.sh` in filename order;
+    core additions live in `home/.config/shell/path.d/00-core.sh` (`~/.local/bin`,
+    `~/.cargo/bin`, `~/go/bin`, `~/.opencode/bin`, azure-cli). **Never rewrite
+    `PATH` with a fixed list** — that clobbers per-machine entries (e.g. Gentoo's
+    `/opt/bin`, llvm); PATH is core + additive. Add per-platform/host dirs by
+    dropping another `path.d/*.sh` fragment in a profile or host layer. Sourced
+    from `.zshenv` and the bash entrypoints. Must have **no side effects** (no
     network, no prompt) and **no bashisms/zshisms**.
   - `aliases.sh` — the single alias set (replaced `.bash_aliases` and
     `zsh/aliases.zsh`).
@@ -162,6 +175,59 @@ and zsh rather than duplicated:
   (`hosts/stationzebra/.config/kanshi/`).
 - GNOME settings are not files; manage them with `dotfiles dconf dump|load`
   (keyfile under `profiles/gnome/dconf/`).
+
+## Hyprland session launch & the `fedora` host (GDM)
+
+The biggest cross-machine difference is **how the compositor is launched**, which
+determines its `PATH` and whether the session env reaches `systemd --user`:
+
+- **stationzebra (Gentoo):** Hyprland starts from a **TTY login shell** → full
+  login `PATH` (incl. `path.d`) and the session env is already in `systemd --user`.
+- **`fedora` (GDM):** the plain "Hyprland" session (`/usr/bin/start-hyprland`) runs
+  in a PAM `session.scope` **without a login shell** → minimal
+  `PATH=/usr/local/bin:/usr/bin` and **no** import of the session env into
+  `systemd --user`. All Fedora-specific glue exists to compensate for this.
+
+Durable rules that follow from it:
+
+1. **Install compositor-launched tools onto the minimal PATH.** `walker`/`elephant`
+   are installed to **`/usr/local/bin`** (their makefiles default to
+   `PREFIX=/usr/local`) so the shared `exec-once = elephant` /
+   `exec-once = walker --gapplication-service` and the `walker` keybinds resolve
+   under GDM's minimal PATH — same layout as stationzebra. **Never** add an
+   `env = PATH,…` rewrite to shared config, and don't rely on `~/.local/bin` for
+   anything the compositor launches by bare name under GDM.
+2. **Per-host Hyprland include.** Shared `hyprland.conf` autostart ends with
+   `source = $HOME/.config/hypr/local.conf` (before it starts
+   `hyprland-session.target`). Every host ships a `local.conf` — an **empty stub**
+   where there's nothing to add. **Hyprland's `source=` does NOT expand `~`; use
+   `$HOME`** (it does expand `$HOME`).
+3. **Fedora glue is host-scoped** in `hosts/fedora/`:
+   - `.config/hypr/local.conf` — `dbus-update-activation-environment --systemd
+     --all` (import the Wayland session env so units/guards see
+     `WAYLAND_DISPLAY`/`XDG_CURRENT_DESKTOP`), plus `hyprpaper` + `hyprpolkitagent`
+     autostarts (stationzebra gets these by other means).
+   - `.config/systemd/user/{kanshi,waybar}.service.d/hyprland-only.conf` — the
+     dual-session guard (see next point).
+4. **Dual-session (GNOME + Hyprland via GDM):** both DEs reach
+   `graphical-session.target`, so a `WantedBy=graphical-session.target` user
+   service would start under **both**. Keep shared units **guard-free**
+   (`profiles/hyprland/.config/systemd/user/kanshi.service`) and put the guard
+   `ConditionEnvironment=XDG_CURRENT_DESKTOP=Hyprland` in the Fedora host drop-ins.
+   Under Hyprland the units start; under GNOME the condition fails and they stay
+   dormant. (`waybar.service` is the Fedora-packaged unit; the drop-in narrows it.)
+5. **Packaging:** compositor + ecosystem from the **`lionheartp/Hyprland` COPR**
+   (`solopasha/hyprland` is unmaintained for F43); waybar/kanshi/etc. from Fedora
+   repos. **walker is Rust/GTK4** (v2, not Go): build needs `cargo` +
+   `gtk4-layer-shell-devel` + `poppler-glib-devel`, and its `build.rs` needs
+   `protoc` on `PATH` (use the vendored `protoc-bin-vendored`). **elephant is Go**:
+   build the binary + each provider as a plugin (`go build -buildmode=plugin` →
+   `~/.config/elephant/providers/*.so`). walker requires elephant running (it
+   `which("elephant")` and connects to its socket).
+6. **After a `git pull` that touches systemd user units, run `systemctl --user
+   daemon-reload`** — the `post-merge` hook re-links but does not reload, so new
+   unit drop-ins won't take effect until reload (or next login, where
+   `systemd --user` starts fresh).
 
 ## Common Commands
 
