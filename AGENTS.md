@@ -15,8 +15,9 @@ It replaced an earlier GNU Stow-based system. Stow is no longer used.
 - **Linux only.** Target distros are **Gentoo** and **Fedora**; desktops are
   **Hyprland** and **GNOME**. No macOS/Windows/WSL support is maintained.
 - Primary machine: **`stationzebra`** (Gentoo, Hyprland, laptop + dual external
-  displays via a dock).
-- Second machine: **`fedora`** (Fedora 43 Workstation, Intel Lunar Lake/Arc). GNOME
+  displays via a dock; **AMD** CPU → hwmon `k10temp`).
+- Second machine: **`fedora`** (Fedora 43 Workstation, **Intel** Lunar Lake/Arc →
+  hwmon `coretemp`). GNOME
   is the default DE with **Hyprland added alongside it** — both selectable at
   **GDM**; single internal display (`eDP-1`). GNOME is never modified.
 - **No secrets in the repo.** Machine-specific private values stay in untracked
@@ -85,7 +86,8 @@ container, so adopting genuinely general-purpose scripts there is fine too.
 ### Current inventory (snapshot)
 
 - `profiles/hyprland/` — `waybar/` (config + style + `scripts/{wifimenu,
-  tailscalemenu,tailscale-status}`); `walker/themes/{default,topleft,topright}`;
+  tailscalemenu,tailscale-status,oslogo,cputemp}`);
+  `walker/themes/{default,topleft,topright}`;
   `elephant/providers.list`; systemd `hyprland-session.target` + (guard-free)
   `kanshi.service`.
 - `hosts/stationzebra/` — `kanshi/` (config + `move-workspaces.sh`); systemd
@@ -166,6 +168,11 @@ and zsh rather than duplicated:
   with `dotfiles env status|set|skip|add|unset`. `doctor` and `sync` report vars
   that are declared but unset-and-not-skipped on this host (cross-machine
   reconciliation). Values are committed in the host layer (non-secret only).
+- **fzf integration loads portably.** `.zshrc`/`.bashrc` prefer `fzf --zsh` /
+  `fzf --bash` (fzf >= 0.48 emits key-bindings + completion), then fall back to
+  **guarded** per-distro script paths (`/usr/share/fzf/` on Gentoo/Arch,
+  `/usr/share/fzf/shell/` on Fedora, `/usr/share/doc/fzf/examples/` on Debian).
+  Never source a fixed distro path unguarded.
 
 ### Monitors / desktop specifics
 
@@ -228,6 +235,59 @@ Durable rules that follow from it:
    daemon-reload`** — the `post-merge` hook re-links but does not reload, so new
    unit drop-ins won't take effect until reload (or next login, where
    `systemd --user` starts fresh).
+
+## Fonts, Waybar & app configs (durable)
+
+Making the **shared** configs render correctly on both Fedora and Gentoo taught
+one theme: **be explicit and hardware/OS-agnostic; never lean on a machine's
+defaults.**
+
+- **Nerd Font glyphs get hijacked on Fedora.** Fedora ships fonts Gentoo does
+  not — `adwaita-sans-fonts` (GNOME's UI font), `fontawesome-6-free-fonts`,
+  `Jomolhari`, Noto symbols — that also cover the PUA ranges Nerd Font icons use.
+  With a non-icon primary font (`font-family: "DM Sans", "JetBrainsMono Nerd
+  Font"`), fontconfig's per-glyph fallback may pick one of those → **wrong glyph,
+  not tofu**. Rules: (1) **name an installed Nerd Font in the CSS** (a named
+  family beats system fallback); `JetBrainsMono Nerd Font` must be installed per
+  machine (`~/.fonts` + `fc-cache` — it is a font, not repo content). (2) **only
+  use codepoints that exist in a Nerd Font** — FontAwesome 5/6 glyphs like
+  `\uf3ed` are in *no* Nerd Font (rendered as Jomolhari here); prefer
+  Material-Design `nf-md-*` / Font-Logos `nf-linux-*`, codepoints from
+  `ryanoasis/nerd-fonts` `glyphnames.json`. (3) **verify** with
+  `fc-list ":charset=<hex>"` (coverage) and a Pango itemize
+  (`PangoCairo.FontMap.get_default()` + the CSS family list) for *which* font
+  actually renders — assumptions here cost multiple rounds.
+- **Waybar helpers detect OS/hardware so one shared `config.jsonc` works
+  everywhere** (`profiles/hyprland/.config/waybar/scripts/`):
+  - `oslogo` → `/etc/os-release` `$ID` (then `$ID_LIKE`) → Font-Logos
+    `nf-linux-*` glyph (Fedora/Gentoo/…), Tux fallback; backs the `custom/oslogo`
+    launcher button (replaced the old hardcoded `custom/archicon`).
+  - `cputemp` → probes `/sys/class/hwmon` by driver (`coretemp`/`k10temp`/
+    `zenpower`/`cpu_thermal`) then the `x86_pkg_temp` zone; backs
+    `custom/temperature`. **Do not** use waybar's built-in `temperature` default:
+    it reads `thermal_zone0` = `acpitz` (a bogus **-273200** on Lunar Lake), and a
+    static `hwmon-path` is not portable (Intel `coretemp` vs AMD `k10temp`).
+  - `tailscale-status` → `nf-md-shield-check`/`shield-off` (present in Nerd
+    Fonts), not the FA `shield-alt` (`\uf3ed`) that mis-rendered.
+  - These are Python; `__pycache__/` and `*.pyc` are gitignored.
+- **Waybar bluetooth:** `format-icons` has no `connected` state, so
+  `format-connected: "{icon}"` renders **empty** when a device connects. Use a
+  literal glyph for `format-connected`/`-battery`; list devices in the tooltip
+  via `{device_enumerate}`.
+- **Neovim `nvim-treesitter` is pinned `branch = "main"`** (the v1.x rewrite:
+  `require("nvim-treesitter").setup()/install()/indentexpr()`). Upstream's default
+  branch is the now-archived `master`, whose module has **no `.install`** (→
+  `attempt to call field 'install' (a nil value)`); and `lazy-lock.json` is
+  gitignored/not synced, so the branch **must** be pinned in the spec or a fresh
+  machine installs `master`. Needs recent Neovim + `tree-sitter` CLI + `cc` to
+  build parsers.
+- **`~/.config/user-dirs.dirs` is dotfiles-managed**, but `xdg-user-dirs-update`
+  (login autostart `/etc/xdg/autostart/xdg-user-dirs.desktop`) rewrites it with an
+  atomic temp-file+rename, replacing the symlink with a real file every login.
+  Ship `home/.config/user-dirs.conf` with `enabled=False` to disable it (verified
+  to block the rewrite even under `--force`). `user-dirs.conf` supports only
+  `enabled` and `filename_encoding`; with the updater off, edit `user-dirs.dirs`
+  directly.
 
 ## Common Commands
 
