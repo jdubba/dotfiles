@@ -81,12 +81,15 @@ container, so adopting genuinely general-purpose scripts there is fine too.
 - systemd `*.wants/` enablement symlinks (machine-local; some point into
   `/usr/lib`). Re-enable per machine with `systemctl --user enable <unit>`
   (and `systemctl --user daemon-reload` after adopting a unit).
+- Self-rewriting configs that fold into the repo: `nvim/lazy-lock.json` and
+  `btop/btop.conf` (btop rewrites it on exit through the folded `~/.config/btop`
+  symlink) — both gitignored, like machine-local state.
 - Secrets (see Environment & scope).
 
 ### Current inventory (snapshot)
 
 - `profiles/hyprland/` — `waybar/` (config + style + `scripts/{wifimenu,
-  tailscalemenu,tailscale-status,oslogo,cputemp,thememenu}`);
+  tailscalemenu,tailscale-status,oslogo,cputemp,thememenu,theme-status}`);
   `walker/themes/{default,topleft,topright}`;
   `elephant/providers.list`; systemd `hyprland-session.target` + (guard-free)
   `kanshi.service` + `dotfiles-autotheme.service`.
@@ -307,8 +310,10 @@ layer** (`themes/<name>/`, mirroring `$HOME`) injected between profiles and host
 Manage with `dotfiles theme status|list|set|unset|auto`. `theme set` records the
 selection in **machine-local state** (never the repo) then auto-runs `link` and
 live-reloads; flags `--no-link`/`--no-reload`. `theme unset` clears the
-machine-local selection (falling back to the committed override/default). ~40
-curated themes
+machine-local selection (falling back to the committed override/default).
+Scriptable helpers `theme list --plain` (names to stdout) and `theme name`
+(resolved active theme) back the waybar switcher pill (`custom/theme` →
+`scripts/thememenu` menu + `scripts/theme-status` tooltip). ~40 curated themes
 ship (Catppuccin ×4, Tokyo Night ×4, Rosé Pine ×3, Kanagawa ×3, Ayu ×3,
 Nightfox ×5, Gruvbox/Solarized/Everforest/GitHub ×2, Nord, Dracula, One Dark,
 Monokai/-Pro, Material, Oxocarbon, Melange, Zenburn, Palenight, …).
@@ -349,6 +354,14 @@ layer provides, so switching themes is just a relink + reload. Seams (see
 - **`_df_theme_reload` must not fire in tests.** The sandbox sets
   `DF_TARGET==HOME`, so the `!= HOME` guard is insufficient; `test_helper`
   exports `DF_NO_RELOAD=1` and the reloader honours it. Scripted use can set it.
+- **The waybar switcher pill (`scripts/thememenu`) runs the switch detached
+  (`setsid`).** The reload sequence hits waybar (`killall -SIGUSR2 waybar`)
+  *before* the terminals (kitty/ghostty come later), and reloading waybar kills
+  its on-click child tree — a plain `&` background job dies mid-reload, so the
+  terminals never recolour (theme switched but ghostty stale). `setsid` detaches
+  it into its own session so it always completes. (CLI `theme set` isn't a
+  waybar child, so it was never affected — a classic "reload killed the
+  reloader".)
 - **hyprpaper/hyprlock DO expand `$HOME`** in `path` values (unlike hyprland's
   `source=`), so `path = $HOME/.config/background` is correct and portable.
 - **hyprpaper 0.8.x IPC** dropped `preload`/`unload`/`listloaded`/`reload` (the
