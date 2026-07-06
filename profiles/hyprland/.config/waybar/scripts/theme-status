@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+#
+# theme-status — Waybar custom/theme JSON: the palette glyph + a tooltip that
+# names the active theme on a second line. Re-runs on every waybar reload
+# (interval=once), which theme switches trigger, so it stays current.
+
+set -euo pipefail
+export PATH="$HOME/.local/bin:$HOME/.cargo/bin:/usr/local/bin:/usr/bin:/bin:${PATH:-}"
+
+name=$(dotfiles theme name 2>/dev/null | head -1)
+[[ -n "$name" ]] || name="unknown"
+
+# nf-md-palette-outline glyph in "text"; "\n" splits the tooltip into two lines.
+printf '{"text":"󰸌","tooltip":"Switch theme\\nActive: %s"}\n' "$name"

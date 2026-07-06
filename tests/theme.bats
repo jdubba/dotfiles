@@ -98,6 +98,14 @@ teardown() { teardown_sandbox; }
   [[ "$output" != *"*"* ]]
 }
 
+@test "theme name prints the resolved active theme to stdout" {
+  mk_theme_default gruvbox-dark
+  mk_theme gruvbox-dark ".config/app/conf"
+  run "$DOTFILES" theme name
+  [ "$status" -eq 0 ]
+  [ "$output" = "gruvbox-dark" ]
+}
+
 @test "theme status shows source information" {
   mk_theme catppuccin-mocha ".config/app/conf"
   mk_theme_default catppuccin-mocha

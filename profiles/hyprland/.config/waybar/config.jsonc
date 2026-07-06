@@ -106,12 +106,16 @@
   },
   /* === modules right === */
   "custom/theme": {
-    // Static palette glyph (nf-md-palette-outline, U+F0E0C); on-click opens the
+    // Palette glyph (nf-md-palette-outline, U+F0E0C) + a tooltip whose 2nd line
+    // names the active theme. exec re-runs on waybar reload (which theme
+    // switches trigger), so the tooltip stays current. on-click opens the
     // Walker-based theme switcher (predefined themes + auto-from-image).
-    "format": "󰸌",
+    "exec": "$HOME/.config/waybar/scripts/theme-status",
+    "return-type": "json",
+    "interval": "once",
+    "format": "{}",
     "on-click": "$HOME/.config/waybar/scripts/thememenu",
-    "tooltip": true,
-    "tooltip-format": "Switch theme"
+    "tooltip": true
   },
   "idle_inhibitor": {
     "format": "{icon}",

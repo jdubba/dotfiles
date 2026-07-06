@@ -131,6 +131,12 @@ df_cmd_theme() {
       done
       ;;
 
+    name)
+      # Resolved active theme name to stdout (for scripts/menus).
+      df_theme_name
+      printf '\n'
+      ;;
+
     list)
       # --plain: theme names to stdout, one per line (for scripts/menus).
       if [[ "${1:-}" == "--plain" ]]; then
