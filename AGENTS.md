@@ -297,12 +297,18 @@ layer** (`themes/<name>/`, mirroring `$HOME`) injected between profiles and host
 (`lib/theme.sh`, `lib/identity.sh`). Active-theme resolution precedence:
 
 1. **machine-local auto flag** (`$XDG_STATE_HOME/dotfiles/auto-theme`) → `auto`
-2. per-host override `hosts/<host>/.config/dotfiles/theme` (committed)
-3. repo default `themes/default` (committed)
-4. hardcoded fallback `catppuccin-mocha`
+2. **machine-local selection** (`$XDG_STATE_HOME/dotfiles/theme`) — what
+   `theme set`/`unset` write; kept out of the repo so switching causes no churn
+3. per-host committed override `hosts/<host>/.config/dotfiles/theme` (optional,
+   synced fallback; hand-edit if you want a per-host default in git)
+4. repo default `themes/default` (committed)
+5. hardcoded fallback `catppuccin-mocha`
 
-Manage with `dotfiles theme status|list|set|unset|auto`. `theme set` auto-runs
-`link` then live-reloads; flags `--no-link`/`--no-reload`. ~40 curated themes
+Manage with `dotfiles theme status|list|set|unset|auto`. `theme set` records the
+selection in **machine-local state** (never the repo) then auto-runs `link` and
+live-reloads; flags `--no-link`/`--no-reload`. `theme unset` clears the
+machine-local selection (falling back to the committed override/default). ~40
+curated themes
 ship (Catppuccin ×4, Tokyo Night ×4, Rosé Pine ×3, Kanagawa ×3, Ayu ×3,
 Nightfox ×5, Gruvbox/Solarized/Everforest/GitHub ×2, Nord, Dracula, One Dark,
 Monokai/-Pro, Material, Oxocarbon, Melange, Zenburn, Palenight, …).

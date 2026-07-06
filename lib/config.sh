@@ -133,6 +133,16 @@ df_read_enabled_profiles() {
 }
 
 # ---------------------------------------------------------------------------
+# Machine-local state: selected theme.
+#
+# The active theme is tracked here (not committed) so frequent theme switches
+# don't churn the repo. A committed per-host override
+# (hosts/<host>/.config/dotfiles/theme) still works as a lower-priority
+# fallback for anyone who wants a synced per-host default.
+# ---------------------------------------------------------------------------
+df_state_theme_file() { printf '%s/theme' "$DF_STATE_DIR"; }
+
+# ---------------------------------------------------------------------------
 # Machine-local state: auto-theming (wallpaper-derived theme).
 #
 # Kept machine-local (never committed) because the generated themes/auto/ is

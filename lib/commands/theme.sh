@@ -101,13 +101,14 @@ df_cmd_theme() {
 
   case "$sub" in
     status|show)
-      local name source_label host_file
-      host_file=$(_df_theme_host_file)
+      local name source_label
       name=$(df_theme_name)
 
       if df_autotheme_enabled; then
         source_label="auto (wallpaper-derived)"
-      elif [[ -f "$host_file" ]]; then
+      elif [[ -f "$(df_state_theme_file)" ]]; then
+        source_label="machine-local selection"
+      elif [[ -f "$(_df_theme_host_file)" ]]; then
         source_label="per-host override"
       elif [[ -f "$DF_REPO/$DF_THEMES_DIR/default" ]]; then
         source_label="repo default"
@@ -179,7 +180,8 @@ df_cmd_theme() {
         df_warn "no $DF_THEMES_DIR/$name/ directory yet; create one to add theme files"
       fi
 
-      local f; f=$(_df_theme_host_file)
+      # Machine-local selection (never committed — no repo churn on switch).
+      local f; f=$(df_state_theme_file)
       mkdir -p -- "$(dirname "$f")"
       printf '%s\n' "$name" >"$f"
       df_ok "set theme to '$name'"
@@ -210,13 +212,13 @@ df_cmd_theme() {
       ;;
 
     unset)
-      local f; f=$(_df_theme_host_file)
+      local f; f=$(df_state_theme_file)
       if [[ ! -f "$f" ]]; then
-        df_ok "no per-host theme override to unset (repo default stays active)"
+        df_ok "no machine-local theme selection to clear (committed default stays active)"
         return 0
       fi
       rm -f -- "$f"
-      df_ok "removed per-host theme override (falling back to $(df_theme_name))"
+      df_ok "cleared machine-local theme selection (now: $(df_theme_name))"
 
       df_log ""
       df_info "running dotfiles link..."

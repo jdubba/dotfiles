@@ -19,20 +19,34 @@ teardown() { teardown_sandbox; }
   [[ "$output" == *"theme:"*"gruvbox-dark"* ]]
 }
 
-@test "theme set writes host override and re-links" {
+@test "theme set writes a machine-local selection (no repo churn) and re-links" {
   mk_theme catppuccin-mocha ".config/app/conf"
   mk_theme_default catppuccin-mocha
   run "$DOTFILES" theme set catppuccin-mocha --no-reload
   [ "$status" -eq 0 ]
   [[ "$output" == *"set theme to 'catppuccin-mocha'"* ]]
   [[ "$output" == *"linked"* || "$output" == *"everything already"* ]]
+  # Recorded in machine-local state, not written into the repo.
+  [ -f "$XDG_STATE_HOME/dotfiles/theme" ]
+  [ ! -e "$DF_TEST_REPO/hosts/$(df_host)/.config/dotfiles/theme" ]
+}
+
+@test "machine-local selection overrides the committed per-host override" {
+  mk_theme_default catppuccin-mocha
+  mk_theme catppuccin-mocha ".config/app/conf"
+  mk_theme gruvbox-dark ".config/app/conf"
+  mk_host ".config/dotfiles/theme" "catppuccin-mocha"          # committed override
+  "$DOTFILES" theme set gruvbox-dark --no-link --no-reload     # machine-local wins
+  run "$DOTFILES" info
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"theme:"*"gruvbox-dark"* ]]
 }
 
 @test "host override takes precedence over repo default" {
   mk_theme_default catppuccin-mocha
   mk_theme catppuccin-mocha ".config/app/conf"
   mk_theme gruvbox-dark ".config/app/conf"
-  # Set per-host override to gruvbox-dark
+  # Set per-host override to gruvbox-dark (committed fallback; no machine-local)
   mk_host ".config/dotfiles/theme" "gruvbox-dark"
   run "$DOTFILES" info
   [ "$status" -eq 0 ]
@@ -54,23 +68,25 @@ teardown() { teardown_sandbox; }
   [[ "$output" == *"hosts"* ]]
 }
 
-@test "theme set creates host override file" {
-  override="$DF_TEST_REPO/hosts/$(df_host)/.config/dotfiles/theme"
+@test "theme set records the machine-local selection, not a repo file" {
+  state="$XDG_STATE_HOME/dotfiles/theme"
   mk_theme gruvbox-dark ".config/app/conf"
   run "$DOTFILES" theme set gruvbox-dark --no-link --no-reload
   [ "$status" -eq 0 ]
-  [ -f "$override" ]
-  grep -q "gruvbox-dark" "$override"
+  [ -f "$state" ]
+  grep -q "gruvbox-dark" "$state"
+  [ ! -e "$DF_TEST_REPO/hosts/$(df_host)/.config/dotfiles/theme" ]
 }
 
-@test "theme unset removes host override" {
-  override="$DF_TEST_REPO/hosts/$(df_host)/.config/dotfiles/theme"
+@test "theme unset clears the machine-local selection" {
+  state="$XDG_STATE_HOME/dotfiles/theme"
   mk_theme gruvbox-dark ".config/app/conf"
-  mk_host ".config/dotfiles/theme" "gruvbox-dark"
+  "$DOTFILES" theme set gruvbox-dark --no-link --no-reload
+  [ -f "$state" ]
   run "$DOTFILES" theme unset
   [ "$status" -eq 0 ]
-  [ ! -f "$override" ]
-  [[ "$output" == *"removed"* ]]
+  [ ! -f "$state" ]
+  [[ "$output" == *"cleared"* ]]
 }
 
 @test "theme list shows available themes" {

@@ -41,6 +41,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   matching wallpaper (palette-gradient default; real images where dropped in).
 
 ### Changed
+- **Active theme selection is machine-local** (`$XDG_STATE_HOME/dotfiles/theme`)
+  rather than a committed per-host file, so switching themes no longer churns the
+  repo. `theme set`/`unset` write/clear it; a committed per-host override
+  (`hosts/<host>/.config/dotfiles/theme`) remains an optional lower-priority
+  fallback. Adds `dotfiles theme name` (resolved active theme to stdout).
 - `hypr` wallpaper path made portable: `hyprpaper.conf` reads
   `$HOME/.config/background` (coordinated with hyprlock) instead of a hardcoded
   personal path. `hyprland`/`hyprlock` `source=` switched to relative paths

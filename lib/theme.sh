@@ -4,18 +4,29 @@
 #
 # A theme is a layer directory under themes/<name>/ that mirrors $HOME and
 # ships color-coordinated variants of config files. The active theme is
-# determined by:
+# determined by (first match wins):
 #   0. Machine-local auto-theming flag (wallpaper-derived): themes/auto
-#   1. Per-host override: hosts/<hostname>/.config/dotfiles/theme
-#   2. Repo default:      themes/default
-#   3. Hardcoded fallback: $DF_THEME_FALLBACK (catppuccin-mocha)
+#   1. Machine-local selection: $XDG_STATE_HOME/dotfiles/theme (set by `theme set`)
+#   2. Per-host committed override: hosts/<hostname>/.config/dotfiles/theme
+#   3. Repo default:      themes/default
+#   4. Hardcoded fallback: $DF_THEME_FALLBACK (catppuccin-mocha)
 
 [[ -n "${_DF_THEME_SOURCED:-}" ]] && return 0
 _DF_THEME_SOURCED=1
 
+# Read + trim the first line of a file; print it if non-empty (returns 1 else).
+_df_theme_read() {
+  local f=$1 name
+  [[ -f "$f" ]] || return 1
+  name=$(head -1 "$f" 2>/dev/null || true)
+  name=$(printf '%s' "$name" | tr -d '[:space:]')
+  [[ -n "$name" ]] || return 1
+  printf '%s' "$name"
+}
+
 # Name of the resolved theme: reads the first available source.
 df_theme_name() {
-  local host override_file default_file name
+  local host name
 
   # Machine-local auto-theming wins when enabled (never committed).
   if df_autotheme_enabled; then
@@ -23,21 +34,17 @@ df_theme_name() {
     return 0
   fi
 
+  # Machine-local selection (never committed; set by `dotfiles theme set`).
+  name=$(_df_theme_read "$(df_state_theme_file)") && { printf '%s' "$name"; return 0; }
+
+  # Committed per-host override (optional, synced).
   host=$(df_hostname)
-  override_file="$DF_REPO/$DF_HOSTS_DIR/$host/.config/dotfiles/theme"
-  default_file="$DF_REPO/$DF_THEMES_DIR/default"
+  name=$(_df_theme_read "$DF_REPO/$DF_HOSTS_DIR/$host/.config/dotfiles/theme") \
+    && { printf '%s' "$name"; return 0; }
 
-  if [[ -f "$override_file" ]]; then
-    name=$(head -1 "$override_file" 2>/dev/null || true)
-    name=$(printf '%s' "$name" | tr -d '[:space:]')
-    [[ -n "$name" ]] && { printf '%s' "$name"; return 0; }
-  fi
-
-  if [[ -f "$default_file" ]]; then
-    name=$(head -1 "$default_file" 2>/dev/null || true)
-    name=$(printf '%s' "$name" | tr -d '[:space:]')
-    [[ -n "$name" ]] && { printf '%s' "$name"; return 0; }
-  fi
+  # Committed repo-wide default.
+  name=$(_df_theme_read "$DF_REPO/$DF_THEMES_DIR/default") \
+    && { printf '%s' "$name"; return 0; }
 
   printf '%s' "$DF_THEME_FALLBACK"
 }
