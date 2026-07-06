@@ -1,10 +1,12 @@
 return {
   "nvim-lualine/lualine.nvim",
-  dependencies = { "nvim-tree/nvim-web-devicons", "catppuccin/nvim" },
+  dependencies = { "nvim-tree/nvim-web-devicons" },
   config = function()
     require("lualine").setup({
       options = {
-        theme = "catppuccin-nvim",
+        -- "auto" follows whatever colorscheme the active dotfiles theme applied
+        -- (see lua/plugins/colorscheme.lua + lua/dotfiles_theme.lua).
+        theme = "auto",
         component_separators = { left = "", right = "" },
         section_separators = { left = "", right = "" },
         globalstatus = true,

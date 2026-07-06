@@ -71,3 +71,8 @@ if [ -r "$XDG_CONFIG_HOME/shell/machine-env" ]; then
     done < "$XDG_CONFIG_HOME/shell/machine-env"
     unset _df_k _df_v
 fi
+
+# --- Theme-specific environment (provided by active dotfiles theme layer) ----
+if [ -r "$XDG_CONFIG_HOME/shell/theme-env.sh" ]; then
+    . "$XDG_CONFIG_HOME/shell/theme-env.sh"
+fi

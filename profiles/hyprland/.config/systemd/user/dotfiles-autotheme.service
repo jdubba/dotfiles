@@ -1,0 +1,17 @@
+[Unit]
+Description=dotfiles wallpaper-derived auto-theme watcher
+Documentation=man:dotfiles
+PartOf=graphical-session.target
+After=graphical-session.target
+
+[Service]
+Type=simple
+# systemd --user has a minimal PATH; include the common locations for the
+# dotfiles launcher and palette backends (wallust via ~/.cargo/bin, etc.).
+Environment=PATH=%h/.local/bin:%h/.cargo/bin:/usr/local/bin:/usr/bin:/bin
+ExecStart=%h/.local/bin/dotfiles theme auto watch
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=graphical-session.target

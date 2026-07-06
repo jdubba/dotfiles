@@ -23,6 +23,13 @@ _DF_CONFIG_SOURCED=1
 : "${DF_PROFILES_DIR:=profiles}"
 : "${DF_HOSTS_DIR:=hosts}"
 
+# Theme directory within the repository.
+: "${DF_THEMES_DIR:=themes}"
+# Default theme name (used when themes/default is absent).
+: "${DF_THEME_FALLBACK:=catppuccin-mocha}"
+# Name of the auto-generated, wallpaper-derived theme (themes/auto, gitignored).
+: "${DF_AUTO_THEME_NAME:=auto}"
+
 # Machine-local state directory (never committed).
 : "${DF_STATE_DIR:=${XDG_STATE_HOME:-$HOME/.local/state}/dotfiles}"
 
@@ -124,3 +131,22 @@ df_read_enabled_profiles() {
   # Ignore blank lines and comments.
   grep -vE '^\s*(#|$)' "$f" 2>/dev/null || true
 }
+
+# ---------------------------------------------------------------------------
+# Machine-local state: auto-theming (wallpaper-derived theme).
+#
+# Kept machine-local (never committed) because the generated themes/auto/ is
+# gitignored - committing "theme = auto" per-host would strand other machines
+# that lack the generated content. When the flag is present, the auto theme is
+# the active theme (df_theme_name returns DF_AUTO_THEME_NAME).
+# ---------------------------------------------------------------------------
+df_state_autotheme_file()       { printf '%s/auto-theme' "$DF_STATE_DIR"; }
+df_state_autotheme_watch_file() { printf '%s/auto-theme.watch' "$DF_STATE_DIR"; }
+df_state_autotheme_source_file(){ printf '%s/auto-theme.source' "$DF_STATE_DIR"; }
+df_state_autotheme_hash_file()  { printf '%s/auto-theme.hash' "$DF_STATE_DIR"; }
+
+# True when auto-theming is active (auto is the resolved theme).
+df_autotheme_enabled() { [[ -f "$(df_state_autotheme_file)" ]]; }
+
+# True when continuous watching was requested (used by the watcher, phase 5b).
+df_autotheme_watch_enabled() { [[ -f "$(df_state_autotheme_watch_file)" ]]; }

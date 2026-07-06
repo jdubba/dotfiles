@@ -1,0 +1,150 @@
+# Commands may be slower in restricted environments, e.g. containers
+command_timeout = 10000
+
+format = """
+  $time
+[    ](fg:color_fg_sep)\
+$localip\
+[ / ](fg:color_fg_sep)\
+$custom\
+[ ](fg:color_fg_sep)
+[┌─](fg:color_connector)\
+[](fg:color_os_bg)\
+$os\
+$username\
+$hostname\
+[](fg:color_os_bg bg:color_dir_bg)\
+$directory\
+[](fg:color_dir_bg)\
+$fill\
+$git_branch\
+$git_status
+[└](fg:color_connector)$character"""
+
+
+palette = 'starship_dubba'
+
+[palettes.starship_dubba]
+color_fg_primary = '#ddc2fc'
+color_os_bg = '#4e4b51'
+color_time_bg = '#7851A9'
+color_dir_bg = '#8A65C1'
+color_dir_repo_fg = '#5EB9E6'
+color_red = '#E84D44'
+color_connector = '#ddc2fc'
+
+#git directory and status colos
+color_repo_fg = '#ffffff'
+color_repo_bg = '#f72585'
+color_repo_change_fg = '#ffffff'
+color_repo_change_bg = '#7209b7'
+color_repo_diverge_fg = '#ffffff'
+color_repo_diverge_bg = '#3a0ca3'
+
+#right bar
+color_fg_right = '#8b51b5'
+color_fg_sep = '#bc8be0'
+
+[fill]
+symbol = " "
+
+[os]
+style = "fg:color_fg_primary bg:color_os_bg"
+format = "[$symbol  ]($style)"
+disabled = false
+
+[os.symbols]
+Windows = "" #""
+Ubuntu = "󰕈"
+SUSE = ""
+Raspbian = "󰐿"
+Mint = "󰣭"
+Macos = "󰀵"
+Manjaro = ""
+Linux = "󰌽"
+Gentoo = "󰣨"
+Fedora = "󰣛"
+Alpine = ""
+Amazon = ""
+Android = ""
+Arch = "󰣇"
+Artix = "󰣇"
+CentOS = ""
+Debian = ""
+Redhat = "󱄛"
+RedHatEnterprise = "󱄛"
+Pop = ''
+
+[username]
+disabled = false
+show_always = true
+style_root = "fg:yellow bg:color_os_bg"
+style_user = "fg:color_fg_primary bg:color_os_bg"
+format = "[$user]($style)"
+
+[hostname]
+disabled = false
+ssh_only = false
+style = "fg:color_fg_primary bg:color_os_bg"
+format = "[@$hostname ]($style)"
+
+[directory]
+truncation_length = 3
+truncate_to_repo = false
+repo_root_style = "fg:color_dir_repo_fg bg:color_dir_bg"
+#repo_root_style = "fg:color_dir_repo_fg bg:color_dir_bg"
+fish_style_pwd_dir_length = 2
+# Repo format
+repo_root_format = "[  $before_root_path]($style)[$repo_root]($repo_root_style)[$path]($style)"
+# Non repo format
+format = "[  $path ]($style)"
+style = "fg:color_fg_primary bg:color_dir_bg"
+
+[git_branch]
+format = '[](fg:color_repo_bg)[ $symbol$branch ]($style)'
+symbol = "at  on  "
+style = "fg:color_repo_fg bg:color_repo_bg"
+
+[git_status]
+stashed = "[${count}](fg:color_repo_change_fg bg:color_repo_change_bg) "
+modified = "[${count}](fg:color_repo_change_fg bg:color_repo_change_bg) "
+staged = "[${count}](fg:color_repo_change_fg bg:color_repo_change_bg) "
+untracked = "[${count}](fg:color_repo_change_fg bg:color_repo_change_bg) "
+deleted = "[${count}](fg:color_repo_change_fg bg:color_repo_change_bg) "
+ahead = " [${count}](fg:color_repo_diverge_fg bg:color_repo_diverge_bg) "
+behind = " [${count} ](fg:color_repo_diverge_fg bg:color_repo_diverge_bg)"
+diverged = " [${ahead_count} ${behind_count}](fg:color_repo_diverge_fg bg:color_repo_diverge_bg) "
+format = """
+[](fg:color_repo_change_bg bg:color_repo_bg)\
+[ ](bg:color_repo_change_bg)\
+([$stashed]($style))\
+([$modified]($style))\
+([$staged]($style))\
+([$untracked]($style))\
+([$deleted]($style))\
+[](fg:color_repo_diverge_bg bg:color_repo_change_bg)\
+([$ahead_behind](fg:color_repo_diverge_fg bg:color_repo_diverge_bg))\
+[](fg:color_repo_diverge_bg)"""
+style = "fg:color_fg_primary bg:color_repo_change_bg"
+
+[character]
+success_symbol = '[─](fg:color_connector)'
+error_symbol = '[─](fg:color_connector)[✗](fg:color_red)'
+
+[time]
+disabled = false
+time_format = "%R" # Hour:Minute Format
+style = "fg:color_fg_right"
+format = "([  $time]($style))"
+
+[localip]
+ssh_only = false
+style = "fg:color_fg_right"
+format = "[$localipv4]($style)"
+disabled = false
+
+[custom.externalip]
+command = "printf $EXTERNAL_IP"
+style = "fg:color_fg_right"
+format = "[$output]($style)"
+when = "true"

@@ -5,6 +5,40 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+- **Theme system.** A `themes/<name>/` layer (injected between profiles and
+  host) coordinates colours across kitty, ghostty, hyprland/hyprlock, waybar,
+  walker, tmux, starship, nvim, opencode, bat/fzf, and the wallpaper. Managed
+  with `dotfiles theme status|list|set|unset`. Ships `catppuccin-mocha` and
+  `gruvbox-dark`; selectable per-host (committed) with a repo default.
+- Each tool reads a stable seam path the active theme provides (e.g. kitty
+  `include current-theme.conf`, waybar `@import "colors.css"`), so switching a
+  theme is a relink + live reload.
+- **Auto-theming** (`dotfiles theme auto now|enable|disable|status`): derives a
+  palette from the current wallpaper and generates the whole `themes/auto/` tree
+  (gitignored). Palette backend preference wallust → pywal → bundled
+  python+Pillow, with a notice recommending wallust when a lesser backend is
+  used. Continuous mode is a polling systemd user service; nvim uses generated
+  base16, bat `ansi`, opencode `system`. See `docs/auto-theming.md` (incl. the
+  GNOME/KDE detection backlog).
+- **Waybar theme switcher**: a `custom/theme` pill (between the controls pill and
+  battery) opens a Walker menu to pick any predefined theme, or a Walker-based
+  image browser to generate an auto theme from a chosen wallpaper
+  (`scripts/thememenu`, backed by `dotfiles theme list --plain`).
+- Waybar section pills now use per-section accent colors with contrast-adjusted
+  text (previously all rendered near-black); walker's accent likewise uses a
+  vivid color instead of the darkest palette tone.
+
+### Changed
+- `hypr` wallpaper path made portable: `hyprpaper.conf` reads
+  `$HOME/.config/background` (coordinated with hyprlock) instead of a hardcoded
+  personal path. `hyprland`/`hyprlock` `source=` switched to relative paths
+  (`source=` does not expand `$HOME`/`~`).
+- Neovim colorscheme config bundles catppuccin, gruvbox, and base16-nvim and
+  applies whichever the active theme names (`lua/dotfiles_theme.lua`).
+
 ## [1.0.0] - 2026-07-04
 
 Ground-up rebuild. The GNU Stow-based system is replaced by a custom,

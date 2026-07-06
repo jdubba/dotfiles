@@ -35,6 +35,13 @@ __pycache__/
 # Lazy plugin version tracking (intentionally not pinned in the repo)
 /home/.config/nvim/lazy-lock.json
 
+# btop rewrites its own config on exit (machine-local); ~/.config/btop folds
+# into the repo, so the file lands here. Keep it out.
+/home/.config/btop/btop.conf
+
+# Auto-generated themes (wallpaper-derived, never committed)
+/themes/auto/
+
 # Machine-local dotfiles state (never committed)
 /.local/state/
 

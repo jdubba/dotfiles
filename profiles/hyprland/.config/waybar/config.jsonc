@@ -16,6 +16,7 @@
   ],
   "modules-right": [
     "group/right-controls",
+    "custom/theme",
     "battery"
   ],
   /* === section groups ===
@@ -104,6 +105,14 @@
     "show-special": true
   },
   /* === modules right === */
+  "custom/theme": {
+    // Static palette glyph (nf-md-palette-outline, U+F0E0C); on-click opens the
+    // Walker-based theme switcher (predefined themes + auto-from-image).
+    "format": "󰸌",
+    "on-click": "$HOME/.config/waybar/scripts/thememenu",
+    "tooltip": true,
+    "tooltip-format": "Switch theme"
+  },
   "idle_inhibitor": {
     "format": "{icon}",
     "format-icons": {

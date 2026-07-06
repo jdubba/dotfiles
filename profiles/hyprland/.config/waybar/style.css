@@ -1,19 +1,5 @@
-/* ===== Color palette =====
-   Derived from the desktop wallpaper (~/pictures/temp-wallpaper.jpg -- a
-   foggy, blue-teal magnolia photo). Deliberately just two sets so adding,
-   removing, or reordering widgets never requires touching colors again:
-     - bar-*  : every module in modules-left / modules-right
-     - ws-*   : the center workspaces widget
-   Battery uses the bar-* look when full, and a fixed traffic-light scale
-   for every other charge level (see batt-* below, at the bottom of the
-   file) -- the one intentional color exception. */
-@define-color bar-bg          #1B3A42; /* muted slate-teal pill background */
-@define-color bar-fg          #D7E9F5; /* icy-blue text/icon color on bar-bg */
-
-@define-color ws-bg           #0B2A28; /* near-black teal, the darkest tone in the photo */
-@define-color ws-fg           #3D6475; /* inactive workspace dot */
-@define-color ws-fg-occupied  #85AAC1; /* occupied workspace dot */
-@define-color ws-fg-active    #F2F8FC; /* active workspace dot, echoes the magnolia blossoms */
+/* Color palette is provided by the active theme layer */
+@import "colors.css";
 
 /* Battery level indicator -- fixed traffic-light colors on purpose, so the
    charge level always reads the same regardless of any palette change
@@ -58,6 +44,7 @@ window#waybar.hidden {
 #network,
 #custom-tailscale,
 #language,
+#custom-theme,
 #battery {
   background: @bar-bg;
   color: @bar-fg;
@@ -65,6 +52,27 @@ window#waybar.hidden {
   margin: 5px 0;
   padding: 0 8px;
   transition: none;
+}
+
+/* -- Section (pill) colors --
+   Each section gets its own accent background + a contrasting foreground, both
+   from the active theme's colors.css (bar-bg is only the neutral base/fallback
+   for anything not in a section). Equal specificity to the base block above, so
+   these must come AFTER it. `> * > *` reaches the module widget inside each
+   module's EventBox wrapper -- the same descent the rounding rules use. */
+#left-brand > * > * {
+  background: @pill-brand-bg;
+  color: @pill-brand-fg;
+}
+
+#left-stats > * > * {
+  background: @pill-stats-bg;
+  color: @pill-stats-fg;
+}
+
+#right-controls > * > * {
+  background: @pill-ctrl-bg;
+  color: @pill-ctrl-fg;
 }
 
 /* Slider modules use a GTK scale widget internally, whose trough ignores
@@ -102,8 +110,22 @@ window#waybar.hidden {
   border-bottom-right-radius: 15px;
 }
 
-/* Battery isn't part of a group -- it's a standalone, single-module pill. */
+/* Theme switcher: standalone pill between right-controls and battery. */
+#custom-theme {
+  background: @pill-theme-bg;
+  color: @pill-theme-fg;
+  margin-left: 4px;
+  margin-right: 4px;
+  border-radius: 15px;
+  padding: 0 12px;
+}
+
+/* Battery isn't part of a group -- it's a standalone, single-module pill. Its
+   default (Full) state gets its own accent; the charge-level classes below
+   (higher specificity) still win when a threshold is active. */
 #battery {
+  background: @pill-batt-bg;
+  color: @pill-batt-fg;
   margin-left: 4px;
   margin-right: 4px;
   border-radius: 15px;

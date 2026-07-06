@@ -10,6 +10,7 @@ df_cmd_info() {
   printf '  distro family: %s\n' "$(df_distro_like)" >&2
   printf '  desktop:       %s\n' "$(df_desktop)" >&2
   printf '  target root:   %s\n' "$DF_TARGET" >&2
+  printf '  theme:         %s\n' "$(df_theme_name)" >&2
 
   df_log ""
   df_info "active profiles"

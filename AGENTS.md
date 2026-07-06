@@ -86,10 +86,10 @@ container, so adopting genuinely general-purpose scripts there is fine too.
 ### Current inventory (snapshot)
 
 - `profiles/hyprland/` — `waybar/` (config + style + `scripts/{wifimenu,
-  tailscalemenu,tailscale-status,oslogo,cputemp}`);
+  tailscalemenu,tailscale-status,oslogo,cputemp,thememenu}`);
   `walker/themes/{default,topleft,topright}`;
   `elephant/providers.list`; systemd `hyprland-session.target` + (guard-free)
-  `kanshi.service`.
+  `kanshi.service` + `dotfiles-autotheme.service`.
 - `hosts/stationzebra/` — `kanshi/` (config + `move-workspaces.sh`); systemd
   `rclone-onedrive.service` + `rclone-devsite.service`; `shell/machine-env`
   (`AWS_PROFILE=idkey`); empty `hypr/local.conf` stub.
@@ -204,11 +204,12 @@ Durable rules that follow from it:
    under GDM's minimal PATH — same layout as stationzebra. **Never** add an
    `env = PATH,…` rewrite to shared config, and don't rely on `~/.local/bin` for
    anything the compositor launches by bare name under GDM.
-2. **Per-host Hyprland include.** Shared `hyprland.conf` autostart ends with
-   `source = $HOME/.config/hypr/local.conf` (before it starts
-   `hyprland-session.target`). Every host ships a `local.conf` — an **empty stub**
-   where there's nothing to add. **Hyprland's `source=` does NOT expand `~`; use
-   `$HOME`** (it does expand `$HOME`).
+2. **Per-host Hyprland include.** Shared `hyprland.conf` autostart sources
+   `local.conf` (before it starts `hyprland-session.target`). Every host ships a
+   `local.conf` — an **empty stub** where there's nothing to add.
+   **Hyprland's `source=` does NOT expand `~` or `$HOME`.** Paths are relative
+   to the config directory (`~/.config/hypr/`), so use bare filenames:
+   `source = local.conf`.
 3. **Fedora glue is host-scoped** in `hosts/fedora/`:
    - `.config/hypr/local.conf` — `dbus-update-activation-environment --systemd
      --all` (import the Wayland session env so units/guards see
@@ -288,6 +289,73 @@ defaults.**
   to block the rewrite even under `--force`). `user-dirs.conf` supports only
   `enabled` and `filename_encoding`; with the updater off, edit `user-dirs.dirs`
   directly.
+
+## Theming (durable)
+
+The theme system coordinates colours across every visual tool via a **theme
+layer** (`themes/<name>/`, mirroring `$HOME`) injected between profiles and host
+(`lib/theme.sh`, `lib/identity.sh`). Active-theme resolution precedence:
+
+1. **machine-local auto flag** (`$XDG_STATE_HOME/dotfiles/auto-theme`) → `auto`
+2. per-host override `hosts/<host>/.config/dotfiles/theme` (committed)
+3. repo default `themes/default` (committed)
+4. hardcoded fallback `catppuccin-mocha`
+
+Manage with `dotfiles theme status|list|set|unset|auto`. `theme set` auto-runs
+`link` then live-reloads; flags `--no-link`/`--no-reload`. Shipped themes:
+`catppuccin-mocha`, `gruvbox-dark`.
+
+**Seam design.** Each themed tool reads a stable path that only the active theme
+layer provides, so switching themes is just a relink + reload. Seams (see
+`lib/commands/theme.sh` `_df_theme_seam_source` and `theme status`):
+
+- kitty `include current-theme.conf`; ghostty `theme = current`; tmux
+  `source-file current-theme.conf`; hypr `source = current-theme.conf` (borders/
+  hyprlock via `$vars`); waybar/walker `@import "colors.css"`.
+- **starship** — full-file swap (no include mechanism); **opencode** — full-file
+  `tui.json` (`theme` key; built-in `catppuccin`/`gruvbox`); **nvim** — data file
+  `lua/dotfiles_theme.lua` read by `lua/plugins/colorscheme.lua`, which bundles
+  every candidate colorscheme and applies the named one; **bat/fzf** — env vars
+  from `shell/theme-env.sh` (sourced by `env.sh`); **wallpaper** —
+  `~/.config/background` (hyprpaper + hyprlock both read it).
+- A **home-layer fallback** exists for seams that would otherwise error when no
+  theme is linked (e.g. `home/.config/hypr/current-theme.conf`).
+
+**Durable gotchas:**
+- **`_df_theme_reload` must not fire in tests.** The sandbox sets
+  `DF_TARGET==HOME`, so the `!= HOME` guard is insufficient; `test_helper`
+  exports `DF_NO_RELOAD=1` and the reloader honours it. Scripted use can set it.
+- **hyprpaper/hyprlock DO expand `$HOME`** in `path` values (unlike hyprland's
+  `source=`), so `path = $HOME/.config/background` is correct and portable.
+- **hyprpaper 0.8.x IPC** dropped `preload`/`unload`/`listloaded`/`reload` (the
+  `invalid hyprpaper request` error lives in `hyprctl`, not the daemon; NOT a
+  version skew — 0.55.4 hyprctl ↔ 0.8.4 hyprpaper is a matched pair). Only
+  `wallpaper "<mon>,<abspath>"` (loads+applies in one shot, optional
+  `contain:`/`cover:`/`tile:` prefix) and `listactive` survive. `_df_theme_reload`
+  pushes the new wallpaper live per-monitor
+  (`hyprctl monitors | awk '/^Monitor /{print $2}'`, `wallpaper "$mon,$HOME/.config/background"`)
+  — no daemon restart, works for both the systemd-service (stationzebra) and
+  exec-once (Fedora) setups. Persistence is via `hyprpaper.conf`'s `path=` (read
+  on start); there is no config-reload IPC, so only a structural `hyprpaper.conf`
+  change needs `systemctl --user restart hyprpaper.service`.
+
+**Auto-theming** (`dotfiles theme auto`, `lib/theme-auto.sh`) derives a palette
+from the wallpaper and generates the whole `themes/auto/` tree (gitignored).
+Full detail + the GNOME/KDE detection backlog live in **`docs/auto-theming.md`**.
+Key points:
+- Palette backend preference **wallust → pywal → bundled python+Pillow**
+  (`lib/theme-auto/palette.py`); the active backend is reported and a lesser one
+  triggers an "install wallust" notice. The core tool stays dependency-free;
+  auto-theming is the one feature with an optional external dependency.
+- Auto themes: nvim uses generated **base16** (`RRethy/base16-nvim`), bat uses
+  `ansi`, opencode uses `system` — i.e. follow the themed terminal where a named
+  theme is otherwise required.
+- Continuous mode is a **polling** systemd user service
+  (`profiles/hyprland/.config/systemd/user/dotfiles-autotheme.service`,
+  guard-free; Fedora adds the `XDG_CURRENT_DESKTOP=Hyprland` drop-in). Enabled
+  only via `theme auto enable` (which runs `daemon-reload`). Loop-guard: the
+  generated wallpaper copy's hash matches the last processed source.
+- `DF_WALLPAPER=<image>` overrides detection for a single run (unsupported DEs).
 
 ## Common Commands
 

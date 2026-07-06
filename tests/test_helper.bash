@@ -29,6 +29,9 @@ setup_sandbox() {
   export DF_TARGET="$DF_TEST_TARGET"
   export XDG_STATE_HOME="$DF_TEST_TARGET/.local/state"
   export NO_COLOR=1
+  # The sandbox deliberately sets DF_TARGET==HOME, which would otherwise let
+  # theme reloads fire against the developer's live desktop. Suppress them.
+  export DF_NO_RELOAD=1
 }
 
 teardown_sandbox() {
@@ -55,4 +58,17 @@ mk_host() {
   local p="$DF_TEST_REPO/hosts/$(df_host)/$1"
   mkdir -p "$(dirname "$p")"
   printf '%s\n' "${2:-content}" >"$p"
+}
+
+# mk_theme <name> <relpath> [content]
+mk_theme() {
+  local p="$DF_TEST_REPO/themes/$1/$2"
+  mkdir -p "$(dirname "$p")"
+  printf '%s\n' "${3:-content}" >"$p"
+}
+
+# mk_theme_default <name>  - set the repo default theme
+mk_theme_default() {
+  mkdir -p "$DF_TEST_REPO/themes"
+  printf '%s\n' "$1" >"$DF_TEST_REPO/themes/default"
 }

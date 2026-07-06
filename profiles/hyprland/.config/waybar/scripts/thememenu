@@ -1,0 +1,78 @@
+#!/usr/bin/env bash
+#
+# thememenu — Walker-based theme switcher for Waybar's custom/theme pill.
+#
+# Lists the predefined dotfiles themes (dotfiles theme list --plain) plus an
+# "Auto theme" entry that opens a Walker-driven image browser; picking an image
+# runs `dotfiles theme auto now <image>` (wallpaper-derived theme). Selecting a
+# named theme runs `dotfiles theme set <name>`. Both relink + live-reload.
+#
+# Bound from Waybar's custom/theme module on-click.
+
+set -euo pipefail
+
+# systemd --user (waybar.service) has a minimal PATH; ensure the launcher and
+# the palette backend (wallust via ~/.cargo/bin) resolve.
+export PATH="$HOME/.local/bin:$HOME/.cargo/bin:/usr/local/bin:/usr/bin:/bin:${PATH:-}"
+
+AUTO_LABEL="󰋩  Auto theme — pick an image…"
+
+# --- Walker picker (matches the other waybar menu scripts) -------------------
+# topright positions it just under Waybar's right side; -H hides the F1-F4
+# quick-activate hints; -p sets the prompt.
+menu() { walker -d -t topright -H -p "${1:-Select}"; }
+
+notify() {
+  command -v notify-send >/dev/null 2>&1 && notify-send -a "Theme" "$1" "${2:-}" || true
+}
+
+# First existing of the user's picture dirs, else $HOME.
+_start_dir() {
+  local d
+  for d in "${XDG_PICTURES_DIR:-}" "$HOME/pictures/wallpapers" "$HOME/Pictures" "$HOME/pictures"; do
+    [[ -n "$d" && -d "$d" ]] && { printf '%s' "$d"; return; }
+  done
+  printf '%s' "$HOME"
+}
+
+# Walker-driven image browser: navigate directories, return an absolute image
+# path on stdout (empty / non-zero if cancelled).
+pick_image() {
+  local dir choice listing
+  dir=$(_start_dir)
+  while :; do
+    listing=$(
+      printf '..\n'
+      find "$dir" -mindepth 1 -maxdepth 1 -type d -printf '%f/\n' 2>/dev/null | LC_ALL=C sort
+      find "$dir" -mindepth 1 -maxdepth 1 -type f \
+        \( -iname '*.png' -o -iname '*.jpg' -o -iname '*.jpeg' \
+           -o -iname '*.webp' -o -iname '*.bmp' -o -iname '*.gif' \) \
+        -printf '%f\n' 2>/dev/null | LC_ALL=C sort
+    )
+    choice=$(printf '%s\n' "$listing" | menu "Image: ${dir/#$HOME/~}") || return 1
+    [[ -n "$choice" ]] || return 1
+    case "$choice" in
+      "..") dir=$(dirname "$dir") ;;
+      */)   dir="$dir/${choice%/}" ;;
+      *)    printf '%s/%s' "$dir" "$choice"; return 0 ;;
+    esac
+  done
+}
+
+main() {
+  local choice img
+  choice=$( { dotfiles theme list --plain; printf '%s\n' "$AUTO_LABEL"; } | menu "Theme" ) || exit 0
+  [[ -n "$choice" ]] || exit 0
+
+  if [[ "$choice" == "$AUTO_LABEL" ]]; then
+    img=$(pick_image) || exit 0
+    [[ -n "$img" && -f "$img" ]] || exit 0
+    notify "Auto theme" "Generating from $(basename "$img")…"
+    dotfiles theme auto now "$img" >/dev/null 2>&1 &
+  else
+    notify "Theme" "Switching to $choice…"
+    dotfiles theme set "$choice" >/dev/null 2>&1 &
+  fi
+}
+
+main "$@"

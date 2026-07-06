@@ -6,7 +6,8 @@
 # Layer application order (later layers override / add to earlier ones):
 #   1. home/                       always
 #   2. profiles/<name>/            each active profile, in a stable order
-#   3. hosts/<hostname>/           this machine, if the directory exists
+#   3. themes/<name>/              active theme, if the directory exists
+#   4. hosts/<hostname>/           this machine, if the directory exists
 #
 # A profile is "active" when it is either auto-detected (its name matches the
 # distro id, the distro family, or the current desktop) or explicitly enabled
@@ -82,13 +83,16 @@ df_active_profiles() {
 # Print the ordered list of absolute layer directories that exist.
 df_layers() {
   local host; host=$(df_hostname)
-  local p
+  local p theme
 
   [[ -d "$DF_REPO/$DF_HOME_LAYER" ]] && printf '%s\n' "$DF_REPO/$DF_HOME_LAYER"
 
   while IFS= read -r p; do
     [[ -n "$p" ]] && printf '%s\n' "$DF_REPO/$DF_PROFILES_DIR/$p"
   done < <(df_active_profiles)
+
+  theme=$(df_theme_dir)
+  [[ -n "$theme" ]] && printf '%s\n' "$theme"
 
   [[ -d "$DF_REPO/$DF_HOSTS_DIR/$host" ]] && printf '%s\n' "$DF_REPO/$DF_HOSTS_DIR/$host"
 }
