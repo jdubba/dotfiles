@@ -1,0 +1,17 @@
+/* kanagawa-dragon waybar palette */
+@define-color bar-bg          #181616;
+@define-color bar-fg          #c5c9c5;
+@define-color ws-bg           #0d0c0c;
+@define-color ws-fg           #a6a69c;
+@define-color ws-fg-occupied  #c8c093;
+@define-color ws-fg-active    #c5c9c5;
+@define-color pill-brand-bg   #a292a3;
+@define-color pill-brand-fg   #141414;
+@define-color pill-stats-bg   #8ba4b0;
+@define-color pill-stats-fg   #141414;
+@define-color pill-ctrl-bg    #8ea4a2;
+@define-color pill-ctrl-fg    #141414;
+@define-color pill-theme-bg   #c4b28a;
+@define-color pill-theme-fg   #141414;
+@define-color pill-batt-bg    #8a9a7b;
+@define-color pill-batt-fg    #f0f0f0;

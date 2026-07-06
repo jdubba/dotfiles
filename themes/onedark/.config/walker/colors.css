@@ -1,0 +1,6 @@
+/* onedark walker palette */
+@define-color window_bg_color #282c34;
+@define-color accent_bg_color #c678dd;
+@define-color theme_fg_color  #abb2bf;
+@define-color error_bg_color  #e06c75;
+@define-color error_fg_color  #282c34;

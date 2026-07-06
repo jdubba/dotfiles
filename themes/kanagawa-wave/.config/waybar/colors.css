@@ -1,0 +1,17 @@
+/* kanagawa-wave waybar palette */
+@define-color bar-bg          #1f1f28;
+@define-color bar-fg          #dcd7ba;
+@define-color ws-bg           #090618;
+@define-color ws-fg           #727169;
+@define-color ws-fg-occupied  #c8c093;
+@define-color ws-fg-active    #dcd7ba;
+@define-color pill-brand-bg   #957fb8;
+@define-color pill-brand-fg   #f0f0f0;
+@define-color pill-stats-bg   #7e9cd8;
+@define-color pill-stats-fg   #141414;
+@define-color pill-ctrl-bg    #6a9589;
+@define-color pill-ctrl-fg    #f0f0f0;
+@define-color pill-theme-bg   #c0a36e;
+@define-color pill-theme-fg   #141414;
+@define-color pill-batt-bg    #76946a;
+@define-color pill-batt-fg    #f0f0f0;

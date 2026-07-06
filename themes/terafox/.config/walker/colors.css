@@ -1,0 +1,6 @@
+/* terafox walker palette */
+@define-color window_bg_color #152528;
+@define-color accent_bg_color #ad5c7c;
+@define-color theme_fg_color  #e6eaea;
+@define-color error_bg_color  #e85c51;
+@define-color error_fg_color  #152528;

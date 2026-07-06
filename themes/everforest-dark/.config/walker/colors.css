@@ -1,0 +1,6 @@
+/* everforest-dark walker palette */
+@define-color window_bg_color #2d353b;
+@define-color accent_bg_color #d699b6;
+@define-color theme_fg_color  #d3c6aa;
+@define-color error_bg_color  #e67e80;
+@define-color error_fg_color  #2d353b;

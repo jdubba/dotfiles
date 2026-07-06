@@ -1,0 +1,17 @@
+/* gruvbox-light waybar palette */
+@define-color bar-bg          #fbf1c7;
+@define-color bar-fg          #3c3836;
+@define-color ws-bg           #fbf1c7;
+@define-color ws-fg           #928374;
+@define-color ws-fg-occupied  #7c6f64;
+@define-color ws-fg-active    #3c3836;
+@define-color pill-brand-bg   #b16286;
+@define-color pill-brand-fg   #f0f0f0;
+@define-color pill-stats-bg   #458588;
+@define-color pill-stats-fg   #f0f0f0;
+@define-color pill-ctrl-bg    #689d6a;
+@define-color pill-ctrl-fg    #f0f0f0;
+@define-color pill-theme-bg   #d79921;
+@define-color pill-theme-fg   #141414;
+@define-color pill-batt-bg    #98971a;
+@define-color pill-batt-fg    #f0f0f0;

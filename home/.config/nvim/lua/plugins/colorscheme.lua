@@ -48,6 +48,11 @@ return {
       },
     },
     config = function(_, opts)
+      -- Catppuccin family (mocha/macchiato/frappe/latte) drives the flavour
+      -- from the active dotfiles theme.
+      if theme.colorscheme == "catppuccin" then
+        opts.flavour = theme.flavour or "mocha"
+      end
       require("catppuccin").setup(opts)
       if theme.colorscheme == "catppuccin" then
         vim.o.background = theme.background or "dark"

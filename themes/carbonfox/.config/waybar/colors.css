@@ -1,0 +1,17 @@
+/* carbonfox waybar palette */
+@define-color bar-bg          #161616;
+@define-color bar-fg          #f2f4f8;
+@define-color ws-bg           #282828;
+@define-color ws-fg           #484848;
+@define-color ws-fg-occupied  #dfdfe0;
+@define-color ws-fg-active    #f2f4f8;
+@define-color pill-brand-bg   #be95ff;
+@define-color pill-brand-fg   #141414;
+@define-color pill-stats-bg   #78a9ff;
+@define-color pill-stats-fg   #141414;
+@define-color pill-ctrl-bg    #33b1ff;
+@define-color pill-ctrl-fg    #f0f0f0;
+@define-color pill-theme-bg   #08bdba;
+@define-color pill-theme-fg   #f0f0f0;
+@define-color pill-batt-bg    #25be6a;
+@define-color pill-batt-fg    #f0f0f0;

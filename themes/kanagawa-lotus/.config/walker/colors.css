@@ -1,0 +1,6 @@
+/* kanagawa-lotus walker palette */
+@define-color window_bg_color #f2ecbc;
+@define-color accent_bg_color #b35b79;
+@define-color theme_fg_color  #545464;
+@define-color error_bg_color  #c84053;
+@define-color error_fg_color  #f2ecbc;

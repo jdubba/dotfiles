@@ -30,6 +30,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Waybar section pills now use per-section accent colors with contrast-adjusted
   text (previously all rendered near-black); walker's accent likewise uses a
   vivid color instead of the darkest palette tone.
+- **~40 curated themes** generated from an official-palette registry
+  (`tools/build-themes.sh` + the shared `df_theme_emit_seams` emitter):
+  Catppuccin (Latte/Frappé/Macchiato/Mocha), Nord, Solarized (Dark/Light),
+  Rosé Pine (Main/Moon/Dawn), Gruvbox (Dark/Light), Dracula,
+  Tokyo Night (Night/Storm/Moon/Day), One Dark, Everforest (Dark/Light),
+  Kanagawa (Wave/Dragon/Lotus), Monokai/Monokai-Pro, Ayu (Dark/Mirage/Light),
+  GitHub (Dark/Light), Material, Oxocarbon, Nightfox family
+  (Dusk/Nord/Tera/Carbon/Dawnfox), Melange, Zenburn, Palenight. Each ships a
+  matching wallpaper (palette-gradient default; real images where dropped in).
 
 ### Changed
 - `hypr` wallpaper path made portable: `hyprpaper.conf` reads
@@ -38,6 +47,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   (`source=` does not expand `$HOME`/`~`).
 - Neovim colorscheme config bundles catppuccin, gruvbox, and base16-nvim and
   applies whichever the active theme names (`lua/dotfiles_theme.lua`).
+- ghostty theme seam switched from `theme = current` to `config-file =
+  themes/current`: ghostty's single-instance daemon caches *named* themes and
+  wouldn't hot-reload when the file behind the name changed, so switching themes
+  left the terminal colors stale. A direct config-file include is re-read and
+  applied on `SIGUSR2` reload.
 
 ## [1.0.0] - 2026-07-04
 

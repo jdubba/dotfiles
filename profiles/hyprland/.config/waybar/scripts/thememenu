@@ -59,6 +59,19 @@ pick_image() {
   done
 }
 
+# Run a theme switch fully detached (new session). The switch reloads waybar
+# (SIGUSR2) partway through its work; since this script is a child of waybar,
+# a plain background job would be killed when waybar reloads — before it gets to
+# reload the terminals (ghostty/kitty come after waybar in the reload order).
+# setsid detaches it into its own session so it always runs to completion.
+detached() {
+  if command -v setsid >/dev/null 2>&1; then
+    setsid -f "$@" >/dev/null 2>&1 </dev/null
+  else
+    ( "$@" >/dev/null 2>&1 </dev/null & disown ) 2>/dev/null
+  fi
+}
+
 main() {
   local choice img
   choice=$( { dotfiles theme list --plain; printf '%s\n' "$AUTO_LABEL"; } | menu "Theme" ) || exit 0
@@ -68,10 +81,10 @@ main() {
     img=$(pick_image) || exit 0
     [[ -n "$img" && -f "$img" ]] || exit 0
     notify "Auto theme" "Generating from $(basename "$img")…"
-    dotfiles theme auto now "$img" >/dev/null 2>&1 &
+    detached dotfiles theme auto now "$img"
   else
     notify "Theme" "Switching to $choice…"
-    dotfiles theme set "$choice" >/dev/null 2>&1 &
+    detached dotfiles theme set "$choice"
   fi
 }
 

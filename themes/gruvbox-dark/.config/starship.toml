@@ -25,27 +25,21 @@ $git_status
 palette = 'starship_dubba'
 
 [palettes.starship_dubba]
-color_fg_primary = '#fbf1c7'
-color_os_bg = '#458588'
-color_time_bg = '#7851A9'
-color_dir_bg = '#d5c4a1'
-color_dir_fg = '#3c3836'
-color_dir_repo_fg = '#cc241d'
-color_red = '#E84D44'
-color_connector = '#d65d0e'
-
-#git directory and status colos
-color_repo_fg = '#ffffff'
-color_repo_bg = '#f72585'
-color_repo_change_fg = '#ffffff'
-color_repo_change_bg = '#7209b7'
-color_repo_diverge_fg = '#ffffff'
-color_repo_diverge_bg = '#3a0ca3'
-
-#right bar
-color_fg_right = '#d79921'
-color_fg_sep = '#fabd2f'
-
+color_fg_primary = '#ebdbb2'
+color_os_bg = '#282828'
+color_time_bg = '#b16286'
+color_dir_bg = '#458588'
+color_dir_repo_fg = '#689d6a'
+color_red = '#cc241d'
+color_connector = '#458588'
+color_repo_fg = '#ebdbb2'
+color_repo_bg = '#b16286'
+color_repo_change_fg = '#ebdbb2'
+color_repo_change_bg = '#928374'
+color_repo_diverge_fg = '#ebdbb2'
+color_repo_diverge_bg = '#458588'
+color_fg_right = '#a89984'
+color_fg_sep = '#928374'
 [fill]
 symbol = " "
 
@@ -99,7 +93,7 @@ fish_style_pwd_dir_length = 2
 repo_root_format = "[  $before_root_path]($style)[$repo_root]($repo_root_style)[$path]($style)"
 # Non repo format
 format = "[  $path ]($style)"
-style = "fg:color_dir_fg bg:color_dir_bg"
+style = "fg:color_fg_primary bg:color_dir_bg"
 
 [git_branch]
 format = '[](fg:color_repo_bg)[ $symbol$branch ]($style)'
@@ -134,7 +128,7 @@ error_symbol = '[─](fg:color_connector)[✗](fg:color_red)'
 
 [time]
 disabled = false
-time_format = "%r" # Hour:Minute Format
+time_format = "%R" # Hour:Minute Format
 style = "fg:color_fg_right"
 format = "([  $time]($style))"
 

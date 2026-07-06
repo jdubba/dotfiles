@@ -1,0 +1,6 @@
+/* solarized-light walker palette */
+@define-color window_bg_color #fdf6e3;
+@define-color accent_bg_color #d33682;
+@define-color theme_fg_color  #657b83;
+@define-color error_bg_color  #dc322f;
+@define-color error_fg_color  #fdf6e3;

@@ -1,0 +1,23 @@
+# zenburn ghostty colors.
+background = #3f3f3f
+foreground = #dcdccc
+selection-background = #709080
+selection-foreground = #dcdccc
+palette = 0=#3f3f3f
+palette = 1=#cc9393
+palette = 2=#7f9f7f
+palette = 3=#d0bf8f
+palette = 4=#6ca0a3
+palette = 5=#dc8cc3
+palette = 6=#93e0e3
+palette = 7=#dcdccc
+palette = 8=#709080
+palette = 9=#dca3a3
+palette = 10=#bfebbf
+palette = 11=#f0dfaf
+palette = 12=#8cd0d3
+palette = 13=#ec93d3
+palette = 14=#93e0e3
+palette = 15=#ffffff
+cursor-color = #dcdccc
+cursor-text = #3f3f3f

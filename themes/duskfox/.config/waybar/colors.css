@@ -1,0 +1,17 @@
+/* duskfox waybar palette */
+@define-color bar-bg          #232136;
+@define-color bar-fg          #e0def4;
+@define-color ws-bg           #393552;
+@define-color ws-fg           #47407d;
+@define-color ws-fg-occupied  #e0def4;
+@define-color ws-fg-active    #e0def4;
+@define-color pill-brand-bg   #c4a7e7;
+@define-color pill-brand-fg   #141414;
+@define-color pill-stats-bg   #569fba;
+@define-color pill-stats-fg   #f0f0f0;
+@define-color pill-ctrl-bg    #9ccfd8;
+@define-color pill-ctrl-fg    #141414;
+@define-color pill-theme-bg   #f6c177;
+@define-color pill-theme-fg   #141414;
+@define-color pill-batt-bg    #a3be8c;
+@define-color pill-batt-fg    #141414;

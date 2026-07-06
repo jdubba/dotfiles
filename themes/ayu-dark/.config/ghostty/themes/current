@@ -1,0 +1,23 @@
+# ayu-dark ghostty colors.
+background = #0a0e14
+foreground = #b3b1ad
+selection-background = #686868
+selection-foreground = #b3b1ad
+palette = 0=#01060e
+palette = 1=#ea6c73
+palette = 2=#91b362
+palette = 3=#f9af4f
+palette = 4=#53bdfa
+palette = 5=#fae994
+palette = 6=#90e1c6
+palette = 7=#c7c7c7
+palette = 8=#686868
+palette = 9=#f07178
+palette = 10=#c2d94c
+palette = 11=#ffb454
+palette = 12=#59c2ff
+palette = 13=#ffee99
+palette = 14=#95e6cb
+palette = 15=#ffffff
+cursor-color = #b3b1ad
+cursor-text = #0a0e14

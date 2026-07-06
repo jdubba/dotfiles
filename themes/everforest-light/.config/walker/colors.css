@@ -1,0 +1,6 @@
+/* everforest-light walker palette */
+@define-color window_bg_color #fdf6e3;
+@define-color accent_bg_color #df69ba;
+@define-color theme_fg_color  #5c6a72;
+@define-color error_bg_color  #f85552;
+@define-color error_fg_color  #fdf6e3;

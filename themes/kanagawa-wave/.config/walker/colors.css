@@ -1,0 +1,6 @@
+/* kanagawa-wave walker palette */
+@define-color window_bg_color #1f1f28;
+@define-color accent_bg_color #957fb8;
+@define-color theme_fg_color  #dcd7ba;
+@define-color error_bg_color  #c34043;
+@define-color error_fg_color  #1f1f28;

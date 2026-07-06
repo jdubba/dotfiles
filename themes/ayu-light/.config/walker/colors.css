@@ -1,0 +1,6 @@
+/* ayu-light walker palette */
+@define-color window_bg_color #fcfcfc;
+@define-color accent_bg_color #a37acc;
+@define-color theme_fg_color  #5c6166;
+@define-color error_bg_color  #f07171;
+@define-color error_fg_color  #fcfcfc;

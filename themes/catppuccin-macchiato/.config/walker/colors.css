@@ -1,0 +1,6 @@
+/* catppuccin-macchiato walker palette */
+@define-color window_bg_color #24273a;
+@define-color accent_bg_color #f5bde6;
+@define-color theme_fg_color  #cad3f5;
+@define-color error_bg_color  #ed8796;
+@define-color error_fg_color  #24273a;

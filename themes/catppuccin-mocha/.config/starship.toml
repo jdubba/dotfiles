@@ -25,26 +25,21 @@ $git_status
 palette = 'starship_dubba'
 
 [palettes.starship_dubba]
-color_fg_primary = '#ddc2fc'
-color_os_bg = '#4e4b51'
-color_time_bg = '#7851A9'
-color_dir_bg = '#8A65C1'
-color_dir_repo_fg = '#5EB9E6'
-color_red = '#E84D44'
-color_connector = '#ddc2fc'
-
-#git directory and status colos
-color_repo_fg = '#ffffff'
-color_repo_bg = '#f72585'
-color_repo_change_fg = '#ffffff'
-color_repo_change_bg = '#7209b7'
-color_repo_diverge_fg = '#ffffff'
-color_repo_diverge_bg = '#3a0ca3'
-
-#right bar
-color_fg_right = '#8b51b5'
-color_fg_sep = '#bc8be0'
-
+color_fg_primary = '#cdd6f4'
+color_os_bg = '#45475a'
+color_time_bg = '#f5c2e7'
+color_dir_bg = '#89b4fa'
+color_dir_repo_fg = '#94e2d5'
+color_red = '#f38ba8'
+color_connector = '#89b4fa'
+color_repo_fg = '#cdd6f4'
+color_repo_bg = '#f5c2e7'
+color_repo_change_fg = '#cdd6f4'
+color_repo_change_bg = '#585b70'
+color_repo_diverge_fg = '#cdd6f4'
+color_repo_diverge_bg = '#89b4fa'
+color_fg_right = '#bac2de'
+color_fg_sep = '#585b70'
 [fill]
 symbol = " "
 

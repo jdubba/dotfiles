@@ -1,0 +1,6 @@
+/* melange walker palette */
+@define-color window_bg_color #292522;
+@define-color accent_bg_color #b380b0;
+@define-color theme_fg_color  #ece1d7;
+@define-color error_bg_color  #bd8183;
+@define-color error_fg_color  #292522;

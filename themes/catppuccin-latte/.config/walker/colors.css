@@ -1,0 +1,6 @@
+/* catppuccin-latte walker palette */
+@define-color window_bg_color #eff1f5;
+@define-color accent_bg_color #ea76cb;
+@define-color theme_fg_color  #4c4f69;
+@define-color error_bg_color  #d20f39;
+@define-color error_fg_color  #eff1f5;

@@ -1,0 +1,6 @@
+/* tokyonight-storm walker palette */
+@define-color window_bg_color #24283b;
+@define-color accent_bg_color #bb9af7;
+@define-color theme_fg_color  #c0caf5;
+@define-color error_bg_color  #f7768e;
+@define-color error_fg_color  #24283b;

@@ -1,0 +1,17 @@
+/* catppuccin-latte waybar palette */
+@define-color bar-bg          #eff1f5;
+@define-color bar-fg          #4c4f69;
+@define-color ws-bg           #5c5f77;
+@define-color ws-fg           #6c6f85;
+@define-color ws-fg-occupied  #acb0be;
+@define-color ws-fg-active    #4c4f69;
+@define-color pill-brand-bg   #ea76cb;
+@define-color pill-brand-fg   #141414;
+@define-color pill-stats-bg   #1e66f5;
+@define-color pill-stats-fg   #f0f0f0;
+@define-color pill-ctrl-bg    #179299;
+@define-color pill-ctrl-fg    #f0f0f0;
+@define-color pill-theme-bg   #df8e1d;
+@define-color pill-theme-fg   #141414;
+@define-color pill-batt-bg    #40a02b;
+@define-color pill-batt-fg    #f0f0f0;

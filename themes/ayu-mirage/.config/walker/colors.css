@@ -1,0 +1,6 @@
+/* ayu-mirage walker palette */
+@define-color window_bg_color #1f2430;
+@define-color accent_bg_color #cfbafa;
+@define-color theme_fg_color  #cbccc6;
+@define-color error_bg_color  #ed8274;
+@define-color error_fg_color  #1f2430;

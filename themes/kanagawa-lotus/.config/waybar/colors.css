@@ -1,0 +1,17 @@
+/* kanagawa-lotus waybar palette */
+@define-color bar-bg          #f2ecbc;
+@define-color bar-fg          #545464;
+@define-color ws-bg           #1f1f28;
+@define-color ws-fg           #8a8980;
+@define-color ws-fg-occupied  #545464;
+@define-color ws-fg-active    #545464;
+@define-color pill-brand-bg   #b35b79;
+@define-color pill-brand-fg   #f0f0f0;
+@define-color pill-stats-bg   #4d699b;
+@define-color pill-stats-fg   #f0f0f0;
+@define-color pill-ctrl-bg    #597b75;
+@define-color pill-ctrl-fg    #f0f0f0;
+@define-color pill-theme-bg   #77713f;
+@define-color pill-theme-fg   #f0f0f0;
+@define-color pill-batt-bg    #6f894e;
+@define-color pill-batt-fg    #f0f0f0;

@@ -1,0 +1,12 @@
+-- material: base16 palette consumed by lua/plugins/colorscheme.lua
+return {
+  name = "material",
+  colorscheme = "base16",
+  background = "dark",
+  base16 = {
+    base00 = "#263238", base01 = "#000000", base02 = "#546e7a", base03 = "#546e7a",
+    base04 = "#eeffff", base05 = "#eeffff", base06 = "#eeffff", base07 = "#ffffff",
+    base08 = "#f07178", base09 = "#ffcb6b", base0A = "#ffcb6b", base0B = "#c3e88d",
+    base0C = "#89ddff", base0D = "#82aaff", base0E = "#c792ea", base0F = "#f07178",
+  },
+}

@@ -1,0 +1,17 @@
+/* rose-pine waybar palette */
+@define-color bar-bg          #191724;
+@define-color bar-fg          #e0def4;
+@define-color ws-bg           #26233a;
+@define-color ws-fg           #6e6a86;
+@define-color ws-fg-occupied  #e0def4;
+@define-color ws-fg-active    #e0def4;
+@define-color pill-brand-bg   #c4a7e7;
+@define-color pill-brand-fg   #141414;
+@define-color pill-stats-bg   #9ccfd8;
+@define-color pill-stats-fg   #141414;
+@define-color pill-ctrl-bg    #ebbcba;
+@define-color pill-ctrl-fg    #141414;
+@define-color pill-theme-bg   #f6c177;
+@define-color pill-theme-fg   #141414;
+@define-color pill-batt-bg    #31748f;
+@define-color pill-batt-fg    #f0f0f0;

@@ -1,19 +1,17 @@
-/* Gruvbox Dark - waybar color palette */
+/* gruvbox-dark waybar palette */
 @define-color bar-bg          #282828;
 @define-color bar-fg          #ebdbb2;
-@define-color ws-bg           #1d2021;
-@define-color ws-fg           #665c54;
-@define-color ws-fg-occupied  #bdae93;
+@define-color ws-bg           #282828;
+@define-color ws-fg           #928374;
+@define-color ws-fg-occupied  #a89984;
 @define-color ws-fg-active    #ebdbb2;
-
-/* Section pill accents (bright bg + dark base fg for contrast). */
-@define-color pill-brand-bg   #fe8019; /* bright orange */
-@define-color pill-brand-fg   #282828;
-@define-color pill-stats-bg   #8ec07c; /* bright aqua   */
-@define-color pill-stats-fg   #282828;
-@define-color pill-ctrl-bg    #83a598; /* blue          */
-@define-color pill-ctrl-fg    #282828;
-@define-color pill-theme-bg   #d3869b; /* purple        */
-@define-color pill-theme-fg   #282828;
-@define-color pill-batt-bg    #b8bb26; /* bright green  */
-@define-color pill-batt-fg    #282828;
+@define-color pill-brand-bg   #b16286;
+@define-color pill-brand-fg   #f0f0f0;
+@define-color pill-stats-bg   #458588;
+@define-color pill-stats-fg   #f0f0f0;
+@define-color pill-ctrl-bg    #689d6a;
+@define-color pill-ctrl-fg    #f0f0f0;
+@define-color pill-theme-bg   #d79921;
+@define-color pill-theme-fg   #141414;
+@define-color pill-batt-bg    #98971a;
+@define-color pill-batt-fg    #f0f0f0;

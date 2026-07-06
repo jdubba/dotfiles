@@ -1,0 +1,23 @@
+# dawnfox ghostty colors.
+background = #faf4ed
+foreground = #575279
+selection-background = #938aa4
+selection-foreground = #575279
+palette = 0=#f2e9e1
+palette = 1=#a5222f
+palette = 2=#396847
+palette = 3=#ac5402
+palette = 4=#286983
+palette = 5=#6e33ce
+palette = 6=#3f83a6
+palette = 7=#575279
+palette = 8=#938aa4
+palette = 9=#b3434e
+palette = 10=#4c8f5c
+palette = 11=#c47b28
+palette = 12=#4a9db8
+palette = 13=#8452d5
+palette = 14=#5c9dbb
+palette = 15=#575279
+cursor-color = #575279
+cursor-text = #faf4ed

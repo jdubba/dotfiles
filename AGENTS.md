@@ -302,14 +302,32 @@ layer** (`themes/<name>/`, mirroring `$HOME`) injected between profiles and host
 4. hardcoded fallback `catppuccin-mocha`
 
 Manage with `dotfiles theme status|list|set|unset|auto`. `theme set` auto-runs
-`link` then live-reloads; flags `--no-link`/`--no-reload`. Shipped themes:
-`catppuccin-mocha`, `gruvbox-dark`.
+`link` then live-reloads; flags `--no-link`/`--no-reload`. ~40 curated themes
+ship (Catppuccin ×4, Tokyo Night ×4, Rosé Pine ×3, Kanagawa ×3, Ayu ×3,
+Nightfox ×5, Gruvbox/Solarized/Everforest/GitHub ×2, Nord, Dracula, One Dark,
+Monokai/-Pro, Material, Oxocarbon, Melange, Zenburn, Palenight, …).
+
+**Themes are generated, not hand-authored.** `tools/build-themes.sh` holds a
+registry (official/canonical 16-colour palette + integration metadata per theme)
+and drives the shared emitter `df_theme_emit_seams` (in `lib/theme-auto.sh`,
+also used by auto-theming) to (re)generate `themes/<name>/`. Re-run it after
+changing a palette or the seam format; it's idempotent and preserves any real
+drop-in wallpaper (`themes/<name>/.config/background`). nvim uses the
+catppuccin/gruvbox plugins where a flavour/background exists, else a generated
+base16 palette (`RRethy/base16-nvim`); bat uses a bat built-in where one exists,
+else `ansi`; opencode uses a built-in theme where one exists, else `system`.
+Wallpapers without a real drop-in are generated as a subtle palette gradient
+(`lib/theme-auto/wallpaper.py`).
 
 **Seam design.** Each themed tool reads a stable path that only the active theme
 layer provides, so switching themes is just a relink + reload. Seams (see
 `lib/commands/theme.sh` `_df_theme_seam_source` and `theme status`):
 
-- kitty `include current-theme.conf`; ghostty `theme = current`; tmux
+- kitty `include current-theme.conf`; ghostty `config-file = themes/current`
+  (a direct include, NOT `theme = current` — ghostty's gtk-single-instance
+  daemon caches named themes and won't hot-reload when the file behind the name
+  changes; a `config-file` include is re-read and applied on `SIGUSR2` reload);
+  tmux
   `source-file current-theme.conf`; hypr `source = current-theme.conf` (borders/
   hyprlock via `$vars`); waybar/walker `@import "colors.css"`.
 - **starship** — full-file swap (no include mechanism); **opencode** — full-file

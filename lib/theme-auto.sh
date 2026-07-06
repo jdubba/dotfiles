@@ -165,32 +165,33 @@ _dfa_contrast_fg() {
   if (( lum > 150 )); then printf '#141414'; else printf '#f0f0f0'; fi
 }
 
-# Generate the full themes/auto/ tree from <image>, copy the wallpaper, and
-# record machine-local source/hash state (used by the watcher, phase 5b).
-df_autotheme_generate() {
-  local img=$1
-  local auto="$DF_REPO/$DF_THEMES_DIR/$DF_AUTO_THEME_NAME"
-
-  local -A PAL=()
-  local k v
-  while IFS='=' read -r k v; do
-    [[ -n "$k" ]] && PAL[$k]=$v
-  done < <(df_palette_extract "$img")
-
-  local bg=${PAL[background]} fg=${PAL[foreground]} cur=${PAL[cursor]}
+# Emit every non-wallpaper seam file for a theme into <dest> from the caller's
+# PAL palette (dynamic scope). Shared by auto-theming and the curated build tool.
+#   $1 dest       theme directory (…/themes/<name>)
+#   $2 tag        comment label written into the generated files
+#   $3 nvim_spec  base16 | catppuccin:<flavour> | gruvbox:<dark|light>
+#   $4 bat_theme  value for BAT_THEME
+#   $5 opencode   opencode tui.json "theme" value
+# PAL must define background, foreground, cursor, color0..color15 (and may set
+# background_mode=dark|light for nvim/UI background).
+df_theme_emit_seams() {
+  local dest=$1 tag=$2 nvim_spec=$3 bat_theme=$4 opencode=$5
+  local name; name=$(basename -- "$dest")
+  local bg=${PAL[background]} fg=${PAL[foreground]} cur=${PAL[cursor]:-${PAL[foreground]}}
   local c0=${PAL[color0]} c1=${PAL[color1]} c2=${PAL[color2]} c3=${PAL[color3]}
   local c4=${PAL[color4]} c5=${PAL[color5]} c6=${PAL[color6]} c7=${PAL[color7]}
   local c8=${PAL[color8]} c9=${PAL[color9]} c10=${PAL[color10]} c11=${PAL[color11]}
   local c12=${PAL[color12]} c13=${PAL[color13]} c14=${PAL[color14]} c15=${PAL[color15]}
+  local bgmode=${PAL[background_mode]:-dark}
 
   mkdir -p \
-    "$auto/.config/kitty" "$auto/.config/ghostty/themes" "$auto/.config/hypr" \
-    "$auto/.config/waybar" "$auto/.config/walker" "$auto/.config/tmux" \
-    "$auto/.config/shell" "$auto/.config/opencode" "$auto/.config/nvim/lua"
+    "$dest/.config/kitty" "$dest/.config/ghostty/themes" "$dest/.config/hypr" \
+    "$dest/.config/waybar" "$dest/.config/walker" "$dest/.config/tmux" \
+    "$dest/.config/shell" "$dest/.config/opencode" "$dest/.config/nvim/lua"
 
   # kitty
-  cat >"$auto/.config/kitty/current-theme.conf" <<EOF
-# Auto-generated (wallpaper-derived) kitty colors.
+  cat >"$dest/.config/kitty/current-theme.conf" <<EOF
+# ${tag} kitty colors.
 foreground              ${fg}
 background              ${bg}
 selection_foreground    ${fg}
@@ -219,8 +220,8 @@ inactive_border_color   ${c8}
 EOF
 
   # ghostty
-  cat >"$auto/.config/ghostty/themes/current" <<EOF
-# Auto-generated (wallpaper-derived) ghostty colors.
+  cat >"$dest/.config/ghostty/themes/current" <<EOF
+# ${tag} ghostty colors.
 background = ${bg}
 foreground = ${fg}
 selection-background = ${c8}
@@ -247,7 +248,7 @@ EOF
 
   # hypr / hyprlock (literal $vars -> printf)
   {
-    printf '# Auto-generated (wallpaper-derived) hypr/hyprlock colors.\n'
+    printf '# %s hypr/hyprlock colors.\n' "$tag"
     _dfa_hypr_var rosewater "$c7";  _dfa_hypr_var flamingo "$c7"
     _dfa_hypr_var pink "$c13";      _dfa_hypr_var mauve "$c5"
     _dfa_hypr_var red "$c1";        _dfa_hypr_var maroon "$c9"
@@ -265,11 +266,11 @@ EOF
       "\$active_border = rgba(${c5#\#}ee) rgba(${c4#\#}ee) 45deg" \
       "\$inactive_border = rgba(${c8#\#}aa)" \
       "\$shadow_color = rgba(${bg#\#}ee)"
-  } >"$auto/.config/hypr/current-theme.conf"
+  } >"$dest/.config/hypr/current-theme.conf"
 
   # waybar
-  cat >"$auto/.config/waybar/colors.css" <<EOF
-/* Auto-generated (wallpaper-derived) waybar palette */
+  cat >"$dest/.config/waybar/colors.css" <<EOF
+/* ${tag} waybar palette */
 @define-color bar-bg          ${bg};
 @define-color bar-fg          ${fg};
 @define-color ws-bg           ${c0};
@@ -289,8 +290,8 @@ EOF
 EOF
 
   # walker
-  cat >"$auto/.config/walker/colors.css" <<EOF
-/* Auto-generated (wallpaper-derived) walker palette */
+  cat >"$dest/.config/walker/colors.css" <<EOF
+/* ${tag} walker palette */
 @define-color window_bg_color ${bg};
 @define-color accent_bg_color ${c5};
 @define-color theme_fg_color  ${fg};
@@ -299,8 +300,8 @@ EOF
 EOF
 
   # tmux
-  cat >"$auto/.config/tmux/current-theme.conf" <<EOF
-# Auto-generated (wallpaper-derived) tmux colors
+  cat >"$dest/.config/tmux/current-theme.conf" <<EOF
+# ${tag} tmux colors
 set -g pane-border-style fg=${c8}
 set -g pane-active-border-style fg=${c5}
 set -g status-bg '${bg}'
@@ -311,40 +312,27 @@ setw -g window-status-format '#I:#W'
 setw -g window-status-current-format '#[fg=${c7},bold]#I:#W#[default]'
 EOF
 
-  # shell theme-env: bat follows the (now themed) terminal via ansi; fzf colors
-  cat >"$auto/.config/shell/theme-env.sh" <<EOF
+  # shell theme-env: fzf colors from palette; BAT_THEME per theme
+  cat >"$dest/.config/shell/theme-env.sh" <<EOF
 # shellcheck shell=sh
-# Auto-generated (wallpaper-derived) shell theme environment.
-export BAT_THEME="ansi"
+# ${tag} shell theme environment.
+export BAT_THEME="${bat_theme}"
 export FZF_DEFAULT_OPTS=" \\
   --color=bg+:${c0},bg:${bg},spinner:${c6},hl:${c1} \\
   --color=fg:${fg},header:${c1},info:${c5},pointer:${c6} \\
   --color=marker:${c6},fg+:${fg},prompt:${c5},hl+:${c1}"
 EOF
 
-  # opencode: follow the themed terminal
-  cat >"$auto/.config/opencode/tui.json" <<'EOF'
+  # opencode
+  cat >"$dest/.config/opencode/tui.json" <<EOF
 {
-  "$schema": "https://opencode.ai/tui.json",
-  "theme": "system"
+  "\$schema": "https://opencode.ai/tui.json",
+  "theme": "${opencode}"
 }
 EOF
 
-  # nvim: base16 data consumed by lua/plugins/colorscheme.lua
-  cat >"$auto/.config/nvim/lua/dotfiles_theme.lua" <<EOF
--- Auto-generated (wallpaper-derived) nvim theme descriptor.
-return {
-  name = "auto",
-  colorscheme = "base16",
-  background = "dark",
-  base16 = {
-    base00 = "${bg}", base01 = "${c0}", base02 = "${c8}", base03 = "${c8}",
-    base04 = "${c7}", base05 = "${fg}", base06 = "${c7}", base07 = "${c15}",
-    base08 = "${c1}", base09 = "${c11}", base0A = "${c3}", base0B = "${c2}",
-    base0C = "${c6}", base0D = "${c4}", base0E = "${c5}", base0F = "${c1}",
-  },
-}
-EOF
+  # nvim
+  _dfa_emit_nvim "$dest" "$name" "$nvim_spec" "$bgmode"
 
   # starship: reuse the shared file's structure, swap only the palette block.
   local base_starship="$DF_REPO/$DF_HOME_LAYER/.config/starship.toml"
@@ -372,14 +360,63 @@ EOF
       skip==1 && /^\[/ { skip=0 }
       skip==1 { next }
       { print }
-    ' "$base_starship" >"$auto/.config/starship.toml"
+    ' "$base_starship" >"$dest/.config/starship.toml"
     rm -f "$block"
   fi
+}
+
+# Emit lua/dotfiles_theme.lua for the given nvim integration spec.
+_dfa_emit_nvim() {
+  local dest=$1 name=$2 spec=$3 bgmode=$4
+  local f="$dest/.config/nvim/lua/dotfiles_theme.lua"
+  local bg=${PAL[background]} fg=${PAL[foreground]}
+  local c0=${PAL[color0]} c1=${PAL[color1]} c2=${PAL[color2]} c3=${PAL[color3]}
+  local c4=${PAL[color4]} c5=${PAL[color5]} c6=${PAL[color6]} c7=${PAL[color7]}
+  local c8=${PAL[color8]} c11=${PAL[color11]} c15=${PAL[color15]}
+  case "$spec" in
+    catppuccin:*)
+      printf 'return { name = "%s", colorscheme = "catppuccin", flavour = "%s", background = "%s" }\n' \
+        "$name" "${spec#catppuccin:}" "$bgmode" >"$f" ;;
+    gruvbox:*)
+      printf 'return { name = "%s", colorscheme = "gruvbox", background = "%s" }\n' \
+        "$name" "${spec#gruvbox:}" >"$f" ;;
+    *)
+      cat >"$f" <<EOF
+-- ${name}: base16 palette consumed by lua/plugins/colorscheme.lua
+return {
+  name = "$name",
+  colorscheme = "base16",
+  background = "$bgmode",
+  base16 = {
+    base00 = "$bg", base01 = "$c0", base02 = "$c8", base03 = "$c8",
+    base04 = "$c7", base05 = "$fg", base06 = "$c7", base07 = "$c15",
+    base08 = "$c1", base09 = "$c11", base0A = "$c3", base0B = "$c2",
+    base0C = "$c6", base0D = "$c4", base0E = "$c5", base0F = "$c1",
+  },
+}
+EOF
+      ;;
+  esac
+}
+
+# Generate the full themes/auto/ tree from <image>, copy the wallpaper, and
+# record machine-local source/hash state (used by the watcher).
+df_autotheme_generate() {
+  local img=$1
+  local auto="$DF_REPO/$DF_THEMES_DIR/$DF_AUTO_THEME_NAME"
+
+  local -A PAL=()
+  local k v
+  while IFS='=' read -r k v; do
+    [[ -n "$k" ]] && PAL[$k]=$v
+  done < <(df_palette_extract "$img")
+
+  df_theme_emit_seams "$auto" "Auto-generated (wallpaper-derived)" base16 ansi system
 
   # wallpaper
   cp -f -- "$img" "$auto/.config/background"
 
-  # record machine-local source + hash (loop-guard / watcher use in 5b)
+  # record machine-local source + hash (loop-guard / watcher use)
   mkdir -p "$DF_STATE_DIR"
   printf '%s\n' "$img" >"$(df_state_autotheme_source_file)"
   if command -v sha256sum &>/dev/null; then
