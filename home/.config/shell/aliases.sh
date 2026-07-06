@@ -69,3 +69,8 @@ if command -v bat >/dev/null 2>&1; then
 elif command -v batcat >/dev/null 2>&1; then
     alias cat='batcat'
 fi
+
+# --- hypr ---
+alias hc='hyprctl'
+alias hp='hyprctl hyprpaper'
+alias hl='hyprlock'
