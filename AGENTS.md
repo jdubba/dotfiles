@@ -95,10 +95,19 @@ container, so adopting genuinely general-purpose scripts there is fine too.
   `kanshi.service` + `dotfiles-autotheme.service`.
 - `hosts/stationzebra/` — `kanshi/` (config + `move-workspaces.sh`); systemd
   `rclone-onedrive.service` + `rclone-devsite.service`; `shell/machine-env`
-  (`AWS_PROFILE=idkey`); empty `hypr/local.conf` stub.
+  (`AWS_PROFILE=idkey`); empty `hypr/local.conf` stub; `hypr/hyprlock-local.conf`
+  (per-host hyprlock auth seam — fingerprint stub, no sensor confirmed).
 - `hosts/fedora/` — `kanshi/config` (single `eDP-1`); `hypr/local.conf` (GDM
-  session glue); `systemd/user/{kanshi,waybar}.service.d/hyprland-only.conf`
+  session glue); `hypr/hyprlock-local.conf` (per-host hyprlock auth seam —
+  fingerprint stub, no sensor confirmed);
+  `systemd/user/{kanshi,waybar}.service.d/hyprland-only.conf`
   (dual-session guards); `shell/machine-env`.
+- `hosts/cltc-aus-lws03/` — Fedora laptop (GNOME + Hyprland from GDM); `kanshi/`;
+  `hypr/local.conf` (GDM session glue + rigid workspace→monitor binding);
+  `hypr/hyprlock-local.conf` (per-host hyprlock auth seam — **native fingerprint
+  enabled**: Goodix MOC + enrolled print; requires the password-only
+  `/etc/pam.d/hyprlock` — see `docs/hyprlock-auth.md`);
+  `systemd/user/*.service.d/hyprland-only.conf` guards; `shell/machine-env`.
 - `hyprland.conf` and the rest of `~/.config` still live in `home/`. Only waybar
   was relocated to `profiles/hyprland`; moving `hypr/` there too is a reasonable
   future cleanup.
@@ -207,12 +216,17 @@ Durable rules that follow from it:
    under GDM's minimal PATH — same layout as stationzebra. **Never** add an
    `env = PATH,…` rewrite to shared config, and don't rely on `~/.local/bin` for
    anything the compositor launches by bare name under GDM.
-2. **Per-host Hyprland include.** Shared `hyprland.conf` autostart sources
-   `local.conf` (before it starts `hyprland-session.target`). Every host ships a
-   `local.conf` — an **empty stub** where there's nothing to add.
-   **Hyprland's `source=` does NOT expand `~` or `$HOME`.** Paths are relative
-   to the config directory (`~/.config/hypr/`), so use bare filenames:
-   `source = local.conf`.
+ 2. **Per-host Hyprland include.** Shared `hyprland.conf` autostart sources
+    `local.conf` (before it starts `hyprland-session.target`). Every host ships a
+    `local.conf` — an **empty stub** where there's nothing to add.
+    **Hyprland's `source=` does NOT expand `~` or `$HOME`.** Paths are relative
+    to the config directory (`~/.config/hypr/`), so use bare filenames:
+    `source = local.conf`. hyprlock has its **own** separate per-host seam,
+    `source = hyprlock-local.conf` (host `auth {}` block: native fingerprint +
+    PAM) — `local.conf`'s hyprland-only directives are invalid in hyprlock, so it
+    needs a distinct file; every host ships a real `hyprlock-local.conf` (stub
+    where there's no sensor). Enabling native fingerprint **requires** the host's
+    `/etc/pam.d/hyprlock` be password-only first — see `docs/hyprlock-auth.md`.
 3. **Fedora glue is host-scoped** in `hosts/fedora/`:
    - `.config/hypr/local.conf` — `dbus-update-activation-environment --systemd
      --all` (import the Wayland session env so units/guards see
