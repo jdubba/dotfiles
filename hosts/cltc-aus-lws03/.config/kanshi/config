@@ -1,0 +1,54 @@
+# Kanshi configuration for cltc-aus-lws03 (Fedora laptop + dock).
+# See man 5 kanshi for syntax.
+#
+# Hardware:
+#   eDP-1 : internal panel, AU Optronics, 1920x1200 native @ 60Hz
+#   two   : Dell P2422H externals, 1920x1080 @ 60Hz, on the dock
+#           (identified by EDID serial so the profile survives DP-* renumbering)
+#
+# kanshi auto-selects the profile whose connected-output set matches the current
+# hardware. Externals are addressed by their "make model serial" description
+# rather than the DP-N connector name (which is not stable across docking).
+
+# Profile 1: Docked - internal panel + both Dell externals side by side.
+profile docked {
+    # Left external (DP-6, Dell P2422H, serial CG4WYF3) - workspaces 1, 4, 7
+    output "Dell Inc. DELL P2422H CG4WYF3" {
+        mode 1920x1080@60Hz
+        position 0,0
+        scale 1
+    }
+
+    # Middle external (DP-5, Dell P2422H, serial JQ5X7M3) - workspaces 2, 5, 8
+    output "Dell Inc. DELL P2422H JQ5X7M3" {
+        mode 1920x1080@60Hz
+        position 1920,0
+        scale 1
+    }
+
+    # Internal panel to the right of the externals - workspaces 3, 6, 9
+    # scale 1 -> 1920x1200 renders at native logical px.
+    output eDP-1 {
+        mode 1920x1200@60Hz
+        position 3840,0
+        scale 1
+    }
+
+    # Workspace->monitor placement is enforced rigidly by persistent `workspace`
+    # rules in hosts/cltc-aus-lws03/.config/hypr/local.conf (not moved here at
+    # runtime). kanshi owns only output geometry for this profile.
+}
+
+# Profile 2: Laptop-only (no externals connected).
+profile laptop-only {
+    output eDP-1 {
+        mode 1920x1200@60Hz
+        position 0,0
+        scale 1
+    }
+
+    # No workspace moves needed: with the externals absent, Hyprland relocates
+    # their persistent workspaces onto eDP-1 automatically (and restores them to
+    # the externals on reconnect). Placement is owned by the `workspace` rules in
+    # hosts/cltc-aus-lws03/.config/hypr/local.conf.
+}

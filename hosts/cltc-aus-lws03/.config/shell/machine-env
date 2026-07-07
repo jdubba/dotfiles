@@ -1,0 +1,3 @@
+# Machine-specific env values for cltc-aus-lws03.
+# KEY=VALUE, one per line; @skip = not relevant here. Managed by 'dotfiles env'.
+AWS_PROFILE=sandbox
