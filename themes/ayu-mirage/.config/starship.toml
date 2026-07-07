@@ -25,18 +25,19 @@ $git_status
 palette = 'starship_dubba'
 
 [palettes.starship_dubba]
-color_fg_primary = '#cbccc6'
+color_fg_primary = '#6dcbfa'
 color_os_bg = '#191e2a'
 color_time_bg = '#cfbafa'
 color_dir_bg = '#6dcbfa'
-color_dir_repo_fg = '#90e1c6'
+color_dir_fg = '#191e2a'
+color_dir_repo_fg = '#ffffff'
 color_red = '#ed8274'
-color_connector = '#6dcbfa'
-color_repo_fg = '#cbccc6'
+color_connector = '#ed8274'
+color_repo_fg = '#191e2a'
 color_repo_bg = '#cfbafa'
-color_repo_change_fg = '#cbccc6'
-color_repo_change_bg = '#686868'
-color_repo_diverge_fg = '#cbccc6'
+color_repo_change_fg = '#191e2a'
+color_repo_change_bg = '#a6cc70'
+color_repo_diverge_fg = '#191e2a'
 color_repo_diverge_bg = '#6dcbfa'
 color_fg_right = '#c7c7c7'
 color_fg_sep = '#686868'
@@ -93,7 +94,7 @@ fish_style_pwd_dir_length = 2
 repo_root_format = "[  $before_root_path]($style)[$repo_root]($repo_root_style)[$path]($style)"
 # Non repo format
 format = "[  $path ]($style)"
-style = "fg:color_fg_primary bg:color_dir_bg"
+style = "fg:color_dir_fg bg:color_dir_bg"
 
 [git_branch]
 format = '[](fg:color_repo_bg)[ $symbol$branch ]($style)'
