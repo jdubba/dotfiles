@@ -25,13 +25,13 @@ $git_status
 palette = 'starship_dubba'
 
 [palettes.starship_dubba]
-color_fg_primary = '#f8f8f2'
-color_os_bg = '#21222c'
+color_fg_primary = '#141414'
+color_os_bg = '#8be9fd'
 color_time_bg = '#ff79c6'
 color_dir_bg = '#bd93f9'
-color_dir_repo_fg = '#8be9fd'
+color_dir_repo_fg = '#ffffa5'
 color_red = '#ff5555'
-color_connector = '#bd93f9'
+color_connector = '#ff5555'
 color_repo_fg = '#f8f8f2'
 color_repo_bg = '#ff79c6'
 color_repo_change_fg = '#f8f8f2'
