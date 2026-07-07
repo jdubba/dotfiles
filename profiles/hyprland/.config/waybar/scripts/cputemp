@@ -77,7 +77,7 @@ def main():
     else:
         c = round(milli / 1000)
         out = {"text": f"{c}°c {ICON}",
-               "tooltip": f"Temperatura actual: {c}°c\nCrítico si > 80°c"}
+               "tooltip": f"current temp: {c}°c\ncritical above 80°c"}
         if c >= 80:
             out["class"] = "critical"
     print(json.dumps(out, ensure_ascii=False))

@@ -66,17 +66,20 @@
   "cpu": {
     "format": "{usage}% ",
     "tooltip": true,
-    "tooltip-format": "uso de cpu: {usage}%\nnúcleos: {cores}"
+    "tooltip-format": "cpu usage: {usage}%\ncores: {cores}",
+    "on-click": "$HOME/.config/waybar/scripts/btop-focus"
   },
   "memory": {
     "format": "{}% 󰍛",
     "tooltip": true,
-    "tooltip-format": "ram en uso: {used} / {total} ({percentage}%)"
+    "tooltip-format": "ram in use: {used} / {total} ({percentage}%)",
+    "on-click": "$HOME/.config/waybar/scripts/btop-focus"
   },
   "disk": {
     "format": "{percentage_free}% ",
     "tooltip": true,
-    "tooltip-format": "espacio libre: {free} / {total} ({percentage_free}%)"
+    "tooltip-format": "free space: {free} / {total} ({percentage_free}%)",
+    "on-click": "$HOME/.config/waybar/scripts/btop-focus"
   },
   "custom/temperature": {
     // CPU package temp via scripts/cputemp, which probes hwmon for the CPU
@@ -86,7 +89,8 @@
     "exec": "$HOME/.config/waybar/scripts/cputemp",
     "return-type": "json",
     "interval": 10,
-    "tooltip": true
+    "tooltip": true,
+    "on-click": "$HOME/.config/waybar/scripts/btop-focus"
   },
   /* === modules center === */
   "hyprland/workspaces": {

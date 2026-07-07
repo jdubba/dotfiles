@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+# btop-focus: switch to an existing btop window or open a new one.
+#
+# Uses hyprctl to check for a client whose title contains "btop". If found,
+# brings it to focus; otherwise launches ghostty running btop.
+
+set -euo pipefail
+
+# Check if a btop window is already open
+if hyprctl clients -j 2>/dev/null \
+    | python3 -c "
+import sys, json
+for c in json.load(sys.stdin):
+    if c.get('title', '').lower() == 'btop' \
+            or c.get('initialTitle', '').lower() == 'btop':
+        sys.exit(0)
+sys.exit(1)
+"; then
+    hyprctl dispatch focuswindow "title:btop"
+else
+    setsid ghostty -e btop
+fi
