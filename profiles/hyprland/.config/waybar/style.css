@@ -83,6 +83,27 @@ window#waybar.hidden {
   min-height: 6px;
 }
 
+/* Slider fill (selected/left portion) and drag thumb.
+   Without these, GTK falls back to the system theme's default purple.
+   @pill-theme-bg is the per-theme accent used here so the slider color
+   travels with the active theme automatically. */
+#backlight-slider highlight,
+#pulseaudio-slider highlight {
+  background: @ws-bg;
+  min-height: 6px;
+  border-radius: 3px;
+}
+
+#backlight-slider slider,
+#pulseaudio-slider slider {
+  background: @ws-bg;
+  border-radius: 50%;
+  min-width: 12px;
+  min-height: 12px;
+  border: none;
+  box-shadow: none;
+}
+
 /* Section (pill) edges.
    Sections are defined as "group/<name>" containers in config.jsonc.
    Rounding/margin is derived structurally from the first/last visible

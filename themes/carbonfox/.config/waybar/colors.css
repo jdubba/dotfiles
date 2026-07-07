@@ -10,8 +10,8 @@
 @define-color pill-stats-bg   #78a9ff;
 @define-color pill-stats-fg   #141414;
 @define-color pill-ctrl-bg    #33b1ff;
-@define-color pill-ctrl-fg    #f0f0f0;
-@define-color pill-theme-bg   #08bdba;
-@define-color pill-theme-fg   #f0f0f0;
+@define-color pill-ctrl-fg    #141414;
+@define-color pill-theme-bg   #ee5396;
+@define-color pill-theme-fg   #282828;
 @define-color pill-batt-bg    #25be6a;
 @define-color pill-batt-fg    #f0f0f0;
