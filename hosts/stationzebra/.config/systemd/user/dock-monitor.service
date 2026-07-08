@@ -1,0 +1,15 @@
+[Unit]
+Description=Dock monitor layout daemon (stationzebra)
+Documentation=file://%h/.config/kanshi/dock-monitor.sh
+# Start after the Hyprland session target so hyprctl is usable
+After=hyprland-session.target
+PartOf=hyprland-session.target
+
+[Service]
+Type=simple
+ExecStart=%h/.config/kanshi/dock-monitor.sh
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=hyprland-session.target
