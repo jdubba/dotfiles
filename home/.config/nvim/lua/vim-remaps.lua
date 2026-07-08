@@ -36,6 +36,7 @@ map("n", "<leader>s", [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]], { 
 map("n", "<leader>n", "<cmd>bnext<cr>", { desc = "Next buffer" })
 map("n", "<leader>p", "<cmd>bprev<cr>", { desc = "Previous buffer" })
 map("n", "<leader>x", "<cmd>bdelete<cr>", { desc = "Close buffer" })
+map("n", "<leader>q", "<cmd>bp | bd #<cr>", { desc = "Close buffer, leaving runnnig." })
 
 -- Indentation
 map({ "n", "v" }, "<leader>>", ">>", { desc = "Indent right" })
