@@ -48,6 +48,9 @@ if command -v aws_completer >/dev/null 2>&1; then
     complete -C aws_completer aws
 fi
 
+# dotfiles CLI completion (bash-completion script, loaded via bashcompinit above)
+[ -f "$HOME/.config/shell/completions/dotfiles.bash" ] && source "$HOME/.config/shell/completions/dotfiles.bash"
+
 zstyle ':completion:*' menu select
 zstyle ':completion:*' matche-list 'm:{a-z}={A-Za-z}'
 

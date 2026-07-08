@@ -22,6 +22,11 @@ df_cmd_profile() {
 
   case "$sub" in
     list|show)
+      # --plain: profile names to stdout, one per line (for scripts/completion).
+      if [[ "${1:-}" == "--plain" ]]; then
+        _df_available_profiles
+        return 0
+      fi
       df_info "available profiles:"
       local p active
       active=$(df_active_profiles | tr '\n' ' ')

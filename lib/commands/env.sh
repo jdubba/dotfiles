@@ -133,6 +133,7 @@ df_cmd_env() {
     skip)        df_env_skip "$@" ;;
     add)         df_env_add "$@" ;;
     unset|rm)    df_env_unset "$@" ;;
-    *)           df_die "env: unknown subcommand '$sub' (status|set|skip|add|unset)" ;;
+    list)        df_menv_vars ;;   # declared var names to stdout (scripts/completion)
+    *)           df_die "env: unknown subcommand '$sub' (status|set|skip|add|unset|list)" ;;
   esac
 }

@@ -67,6 +67,9 @@ fi
 # shellcheck source=/dev/null
 [ -f "$HOME/.git-completion.bash" ] && . "$HOME/.git-completion.bash"
 command -v aws_completer >/dev/null 2>&1 && complete -C aws_completer aws
+# dotfiles CLI completion (shared script; also loaded by zsh via bashcompinit)
+# shellcheck source=/dev/null
+[ -f "$HOME/.config/shell/completions/dotfiles.bash" ] && . "$HOME/.config/shell/completions/dotfiles.bash"
 
 # ========================================
 # Init Zoxide

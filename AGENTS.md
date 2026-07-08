@@ -151,6 +151,16 @@ and zsh rather than duplicated:
   `bindings.bash`, `tools.bash` (nvm, azure-cli), `prompt.bash`.
 - `home/.config/zsh/` — zsh modules: `fzf.zsh`, `bindings.zsh`, `plugins.zsh`,
   `prompt.zsh`. zsh-only bits (e.g. `compdef eza=ls`) live in `.zshrc`.
+- `home/.config/shell/completions/dotfiles.bash` — the `dotfiles` CLI tab
+  completion. A **single bash-completion-style script** (one `_dotfiles`
+  function + `complete -F`) sourced by **both** shells: directly from `.bashrc`,
+  and from `.zshrc` *after* `bashcompinit` (which lets zsh run bash completion
+  functions). Static command/subcommand/flag structure is inline; dynamic
+  candidates (theme/profile/machine-env names) are fetched live by shelling out
+  to the tool's own `<cmd> list --plain` helpers (`theme list --plain`,
+  `profile list --plain`, `env list`), so new themes/profiles appear with no
+  extra wiring. Add it to `lint.sh`'s sanity loop and `repo.bats`' `bash -n`
+  check when touching it.
 - Entrypoints: `.bashrc` (slim, mirrors `.zshrc`), `.bash_profile`, `.profile`,
   `.zshrc`, `.zshenv`.
 
@@ -173,6 +183,15 @@ and zsh rather than duplicated:
 - **zsh completion:** run `compinit` **once** into `$XDG_CACHE_HOME/zsh/zcompdump`
   with `bashcompinit` *after* it. Do not reintroduce a bare `compinit` — it writes
   a stray `~/.zcompdump` on every startup.
+- **The `dotfiles` CLI completion is one bash-completion script for both shells.**
+  zsh runs it through `bashcompinit`, whose `_bash_complete`/`compgen` invoke the
+  `_dotfiles` function under `emulate -L sh` (so `COMP_WORDS`/`COMP_CWORD` are
+  0-indexed just like bash) — hence a single `complete -F`-style definition works
+  in both. It **must** be sourced *after* `bashcompinit` in `.zshrc`. Keep it
+  shellcheck-clean (`COMPREPLY=( $(compgen …) )` needs a `# shellcheck
+  disable=SC2207`; `mapfile` is unavailable under bashcompinit, so don't use it).
+  Dynamic candidates come from the tool's `<cmd> list --plain` helpers, which
+  print bare names to **stdout** (the rich `list` views print to stderr).
 - **Machine-specific env vars** are declared in
   `home/.config/shell/machine-env.registry` (`VAR: description`) and given per-host
   values in `hosts/<host>/.config/shell/machine-env` (`KEY=VALUE`; `@skip` = "not

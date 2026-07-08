@@ -14,6 +14,7 @@ setup() { load test_helper; }
   bash -n "$DF_SRC_REPO/home/.bash_profile"
   local f
   for f in "$DF_SRC_REPO"/home/.config/bash/*.bash; do bash -n "$f"; done
+  for f in "$DF_SRC_REPO"/home/.config/shell/completions/*.bash; do bash -n "$f"; done
 }
 
 @test "shared POSIX shell files are syntactically valid" {
