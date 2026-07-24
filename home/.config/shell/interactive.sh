@@ -16,3 +16,18 @@ if command -v curl >/dev/null 2>&1; then
 else
     EXTERNAL_IP="unknown"
 fi
+
+# --- NVM (node version manager) ------------------------------------------
+# Both shells load nvm here: bash's own copy in .config/bash/tools.bash predates
+# this file and zsh had none at all. It belongs in an interactive-only file --
+# nvm.sh defines ~20 functions and prepends to PATH, which env.sh must not do
+# because .zshenv sources it for EVERY zsh, including scripts.
+# Prefer the distro-packaged init; otherwise use the standard ~/.nvm layout.
+if [ -f /usr/share/nvm/init-nvm.sh ]; then
+    # shellcheck source=/dev/null
+    . /usr/share/nvm/init-nvm.sh
+elif [ -d "$HOME/.nvm" ]; then
+    export NVM_DIR="$HOME/.nvm"
+    # shellcheck source=/dev/null
+    [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+fi

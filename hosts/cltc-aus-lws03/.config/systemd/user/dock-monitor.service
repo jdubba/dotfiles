@@ -1,0 +1,14 @@
+[Unit]
+Description=Dock monitor layout daemon (cltc-aus-lws03)
+Documentation=file://%h/.config/kanshi/dock-monitor.sh
+After=hyprland-session.target
+PartOf=hyprland-session.target
+
+[Service]
+Type=simple
+ExecStart=%h/.config/kanshi/dock-monitor.sh
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=hyprland-session.target

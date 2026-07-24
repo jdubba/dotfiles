@@ -31,7 +31,13 @@ setopt NUMERIC_GLOB_SORT
 # ========================================
 # Init Zoxide
 # ========================================
-eval "$(zoxide init zsh)"
+# Only initialize in interactive shells (mirrors the non-interactive guard in
+# .bashrc). Agent "shell snapshot" tools (e.g. Claude Code) source this file
+# non-interactively and capture functions via `typeset -f`; that bakes in
+# zoxide's helpers WITHOUT the runtime chpwd_functions hook, later tripping
+# zoxide's config "doctor" false positive ("detected a possible configuration
+# issue").
+[[ -o interactive ]] && eval "$(zoxide init zsh)"
 
 
 # ========================================

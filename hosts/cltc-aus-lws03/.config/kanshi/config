@@ -2,31 +2,35 @@
 # See man 5 kanshi for syntax.
 #
 # Hardware:
-#   eDP-1 : internal panel, AU Optronics, 1920x1200 native @ 60Hz
-#   two   : Dell P2422H externals, 1920x1080 @ 60Hz, on the dock
-#           (identified by EDID serial so the profile survives DP-* renumbering)
+#   eDP-1       : internal panel, AU Optronics, 1920x1200 native @ 60Hz
+#   office dock : Dell P2422H externals, 1920x1080 @ 60Hz
+#                 (identified by EDID serial so the profile survives DP-* renumbering)
+#   TV dock     : LG TV SSCR2 externals, 3840x2160 @ 30Hz
+#                 (duplicate EDIDs with fake serial 0x01010101)
 #
 # kanshi auto-selects the profile whose connected-output set matches the current
-# hardware. Externals are addressed by their "make model serial" description
-# rather than the DP-N connector name (which is not stable across docking).
+# hardware. The TV dock is intentionally not represented as a kanshi profile: the
+# two LG TVs have identical descriptions/serials, and the DP-N names can vary by
+# dock enumeration. dock-monitor.sh/dock-layout.sh sort the LG connectors at
+# runtime and apply that layout via hyprctl instead.
 
-# Profile 1: Docked - internal panel + both Dell externals side by side.
+# Profile 1: Office dock - internal panel + both Dell externals side by side.
 profile docked {
-    # Left external (DP-6, Dell P2422H, serial CG4WYF3) - workspaces 1, 4, 7
+    # Left external (DP-6, Dell P2422H, serial CG4WYF3) - workspaces 1, 2, 3
     output "Dell Inc. DELL P2422H CG4WYF3" {
         mode 1920x1080@60Hz
         position 0,0
         scale 1
     }
 
-    # Middle external (DP-5, Dell P2422H, serial JQ5X7M3) - workspaces 2, 5, 8
+    # Middle external (DP-5, Dell P2422H, serial JQ5X7M3) - workspaces 4, 5, 6
     output "Dell Inc. DELL P2422H JQ5X7M3" {
         mode 1920x1080@60Hz
         position 1920,0
         scale 1
     }
 
-    # Internal panel to the right of the externals - workspaces 3, 6, 9
+    # Internal panel to the right of the externals - workspaces 7, 8, 9
     # scale 1 -> 1920x1200 renders at native logical px.
     output eDP-1 {
         mode 1920x1200@60Hz

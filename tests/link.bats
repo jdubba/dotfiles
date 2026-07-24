@@ -61,6 +61,46 @@ teardown() { teardown_sandbox; }
   grep -q "keep me" "$HOME/.config/other-app.conf"
 }
 
+@test "a dotfiles.conf container dir stays real with one layer (protects opencode's agent/)" {
+  # opencode owns its own state under ~/.config/opencode (node_modules,
+  # package.json, agent/); only opencode.jsonc/tui.json are repo-managed. Marking
+  # the dir a container in dotfiles.conf must keep it a real directory - so the
+  # unmanaged agent/ is never folded into the repo or clobbered - EVEN when a
+  # single layer contributes and would otherwise fold it into one symlink.
+  printf 'DF_CONTAINER_DIRS+=(".config/opencode")\n' >"$DF_TEST_REPO/dotfiles.conf"
+  mk_home ".config/opencode/opencode.jsonc" '{}'
+
+  # opencode's own, unmanaged state already living in the target.
+  mkdir -p "$HOME/.config/opencode/agent"
+  printf 'AGENT\n' >"$HOME/.config/opencode/agent/sysadmin.md"
+  printf 'PKG\n'   >"$HOME/.config/opencode/package.json"
+
+  run "$DOTFILES" link
+  [ "$status" -eq 0 ]
+  [ -d "$HOME/.config/opencode" ] && [ ! -L "$HOME/.config/opencode" ]  # real, not folded
+  [ -L "$HOME/.config/opencode/opencode.jsonc" ]                        # managed child linked
+  [ ! -L "$HOME/.config/opencode/agent" ]                               # unmanaged dir untouched
+  [ -f "$HOME/.config/opencode/agent/sysadmin.md" ]
+  grep -q AGENT "$HOME/.config/opencode/agent/sysadmin.md"
+  [ -f "$HOME/.config/opencode/package.json" ]                          # unmanaged file untouched
+}
+
+@test "WITHOUT the container marking, the same one-layer dir folds (why opencode needs it)" {
+  # Contrast to the test above: with no container entry a solely-owned directory
+  # folds into a single symlink. The pre-existing unmanaged agent/ then collides
+  # and is reported as a CONFLICT (never clobbered) - which is exactly the hazard
+  # the .config/opencode container entry in dotfiles.conf prevents.
+  mk_home ".config/opencode/opencode.jsonc" '{}'
+  mkdir -p "$HOME/.config/opencode/agent"
+  printf 'AGENT\n' >"$HOME/.config/opencode/agent/sysadmin.md"
+
+  run "$DOTFILES" link
+  [ "$status" -ne 0 ]                                     # conflict reported
+  [[ "$output" == *"conflict"* || "$output" == *"CONFLICT"* ]]
+  [ ! -L "$HOME/.config/opencode" ]                       # nothing folded/overwritten
+  grep -q AGENT "$HOME/.config/opencode/agent/sysadmin.md"  # content preserved
+}
+
 @test "link is idempotent" {
   mk_home ".config/nvim/init.lua"
   run "$DOTFILES" link

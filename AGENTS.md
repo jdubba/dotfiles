@@ -68,6 +68,16 @@ in `home/` or a profile; keep only the varying data per host:
   lines) delegates to **kanshi** — whose *service* is shared
   (`profiles/hyprland`) and whose *config* is per-host (`hosts/<host>/.config/kanshi/`).
 - machine-env: registry in `home/`, values in `hosts/<host>/`.
+- **git identity**: all of `.gitconfig` is shared in `home/` except `[user]`,
+  which is a per-host include (`hosts/<host>/.config/git/identity`) — work
+  machines commit as the corporate address, personal ones as `jdubba`. Include
+  order in `.gitconfig` is load-bearing: `~/.gitsigning` (untracked signing key)
+  first, then the host identity, then an
+  `includeIf "gitdir:~/source/dotfiles/"` → `~/.config/git/identity-dotfiles`
+  that pins **this public repo** to `jdubba` on every machine so a work address
+  can't leak into its history. Last include wins. `identity-dotfiles` lives in
+  `home/` precisely because it must be identical everywhere. Adding a host means
+  adding its `identity` file, or git falls back to guessing.
 
 **Co-locate app-support scripts with the app** when they exist only to serve it
 (waybar's helpers live in `waybar/scripts/`, referenced by absolute path from
@@ -78,12 +88,23 @@ container, so adopting genuinely general-purpose scripts there is fine too.
 - Build artifacts / compiled binaries (e.g. elephant `providers/*.so`). Track a
   manifest indicator (`providers.list`) and mark the dir a container via
   `dotfiles.conf` so the binaries can't be folded/adopted.
+- opencode's own state under `~/.config/opencode` (`node_modules`,
+  `package.json`/`package-lock.json`, `.gitignore`) and machine-local, unmanaged
+  content such as `agent/`. Only `opencode.jsonc` (**host layer** — its MCP
+  servers are per-machine: corporate endpoints, `AWS_PROFILE`-keyed servers) and
+  `tui.json` (theme seam, with a `home/` fallback) are managed; the dir is a
+  container in `dotfiles.conf` so the rest can't be folded into the repo or
+  adopted.
 - systemd `*.wants/` enablement symlinks (machine-local; some point into
   `/usr/lib`). Re-enable per machine with `systemctl --user enable <unit>`
   (and `systemctl --user daemon-reload` after adopting a unit).
 - Self-rewriting configs that fold into the repo: `nvim/lazy-lock.json` and
   `btop/btop.conf` (btop rewrites it on exit through the folded `~/.config/btop`
-  symlink) — both gitignored, like machine-local state.
+  symlink) — both gitignored, like machine-local state. Note `btop.conf` lands in
+  whichever layer *solely owns* `.config/btop`: once a theme ships
+  `.config/btop/themes/current.theme`, the fold points at the **active theme
+  layer**, so the ignore covers `/themes/*/.config/btop/btop.conf` too. Only
+  `current.theme` is tracked there.
 - Secrets (see Environment & scope).
 
 ### Current inventory (snapshot)
@@ -107,7 +128,9 @@ container, so adopting genuinely general-purpose scripts there is fine too.
   `hypr/hyprlock-local.conf` (per-host hyprlock auth seam — **native fingerprint
   enabled**: Goodix MOC + enrolled print; requires the password-only
   `/etc/pam.d/hyprlock` — see `docs/hyprlock-auth.md`);
-  `systemd/user/*.service.d/hyprland-only.conf` guards; `shell/machine-env`.
+  `systemd/user/*.service.d/hyprland-only.conf` guards; `shell/machine-env`;
+  `opencode/opencode.jsonc` (work MCP servers: internal msgraph endpoint +
+  AWS-docs server keyed off `AWS_PROFILE`).
 - `hyprland.conf` and the rest of `~/.config` still live in `home/`. Only waybar
   was relocated to `profiles/hyprland`; moving `hypr/` there too is a reasonable
   future cleanup.

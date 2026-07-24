@@ -1,0 +1,6 @@
+# Git identity for stationzebra (personal machine).
+#
+# Included from the shared ~/.gitconfig; see the [include] block there.
+[user]
+	name = jdubba
+	email = 148065+jdubba@users.noreply.github.com

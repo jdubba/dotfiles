@@ -54,6 +54,7 @@ alias y='claude --prompt'
 alias x='xdg-open'
 alias alo='aws sso login --profile '
 alias es='equery list -p '
+alias t="termai"
 
 # --- git ------------------------------------------------------------------
 alias gst='git status'

@@ -1,0 +1,8 @@
+# Git identity for cltc-aus-lws03 (work laptop).
+#
+# Included from the shared ~/.gitconfig; see the [include] block there. Work
+# machine, so commits default to the corporate address -- except in the dotfiles
+# repo itself, which ~/.config/git/identity-dotfiles pins back to jdubba.
+[user]
+	name = Justin Williams
+	email = justin.williams@cgic.com

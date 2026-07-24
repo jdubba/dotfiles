@@ -1,0 +1,12 @@
+# Identity override for the dotfiles repo itself (~/source/dotfiles).
+#
+# Included from ~/.gitconfig via includeIf "gitdir:~/source/dotfiles/", AFTER the
+# per-host identity, so it wins on every machine. This repo is public and its
+# history is authored as jdubba no matter which machine the edit happens on --
+# notably, work machines must not leak a corporate address into it.
+#
+# This lives in the home layer (not a host layer) precisely because it must be
+# identical everywhere.
+[user]
+	name = jdubba
+	email = 148065+jdubba@users.noreply.github.com

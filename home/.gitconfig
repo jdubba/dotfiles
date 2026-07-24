@@ -15,6 +15,22 @@
 [include]
     path=~/.gitsigning
 
+# Identity is the only per-machine part of this file, so it lives in the host
+# layer: hosts/<host>/.config/git/identity supplies [user] name/email (work
+# address on work machines, personal elsewhere). Listed AFTER ~/.gitsigning so
+# the host identity wins over any name/email that file also happens to set;
+# .gitsigning remains the (untracked) home of the signing key.
+# A missing include is not an error in git, so a host without the file simply
+# falls through to whatever git can infer.
+[include]
+    path=~/.config/git/identity
+
+# ...except in this repo, which is public and authored as jdubba regardless of
+# which machine it is edited on. Last include wins, so this overrides the
+# host identity above for the dotfiles working tree only.
+[includeIf "gitdir:~/source/dotfiles/"]
+    path=~/.config/git/identity-dotfiles
+
 [credential "https://github.com"]
 	helper = 
 	helper = !/usr/bin/gh auth git-credential
@@ -40,6 +56,3 @@
 
 [pager]
 	log = false
-[user]
-	email = 148065+jdubba@users.noreply.github.com
-	name = jdubba
