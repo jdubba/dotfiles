@@ -417,13 +417,18 @@ themes legitimately need to escape: an upstream-published base16 palette
 (nightfox/ayu ship their own, which is *not* a remapping of the 16 ANSI slots), a
 vendor's official ghostty file, a panel/accent colour that simply isn't in the
 palette (ayu's `#E6B450`), or a deliberately different waybar pill assignment.
+A further reason is **contrast**: the formula assigns pill and segment colours by
+palette slot, not by luminance, so on some palettes it produces pairs that simply
+cannot be read (gruvbox-dark's generated starship put the repo-root name at
+1.33:1). Measure with WCAG contrast before and after when tuning for this.
 An override is a whole file mirroring its path under `themes/<name>/`, overlaid
-after emission by `apply_overrides`. Currently the 7 "polished" themes
-(`ayu-{dark,light,mirage}`, `carbonfox`, `catppuccin-{frappe,latte}`, `dracula`)
-carry 28 between them. Adding one is a decision to maintain that file by hand —
-it stops tracking palette and seam-format changes — so keep them few and delete
-one as soon as the generic formula can express it. **Editing `themes/` directly is
-always wrong**: the next `build-themes.sh` run silently reverts it.
+after emission by `apply_overrides`. Currently the 9 "polished" themes
+(`ayu-{dark,light,mirage}`, `carbonfox`, `catppuccin-{frappe,latte}`, `dracula`,
+`gruvbox-{dark,light}`) carry 36 between them. Adding one is a decision to
+maintain that file by hand — it stops tracking palette and seam-format changes —
+so keep them few and delete one as soon as the generic formula can express it.
+**Editing `themes/` directly is always wrong**: the next `build-themes.sh` run
+silently reverts it.
 
 **Seam design.** Each themed tool reads a stable path that only the active theme
 layer provides, so switching themes is just a relink + reload. Seams (see
@@ -446,6 +451,75 @@ layer provides, so switching themes is just a relink + reload. Seams (see
   `~/.config/background` (hyprpaper + hyprlock both read it).
 - A **home-layer fallback** exists for seams that would otherwise error when no
   theme is linked (e.g. `home/.config/hypr/current-theme.conf`).
+
+### Polishing a theme (durable)
+
+**Measure, don't eyeball.** Compute WCAG contrast for every foreground/background
+pair before and after. The emitter assigns colours by *palette slot*, not by
+luminance, so it reliably produces unreadable pairs on some palettes — worst found
+was gruvbox-dark's starship repo-root name at **1.33:1**. Targets: 4.5:1 for text,
+3.0:1 for large/bold text and dots. Below 3.0 is a defect, not a taste question.
+
+**Structural colour vs. content colour.** Chrome that should recede (btop
+`meter_bg`/`div_line`/`inactive_fg`, empty workspace dots) belongs *below* 3:1
+deliberately; only content needs to clear AA. Judge each pair by its role — a
+blanket "raise everything" is as wrong as leaving a failure in place.
+
+**Palette-slot assumptions that do not hold** (each cost a real bug):
+- `c0` **is the background** in 8 of 41 palettes (gruvbox ×2, monokai/-pro,
+  onedark, oxocarbon, palenight, zenburn), so anything using `c0` as a distinct
+  surface vanishes there.
+- A light palette's "bright" slots can be **darker** than its normal ones
+  (gruvbox-light's `c12` `#076678` vs `c4` `#458588`) — the emitter takes the
+  normal set regardless, which is backwards for a light bar where the pill must be
+  the dark element.
+- `c7` is **not** reliably a light grey on light palettes (gruvbox-light's is
+  `#7c6f64`, dark), which is how btop's chrome ended up drawing heavy dark bars
+  across a cream canvas.
+- Mid-luminance accents cap out: nothing reaches 4.5:1 against `#458588` at any
+  foreground. On a *saturated* surface only near-black/near-white inks are
+  legible, so a vivid highlight and a legible one can be mutually exclusive — say
+  so rather than silently picking one.
+
+**Deriving colours generically.** `_df_theme_mix <base> <toward> <pct>` in
+`lib/theme-auto.sh` is pure bash integer maths (the core tool stays
+dependency-free — do not reach for python here). Two patterns that avoid a
+light/dark branch entirely:
+- mix the background **toward the foreground** for a surface tone — lifts a dark
+  theme, deepens a light one;
+- ramp a hue **toward `_dfa_contrast_fg` of the surface** for a state ramp — the
+  ink flips with the surface, so one formula serves both polarities. The
+  workspaces dots use this at 25/55/85, stops chosen by measuring all 41 palettes.
+
+**waybar specifics established by that pass:**
+- `window#waybar` draws `alpha(@bar-bg, 0.6)`. It was hardcoded to a dark slate,
+  which every theme inherited — the single biggest cause of themes feeling alike.
+- The **workspaces group is a pill**, not chrome: `ws-bg` = `c3` (shared with the
+  theme switcher) and the dots ramp `c4`. Previously all five `ws-*` variables
+  came from achromatic slots (`c0`/`c7`/`c8`/`fg`/`fg`) while every hue went to
+  pills,
+  so the bar's centrepiece was the one module with no colour in any theme.
+- The **battery pill is deliberately un-themed** — the `batt-*` traffic-light
+  palette in `style.css`, in every state. `@pill-batt-*` is still emitted for all
+  themes but unreferenced; dropping it is an emitter change plus a regeneration.
+- starship's template **shares `color_fg_primary`** across the os, directory and
+  git-status segments. Giving one segment a different polarity needs a new palette
+  key (`color_os_fg`), and `style_root` breaks whenever `os_bg` becomes an accent
+  (its ANSI yellow disappears) — repoint it at `color_red`.
+
+**An override pins a value, so emitter improvements skip that theme.** After
+changing the emitter, check which `tools/theme-overrides/*/` files hardcode what
+you just improved and update them too, or say which themes now lag. As of this
+writing `ayu-dark`, `ayu-mirage`, `carbonfox`, `catppuccin-{frappe,latte}` still
+carry the old achromatic workspaces.
+
+**Verify by rendering, not by reading the file.** `starship prompt --status=0
+--path=<dir>` prints real escape sequences — parse them to confirm which colours
+actually resolved. For waybar/btop, `grim -o <output>` then sample pixels with
+ImageMagick/PIL; note `hyprctl clients` reports **global** coordinates, so
+subtract the monitor's `x`/`y` before cropping. For btop and walker, diff the
+generated key set against the previous one — a typo'd key falls back silently
+instead of erroring.
 
 **Durable gotchas:**
 - **A conflict anywhere in the plan must never abort a theme switch.**
