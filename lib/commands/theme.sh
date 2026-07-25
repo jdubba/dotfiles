@@ -25,6 +25,62 @@ _df_theme_seam_source() {
   esac
 }
 
+# --- Brave custom theme color -------------------------------------------------
+#
+# Brave has no reload path like the other tools: it keeps its preferences in
+# memory, rewrites `Preferences` from that copy throughout a session (including
+# on quit) and never re-reads the file. So an external write only survives while
+# the browser is closed, and the change shows up at its next launch rather than
+# immediately -- which is what the messages below say.
+_DF_BRAVE_DIR=".config/BraveSoftware/Brave-Browser"
+
+# True when a browser is live in that user-data-dir. Chromium's SingletonLock is
+# a symlink to "<host>-<pid>": it is specific to this data-dir (so a Brave running
+# on some other --user-data-dir is not mistaken for this one), but it also
+# outlives a crash, hence the liveness check on the pid rather than trusting the
+# lock's mere existence.
+_df_theme_brave_running() {
+  local target pid lock="$HOME/$_DF_BRAVE_DIR/SingletonLock"
+  [[ -L "$lock" ]] || return 1
+  target=$(readlink "$lock") || return 1
+  pid=${target##*-}                                  # hostnames may contain '-'
+  [[ "$pid" =~ ^[0-9]+$ ]] || return 0               # unreadable lock: assume held
+  [[ -d "/proc/$pid" ]]
+}
+
+_df_theme_brave_apply() {
+  local prefs accent polarity rc=0
+  prefs="$HOME/$_DF_BRAVE_DIR/Default/Preferences"
+
+  # Skip silently when Brave was never installed/run, and when python3 is absent
+  # (the core tool stays dependency-free; this is a cosmetic extra, and the JSON
+  # edit is not something to attempt in bash).
+  [[ -f "$prefs" ]] || return 0
+  command -v python3 &>/dev/null || return 0
+
+  # Color: the shared pill accent the emitter draws for this theme, read from the
+  # active theme's waybar seam. Polarity: the theme's own declared background,
+  # from its nvim seam. Every theme ships both (including the generated `auto`),
+  # so aligning Brave needs no new seam of its own.
+  accent=$(sed -n 's/^@define-color pill-brand-bg  *\(#[0-9a-fA-F]\{6\}\);.*/\1/p' \
+    "$HOME/.config/waybar/colors.css" 2>/dev/null | head -n1)
+  [[ -n "$accent" ]] || return 0
+  polarity=$(sed -n 's/.*background *= *"\(light\|dark\)".*/\1/p' \
+    "$HOME/.config/nvim/lua/dotfiles_theme.lua" 2>/dev/null | head -n1)
+
+  if _df_theme_brave_running; then
+    df_dim "brave: running, theme color left alone (re-run 'dotfiles theme set' once closed)"
+    return 0
+  fi
+
+  python3 "$DF_REPO/lib/theme-brave.py" "$prefs" "$accent" "${polarity:-dark}" || rc=$?
+  case "$rc" in
+    0) df_ok "brave: theme color set to $accent (applies at next launch)" ;;
+    2) : ;;                                          # already aligned
+    *) df_warn "brave: could not update the theme color" ;;
+  esac
+}
+
 _df_theme_reload() {
   local reloaded="" tool
 
@@ -91,6 +147,9 @@ _df_theme_reload() {
   if [[ -n "$reloaded" ]]; then
     df_ok "reloaded:$reloaded"
   fi
+
+  # brave (no live reload; see _df_theme_brave_apply)
+  _df_theme_brave_apply
 
   df_dim "manual restart may be needed for: nvim walker btop new shells opencode"
 }
