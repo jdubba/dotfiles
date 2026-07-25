@@ -426,16 +426,21 @@ df_autotheme_generate() {
 
 # --- Activation (link + reload), mirrors the theme set/unset path -----------
 df_autotheme_apply() {
+  local apply_rc=0
   df_resolve_layers
   df_build_plan
   trap df_cleanup_plan RETURN
   df_print_plan 0
-  df_apply_plan
+  # A conflict must not abort the reload (see lib/commands/theme.sh): the links
+  # are already applied, so bailing here would just leave every tool -- and the
+  # Hyprland error state -- on the previous theme.
+  df_apply_plan || apply_rc=$?
   if [[ "$DF_TARGET" == "$HOME" ]]; then
     df_log ""
     df_info "reloading running tools..."
     _df_theme_reload
   fi
+  return "$apply_rc"
 }
 
 # --- Subcommand entry points ------------------------------------------------

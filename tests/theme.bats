@@ -306,3 +306,49 @@ teardown() { teardown_sandbox; }
   [ ! -L "$HOME/.config/btop" ]
   [ -L "$HOME/.config/btop/btop.conf" ]
 }
+
+# --- Theme switching must survive an unrelated conflict ---------------------
+#
+# Regression: df_apply_plan returns 1 when the plan holds a conflict, and the
+# `set` branch called it bare under `set -euo pipefail` -- so the command died
+# right there, after the theme's links were already applied but *before* the
+# reload. Result: every tool kept showing the previous theme, and Hyprland
+# stayed in the transient error state its autoreload hit while
+# current-theme.conf was being replaced. The conflict must still surface in the
+# exit status, but only after the switch and the reload have both run.
+
+@test "theme set still reloads (and relinks) when the plan holds a conflict" {
+  mk_theme gruvbox-dark ".config/kitty/current-theme.conf" "gruvbox-kitty"
+  mk_theme gruvbox-dark ".config/starship.toml" "gruvbox-starship"
+  mk_theme_default gruvbox-dark
+
+  # An unmanaged real file the repo does not own -> guaranteed CONFLICT.
+  mkdir -p "$HOME/.config"
+  printf 'hand-written\n' >"$HOME/.config/starship.toml"
+
+  run "$DOTFILES" theme set gruvbox-dark
+  [ "$status" -ne 0 ]                              # conflict surfaced
+  [[ "$output" == *"CONFLICT"* ]]
+  [[ "$output" == *"reloading running tools"* ]]   # got past df_apply_plan
+
+  # The non-conflicting seams were linked despite the conflict...
+  [ -e "$HOME/.config/kitty/current-theme.conf" ]
+  grep -q "gruvbox-kitty" "$HOME/.config/kitty/current-theme.conf"
+  # ...and the conflicting file was left untouched.
+  [ ! -L "$HOME/.config/starship.toml" ]
+  grep -q "hand-written" "$HOME/.config/starship.toml"
+}
+
+@test "theme unset still reloads when the plan holds a conflict" {
+  mk_theme gruvbox-dark ".config/starship.toml" "gruvbox-starship"
+  mk_theme_default gruvbox-dark
+  "$DOTFILES" theme set gruvbox-dark --no-link --no-reload
+
+  mkdir -p "$HOME/.config"
+  printf 'hand-written\n' >"$HOME/.config/starship.toml"
+
+  run "$DOTFILES" theme unset
+  [ "$status" -ne 0 ]
+  [[ "$output" == *"CONFLICT"* ]]
+  [[ "$output" == *"reloading running tools"* ]]
+}

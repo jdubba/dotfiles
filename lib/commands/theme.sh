@@ -158,7 +158,7 @@ df_cmd_theme() {
 
     set)
       local name=${1:-}; [[ -n "$name" ]] || df_die "theme set: name required"
-      local no_link=0 no_reload=0 arg
+      local no_link=0 no_reload=0 arg apply_rc=0
       for arg in "$@"; do
         case "$arg" in
           --no-link)   no_link=1 ;;
@@ -195,7 +195,12 @@ df_cmd_theme() {
         df_build_plan
         trap df_cleanup_plan RETURN
         df_print_plan 0
-        df_apply_plan
+        # A conflict makes df_apply_plan return 1, but the theme's own links are
+        # already applied by then. Do NOT let `set -e` abort here: skipping the
+        # reload leaves every tool showing the previous theme (and Hyprland
+        # stuck in the transient error state its autoreload hit while the
+        # current-theme.conf symlink was being replaced).
+        df_apply_plan || apply_rc=$?
       fi
 
       if (( no_reload )); then
@@ -209,10 +214,14 @@ df_cmd_theme() {
         df_info "reloading running tools..."
         _df_theme_reload
       fi
+
+      # Still surface the conflict in the exit status, now that the switch and
+      # the reload have both completed.
+      return "$apply_rc"
       ;;
 
     unset)
-      local f; f=$(df_state_theme_file)
+      local f apply_rc=0; f=$(df_state_theme_file)
       if [[ ! -f "$f" ]]; then
         df_ok "no machine-local theme selection to clear (committed default stays active)"
         return 0
@@ -226,13 +235,16 @@ df_cmd_theme() {
       df_build_plan
       trap df_cleanup_plan RETURN
       df_print_plan 0
-      df_apply_plan
+      # See the `set` branch: a conflict must not abort the reload.
+      df_apply_plan || apply_rc=$?
 
       if [[ "$DF_TARGET" == "$HOME" ]]; then
         df_log ""
         df_info "reloading running tools..."
         _df_theme_reload
       fi
+
+      return "$apply_rc"
       ;;
 
     auto)

@@ -411,6 +411,17 @@ layer provides, so switching themes is just a relink + reload. Seams (see
   theme is linked (e.g. `home/.config/hypr/current-theme.conf`).
 
 **Durable gotchas:**
+- **A conflict anywhere in the plan must never abort a theme switch.**
+  `df_apply_plan` returns 1 when the plan holds a CONFLICT, but by then the
+  theme's links are already applied. Under `set -euo pipefail` a bare call
+  therefore killed `theme set` *between* the relink and the reload — every tool
+  kept the old colors, and Hyprland stayed stuck in the transient error state its
+  autoreload hit while `current-theme.conf` was momentarily missing (`source=
+  globbing error` + three `failed to parse $active_border as a color`). Symptom:
+  "theme switching does nothing and hyprctl shows 4 errors"; `hyprctl reload`
+  alone clears it, which is the tell that the config is fine and the *reload*
+  never ran. `theme set`/`unset` and `df_autotheme_apply` capture the status
+  (`df_apply_plan || apply_rc=$?`), reload, then `return "$apply_rc"`.
 - **`_df_theme_reload` must not fire in tests.** The sandbox sets
   `DF_TARGET==HOME`, so the `!= HOME` guard is insufficient; `test_helper`
   exports `DF_NO_RELOAD=1` and the reloader honours it. Scripted use can set it.
