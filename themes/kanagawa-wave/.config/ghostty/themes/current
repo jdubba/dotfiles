@@ -1,7 +1,7 @@
 # kanagawa-wave ghostty colors.
 background = #1f1f28
 foreground = #dcd7ba
-selection-background = #727169
+selection-background = #565550
 selection-foreground = #dcd7ba
 palette = 0=#090618
 palette = 1=#c34043

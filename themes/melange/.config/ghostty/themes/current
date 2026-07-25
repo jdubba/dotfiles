@@ -1,7 +1,7 @@
 # melange ghostty colors.
 background = #292522
 foreground = #ece1d7
-selection-background = #867462
+selection-background = #6f6152
 selection-foreground = #ece1d7
 palette = 0=#34302c
 palette = 1=#bd8183

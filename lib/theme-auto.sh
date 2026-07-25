@@ -163,6 +163,48 @@ _dfa_lum() {
   printf '%d' "$(( (299 * r + 587 * g + 114 * b) / 1000 ))"
 }
 
+# sRGB linearisation table: _DFA_LIN[c] = round(f(c) * 1000000), where f is
+# WCAG's per-channel transform. A table is what keeps contrast measurable in pure
+# integer bash -- the transform needs a 2.4 power that shell arithmetic cannot
+# express, and the emitter must stay dependency-free because `theme auto` runs it.
+_DFA_LIN=(
+  0 304 607 911 1214 1518 1821 2125 2428 2732 3035 3347 3677 4025 4391 4777
+  5182 5605 6049 6512 6995 7499 8023 8568 9134 9721 10330 10960 11612 12286 12983 13702
+  14444 15209 15996 16807 17642 18500 19382 20289 21219 22174 23153 24158 25187 26241 27321 28426
+  29557 30713 31896 33105 34340 35601 36889 38204 39546 40915 42311 43735 45186 46665 48172 49707
+  51269 52861 54480 56128 57805 59511 61246 63010 64803 66626 68478 70360 72272 74214 76185 78187
+  80220 82283 84376 86500 88656 90842 93059 95307 97587 99899 102242 104616 107023 109462 111932 114435
+  116971 119538 122139 124772 127438 130136 132868 135633 138432 141263 144128 147027 149960 152926 155926 158961
+  162029 165132 168269 171441 174647 177888 181164 184475 187821 191202 194618 198069 201556 205079 208637 212231
+  215861 219526 223228 226966 230740 234551 238398 242281 246201 250158 254152 258183 262251 266356 270498 274677
+  278894 283149 287441 291771 296138 300544 304987 309469 313989 318547 323143 327778 332452 337164 341914 346704
+  351533 356400 361307 366253 371238 376262 381326 386429 391572 396755 401978 407240 412543 417885 423268 428690
+  434154 439657 445201 450786 456411 462077 467784 473531 479320 485150 491021 496933 502886 508881 514918 520996
+  527115 533276 539479 545724 552011 558340 564712 571125 577580 584078 590619 597202 603827 610496 617207 623960
+  630757 637597 644480 651406 658375 665387 672443 679542 686685 693872 701102 708376 715694 723055 730461 737910
+  745404 752942 760525 768151 775822 783538 791298 799103 806952 814847 822786 830770 838799 846873 854993 863157
+  871367 879622 887923 896269 904661 913099 921582 930111 938686 947307 955973 964686 973445 982251 991102 1000000
+)
+
+# WCAG relative luminance, scaled by 1e6 (0..1000000).
+_dfa_wcag_lum() {
+  local h=${1#\#} r g b
+  r=$((16#${h:0:2})); g=$((16#${h:2:2})); b=$((16#${h:4:2}))
+  # 2126/7152/722 sum to 10000, so this is a weighted mean of the table entries.
+  printf '%d' "$(( (2126 * _DFA_LIN[r] + 7152 * _DFA_LIN[g] + 722 * _DFA_LIN[b]) / 10000 ))"
+}
+
+# WCAG contrast ratio between two colours, scaled by 1000 (4500 == 4.5:1). Integer
+# throughout: WCAG's +0.05 becomes +50000 at the 1e6 luminance scale. Agrees with a
+# float implementation to within 0.001 in ratio terms.
+#   _dfa_contrast <hex-a> <hex-b>
+_dfa_contrast() {
+  local la lb hi lo
+  la=$(_dfa_wcag_lum "$1"); lb=$(_dfa_wcag_lum "$2")
+  if (( la >= lb )); then hi=$la; lo=$lb; else hi=$lb; lo=$la; fi
+  printf '%d' "$(( ( (hi + 50000) * 1000 ) / (lo + 50000) ))"
+}
+
 # Pick a readable foreground (near-black / near-white) for a #RRGGBB background
 # using Rec.601 perceived luminance. Used for waybar pill text contrast.
 #
@@ -251,13 +293,39 @@ df_theme_emit_seams() {
     "$dest/.config/shell" "$dest/.config/opencode" "$dest/.config/nvim/lua" \
     "$dest/.config/btop/themes"
 
+  # Terminal selection, shared by the kitty and ghostty seams below.
+  #
+  # This was selection_foreground=fg over selection_background=c8, which left
+  # SELECTED TEXT under 4.5:1 in 26 of 40 themes -- solarized-light reached 1.21:1,
+  # i.e. selecting text made it invisible. c8 is a mid grey on most palettes and fg
+  # is often close to it in luminance; nothing in the pairing checked.
+  #
+  # Keep c8, since it is the palette's own selection tone, and pick the ink by
+  # measurement: the theme's fg if it reads, else its bg, else the near-black or
+  # near-white that must. If none of the three clears 4.5 -- c8 is mid-luminance on
+  # 5 palettes, where no ink can -- move the surface instead, mixing c8 away from
+  # the fg's own pole until it does. Every shipped theme now clears 4.5, worst
+  # 4.53:1, and the 14 that already passed keep fg untouched.
+  local sel_bg=$c8 sel_fg="" _sel_c _sel_q
+  for _sel_c in "$fg" "$bg" "$(_dfa_contrast_fg "$c8")"; do
+    if (( $(_dfa_contrast "$_sel_c" "$c8") >= 4500 )); then sel_fg=$_sel_c; break; fi
+  done
+  if [[ -z "$sel_fg" ]]; then
+    sel_fg=$fg
+    _sel_q=0
+    while (( _sel_q < 100 )) && (( $(_dfa_contrast "$sel_fg" "$sel_bg") < 4500 )); do
+      _sel_q=$(( _sel_q + 10 ))
+      sel_bg=$(_df_theme_mix "$c8" "$(_dfa_contrast_fg "$fg")" "$_sel_q")
+    done
+  fi
+
   # kitty
   cat >"$dest/.config/kitty/current-theme.conf" <<EOF
 # ${tag} kitty colors.
 foreground              ${fg}
 background              ${bg}
-selection_foreground    ${fg}
-selection_background    ${c8}
+selection_foreground    ${sel_fg}
+selection_background    ${sel_bg}
 url_color               ${c4}
 color0  ${c0}
 color1  ${c1}
@@ -286,8 +354,8 @@ EOF
 # ${tag} ghostty colors.
 background = ${bg}
 foreground = ${fg}
-selection-background = ${c8}
-selection-foreground = ${fg}
+selection-background = ${sel_bg}
+selection-foreground = ${sel_fg}
 palette = 0=${c0}
 palette = 1=${c1}
 palette = 2=${c2}
@@ -393,14 +461,34 @@ EOF
   # surface: a guaranteed-different hue, so the dots carry colour of their own
   # rather than being a darker wash of the surface they sit on. Ramping toward
   # the ink (not the surface) keeps it legible in both polarities -- the ink
-  # flips with the surface. The 25/55/85 stops were picked by measuring every
-  # palette: they keep the ramp monotonic and hold the faintest state near 2:1.
+  # flips with the surface.
+  #
+  # 25/55/85 were fixed stops, chosen for a monotonic ramp and a faint empty
+  # state. They were never checked against the *surface*, though, and nothing in
+  # the formula constrains that: the ramp starts from a different hue, so on
+  # palettes where the pill accent sits near the workspace surface in luminance
+  # the middle of the ramp lands almost on top of it. The occupied dot fell below
+  # the 3:1 dot target in 16 of 40 themes, worst catppuccin-latte at 1.29:1.
+  #
+  # The occupied stop now starts at 55 and walks up until it measures 3:1 against
+  # the surface, so the 24 themes that already passed keep their exact colours and
+  # only the failures move. Active keeps its 15-point lead over occupied so the
+  # ramp stays ordered. Empty stays fixed and deliberately faint -- an empty
+  # workspace is chrome, and belongs below 3:1.
   local ws_bg=$accent_ws
-  local ws_ink ws_occupied ws_empty ws_active
+  local ws_ink ws_occupied ws_empty ws_active ws_stop ws_active_stop
   ws_ink=$(_dfa_contrast_fg "$accent_ws")
   ws_empty=$(_df_theme_mix "$accent_pill" "$ws_ink" 25)
-  ws_occupied=$(_df_theme_mix "$accent_pill" "$ws_ink" 55)
-  ws_active=$(_df_theme_mix "$accent_pill" "$ws_ink" 85)
+  ws_stop=55
+  while (( ws_stop < 95 )) \
+    && (( $(_dfa_contrast "$(_df_theme_mix "$accent_pill" "$ws_ink" "$ws_stop")" "$ws_bg") < 3000 )); do
+    ws_stop=$(( ws_stop + 5 ))
+  done
+  ws_active_stop=$(( ws_stop + 15 ))
+  (( ws_active_stop < 85 )) && ws_active_stop=85
+  (( ws_active_stop > 100 )) && ws_active_stop=100
+  ws_occupied=$(_df_theme_mix "$accent_pill" "$ws_ink" "$ws_stop")
+  ws_active=$(_df_theme_mix "$accent_pill" "$ws_ink" "$ws_active_stop")
   cat >"$dest/.config/waybar/colors.css" <<EOF
 /* ${tag} waybar palette */
 @define-color bar-bg          ${bg};

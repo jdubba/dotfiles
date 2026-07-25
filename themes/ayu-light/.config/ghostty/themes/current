@@ -2,7 +2,7 @@
 background = #fcfcfc
 foreground = #5c6166
 selection-background = #8a9199
-selection-foreground = #5c6166
+selection-foreground = #141414
 palette = 0=#e6e1cf
 palette = 1=#f07171
 palette = 2=#86b300

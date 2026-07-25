@@ -1,7 +1,7 @@
 # dracula ghostty colors.
 background = #282a36
 foreground = #f8f8f2
-selection-background = #6272a4
+selection-background = #5a6996
 selection-foreground = #f8f8f2
 palette = 0=#21222c
 palette = 1=#ff5555
