@@ -38,14 +38,21 @@ color_os_bg = '#a6da95'
 color_os_fg = '#181926'
 color_time_bg = '#f5bde6'
 color_dir_bg = '#8aadf4'
-# The repo root is set apart from the rest of the path by hue AND weight, not by
-# tone. Both inks have to be dark to stay legible on periwinkle -- a mid-luminance
-# saturated surface, where only near-black or near-white survives -- so they are
-# always in the same tonal family, and merely darkening one reads as the same
-# colour. Plum is mauve #c6a0f6 ramped 75% toward the ink; vivid mauve itself
-# measures 1.04:1 here and vanishes. Bold supplies the second axis for free.
+# The repo root is set apart from the path by POLARITY: the path is dark ink, the
+# repo name is a near-white with the faintest pink tint. Everything dark was tried
+# first (crust, then plum #41374d bold) and all of it reads as the same colour as
+# the path -- periwinkle only tolerates near-black or near-white ink, so any dark
+# repo-root ink is necessarily in the path's own tonal family. Flipping polarity is
+# the one change that actually separates them.
+#
+# The cost is contrast, and it is unavoidable rather than a bad pick: periwinkle
+# caps light ink at 2.24:1 even at PURE WHITE, so no near-white clears the 4.5
+# target, or even 3.0. #fdf4f7 measures 2.08:1, within a whisker of that ceiling.
+# Accepted deliberately -- the repo name is a landmark you recognise rather than
+# text you read character by character. Bold is load-bearing here, thickening the
+# strokes to compensate. Raising this would mean darkening the pill itself.
 color_dir_fg = '#363a4f'
-color_dir_repo_fg = '#41374d'
+color_dir_repo_fg = '#fdf4f7'
 color_red = '#ed8796'
 color_connector = '#ed8796'
 # The branch and ahead/behind pills keep their backgrounds and take a dark ink
