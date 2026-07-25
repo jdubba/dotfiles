@@ -390,6 +390,27 @@ else `ansi`; opencode uses a built-in theme where one exists, else `system`.
 Wallpapers without a real drop-in are generated as a subtle palette gradient
 (`lib/theme-auto/wallpaper.py`).
 
+**Real wallpaper art comes from `new-wallpaper`, not from hand-sourcing images.**
+`~/.local/bin/new-wallpaper "<prompt>"` is a personal script (**not** in this repo
+— machine-local, on `PATH`) that generates a wallpaper via AWS Bedrock (Stable
+Image Ultra 16:9 → conservative upscale → ImageMagick normalise to exactly
+3840x2160) and writes `~/pictures/wallpapers/<uuid>.jpg`. Curated per-theme
+sources are kept alongside at `~/pictures/themes/<theme>.jpg`. Do **not** confuse
+it with `lib/theme-auto/wallpaper.py` above, which only draws the gradient
+placeholder. Notes:
+- It needs a live AWS SSO session (`AWS_PROFILE=idkey` on stationzebra); an
+  expired token can only be renewed by the user (`aws sso login --profile idkey`).
+- It ends with an interactive "set as desktop wallpaper?" prompt — answer **no**
+  for a theme wallpaper. Persistence belongs to the theme system: drop the image
+  at `themes/<name>/.config/background`, then `dotfiles theme set <name>`.
+- Re-encode to ~1.5-2.0M (`magick <src> -quality 88`) to match the other real
+  drop-ins before committing; the raw 4K output is ~2.5M.
+- **Replacing an existing wallpaper needs `systemctl --user restart
+  hyprpaper.service`.** The seam path is unchanged and only its *content* differs,
+  so the `hyprctl hyprpaper wallpaper` push in `_df_theme_reload` re-serves the
+  cached decode and the old image stays on screen. (A *theme switch* is fine —
+  that changes the resolved path.)
+
 **Hand-tuning goes in `tools/theme-overrides/<theme>/`, never in `themes/`.**
 The emitter derives every seam from the 16-colour palette by formula, which a few
 themes legitimately need to escape: an upstream-published base16 palette
