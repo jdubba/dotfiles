@@ -555,6 +555,19 @@ drawn on, and the 25/55/85 stops were chosen for a monotonic ramp and a ~2:1
 faintest state — the occupied state was invisible, so it was never measurable.
 `catppuccin-macchiato` is fine at 3.33:1.
 
+**Also outstanding — terminal selection contrast.** The emitter pairs
+`selection_foreground = fg` with `selection_background = c8` for kitty and
+ghostty, and on many palettes `c8` sits too close to `fg` in luminance: **26 of
+40 themes put selected text under 4.5:1**, worst `solarized-light` at 1.21:1
+(`#657b83` on `#586e75` — effectively invisible), then kanagawa-dragon 1.47,
+catppuccin-latte 1.62, solarized-dark 1.70, ayu-light 1.96. Light themes
+dominate the failures because their `c8` is a mid grey close to their `fg`.
+A generic fix wants the selection surface chosen by *measuring* against `fg`
+(walk the palette's own surface tones, or mix `bg` toward `fg` until the pair
+clears 4.5) rather than always taking `c8`. `catppuccin-macchiato` is fixed in
+its override (surface1, 5.59:1); every other theme still carries the generated
+pairing.
+
 **An override pins a value, so emitter changes do not reach that theme.** After
 changing the emitter, report which `tools/theme-overrides/*/` files hardcode what
 you just changed, so the difference is visible — but treat that as information,
