@@ -44,11 +44,15 @@ color_dir_fg = '#363a4f'
 color_dir_repo_fg = '#181926'
 color_red = '#ed8796'
 color_connector = '#ed8796'
-color_repo_fg = '#cad3f5'
+# The branch and ahead/behind pills keep their backgrounds and take a dark ink
+# instead: both drew light-on-light (#cad3f5 at 1.06:1 on the pink branch pill,
+# 1.51:1 on the periwinkle diverge pill). Same crust the directory pill uses --
+# the diverge pill sits on that same periwinkle, so the ink matches it exactly.
+color_repo_fg = '#181926'
 color_repo_bg = '#f5bde6'
 color_repo_change_fg = '#cad3f5'
 color_repo_change_bg = '#5b6078'
-color_repo_diverge_fg = '#cad3f5'
+color_repo_diverge_fg = '#181926'
 color_repo_diverge_bg = '#8aadf4'
 color_fg_right = '#b8c0e0'
 color_fg_sep = '#5b6078'
