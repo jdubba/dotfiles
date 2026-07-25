@@ -24,9 +24,26 @@
    Periwinkle, the bar's workspaces surface and the prompt's directory pill.
    Reached via darker() for the 1px borders and alpha(..., 0.25) for the chips. */
 @define-color accent_bg_color #8aadf4;
-/* The selected row alone. Dusty rose, the bar's workspace dots and the prompt's
-   connectors. Split from accent_bg_color so chrome and selection can differ. */
-@define-color highlight_bg_color #ed8796;
+/* The selected row alone. This value is NOT the colour you see -- do not "fix" it
+   to something that looks like rose.
+ *
+ * style.css draws the selection as alpha(@highlight_bg_color, 0.25) over the
+ * panel, so the rendered band is 0.25*H + 0.75*#8bd5ca and the teal supplies
+ * three quarters of it. Storing dusty rose #ed8796 here therefore rendered a COOL
+ * grey (#a4c2bd, R164 < G194) -- the warm hue was cancelled.
+ *
+ * Solving H = (target - 0.75*panel) / 0.25 for dusty rose puts every channel out
+ * of gamut (R 531, G -99, B -6), so that exact colour is unreachable at this
+ * alpha; it needs alpha >= 0.845, i.e. an essentially opaque selection, which is
+ * the legibility guarantee upstream's tint exists to provide. #ff0000 is the
+ * clamped optimum -- the in-gamut H whose blend lands nearest dusty rose:
+ *
+ *   H = #ff0000  ->  band #a8a098   distance to #ed8796: 73.3, and WARM (R168>G160)
+ *   H = #ed8796  ->  band #a4c2bd   distance to #ed8796: 101.7, and cool
+ *
+ * So the band is a warm taupe rather than pink. It is as close to dusty rose as
+ * a 25% tint over teal can get. Dark indigo ink reads 5.70:1 on it. */
+@define-color highlight_bg_color #ff0000;
 /* Dark indigo, because the panel is light. See the note above. */
 @define-color theme_fg_color  #24273a;
 /* The one place walker puts text on a solid themed background. Sound as
