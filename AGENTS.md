@@ -532,6 +532,28 @@ light/dark branch entirely:
   git-status segments. Giving one segment a different polarity needs a new palette
   key (`color_os_fg`), and `style_root` breaks whenever `os_bg` becomes an accent
   (its ANSI yellow disappears) — repoint it at `color_red`.
+- **`hyprland/workspaces` has no `.occupied` class.** It marks the *empty*
+  workspaces, not the occupied ones — the classes are `.active`, `.empty`,
+  `.persistent`, `.visible`, `.special`, `.urgent`, `.hosting-monitor`. A
+  `#workspaces button.occupied` rule therefore matches nothing, which is how
+  `@ws-fg-occupied` went unrendered in every theme while empty and occupied dots
+  both fell through to the base rule. `style.css` now carries the occupied ink on
+  the base rule and dims it back down in `.empty`; `.active` must stay *after*
+  `.empty`, as they share specificity and an active-but-empty workspace still has
+  to read as active. Note `strings waybar | grep -x occupied` **does** hit, so the
+  binary is not evidence the class exists — probe the live bar with sentinel
+  colours instead.
+
+**Outstanding — fold into the next contrast pass.** Fixing that dead selector lit
+`@ws-fg-occupied` up in all 40 themes for the first time, and the ramp does not
+clear the 3.0 dot target everywhere: **16 of 40 measure under it**, worst
+`catppuccin-latte` at 1.29:1 (`#acb0be` on `#04a5e5`), then terafox 1.92,
+ayu-light 2.12, github-light and monokai-pro 2.16. The cause is structural rather
+than a bad constant: the ramp mixes the **pill** accent toward the **surface's**
+ink, so nothing in the formula constrains the result against the surface it is
+drawn on, and the 25/55/85 stops were chosen for a monotonic ramp and a ~2:1
+faintest state — the occupied state was invisible, so it was never measurable.
+`catppuccin-macchiato` is fine at 3.33:1.
 
 **An override pins a value, so emitter changes do not reach that theme.** After
 changing the emitter, report which `tools/theme-overrides/*/` files hardcode what
