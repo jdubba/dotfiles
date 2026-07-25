@@ -38,7 +38,7 @@ color_repo_change_fg = '#cdd6f4'
 color_repo_change_bg = '#585b70'
 color_repo_diverge_fg = '#cdd6f4'
 color_repo_diverge_bg = '#89b4fa'
-color_fg_right = '#bac2de'
+color_fg_right = '#a6adc8'
 color_fg_sep = '#585b70'
 [fill]
 symbol = " "

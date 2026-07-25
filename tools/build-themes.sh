@@ -102,9 +102,9 @@ df_info "building themes into $DF_THEMES_DIR/ ..."
 #            name                 nvim                 bat                  opencode              mode  bg     fg     c0     c1     c2     c3     c4     c5     c6     c7     c8     c9     c10    c11    c12    c13    c14    c15
 # --- Catppuccin ---
 build_theme catppuccin-latte      catppuccin:latte     ansi                 catppuccin            light eff1f5 4c4f69 5c5f77 d20f39 40a02b df8e1d 1e66f5 ea76cb 179299 acb0be 6c6f85 d20f39 40a02b df8e1d 1e66f5 ea76cb 179299 bcc0cc
-build_theme catppuccin-frappe     catppuccin:frappe    ansi                 catppuccin            dark  303446 c6d0f5 51576d e78284 a6d189 e5c890 8caaee f4b8e4 81c8be b5bfe2 626880 e78284 a6d189 e5c890 8caaee f4b8e4 81c8be a5adce
-build_theme catppuccin-macchiato  catppuccin:macchiato ansi                 catppuccin-macchiato  dark  24273a cad3f5 494d64 ed8796 a6da95 eed49f 8aadf4 f5bde6 8bd5ca b8c0e0 5b6078 ed8796 a6da95 eed49f 8aadf4 f5bde6 8bd5ca a5adcb
-build_theme catppuccin-mocha      catppuccin:mocha     ansi                 catppuccin            dark  1e1e2e cdd6f4 45475a f38ba8 a6e3a1 f9e2af 89b4fa f5c2e7 94e2d5 bac2de 585b70 f38ba8 a6e3a1 f9e2af 89b4fa f5c2e7 94e2d5 a6adc8
+build_theme catppuccin-frappe     catppuccin:frappe    ansi                 catppuccin            dark  303446 c6d0f5 51576d e78284 a6d189 e5c890 8caaee f4b8e4 81c8be a5adce 626880 e78284 a6d189 e5c890 8caaee f4b8e4 81c8be b5bfe2
+build_theme catppuccin-macchiato  catppuccin:macchiato ansi                 catppuccin-macchiato  dark  24273a cad3f5 494d64 ed8796 a6da95 eed49f 8aadf4 f5bde6 8bd5ca a5adcb 5b6078 ed8796 a6da95 eed49f 8aadf4 f5bde6 8bd5ca b8c0e0
+build_theme catppuccin-mocha      catppuccin:mocha     ansi                 catppuccin            dark  1e1e2e cdd6f4 45475a f38ba8 a6e3a1 f9e2af 89b4fa f5c2e7 94e2d5 a6adc8 585b70 f38ba8 a6e3a1 f9e2af 89b4fa f5c2e7 94e2d5 bac2de
 
 # --- Nord ---
 build_theme nord                  base16               Nord                 nord                  dark  2e3440 d8dee9 3b4252 bf616a a3be8c ebcb8b 81a1c1 b48ead 88c0d0 e5e9f0 4c566a bf616a a3be8c ebcb8b 81a1c1 b48ead 8fbcbb eceff4
