@@ -119,9 +119,11 @@ container, so adopting genuinely general-purpose scripts there is fine too.
   `walker/themes/{default,topleft,topright}`;
   `elephant/providers.list`; systemd `hyprland-session.target` + (guard-free)
   `kanshi.service` + `dotfiles-autotheme.service`.
-- `hosts/stationzebra/` — `kanshi/` (config + `move-workspaces.sh`); systemd
+- `hosts/stationzebra/` — `kanshi/` (config + `move-workspaces.sh` +
+  `dock-{layout,monitor}.sh` for the LG TV dock: workspaces 1-3 left TV, 4-6
+  middle TV, 7-10 eDP-1 at the far right); systemd `dock-monitor.service` +
   `rclone-onedrive.service` + `rclone-devsite.service`; `shell/machine-env`
-  (`AWS_PROFILE=idkey`); empty `hypr/local.conf` stub; `hypr/hyprlock-local.conf`
+  (`AWS_PROFILE=idkey`); `hypr/local.conf`; `hypr/hyprlock-local.conf`
   (per-host hyprlock auth seam — fingerprint stub, no sensor confirmed).
 - `hosts/fedora/` — `kanshi/config` (single `eDP-1`); `hypr/local.conf` (GDM
   session glue); `hypr/hyprlock-local.conf` (per-host hyprlock auth seam —
@@ -239,6 +241,20 @@ and zsh rather than duplicated:
   bindings; **kanshi** owns output geometry *and* workspace placement (via its
   `move-workspaces.sh`). kanshi config lives in the host layer
   (`hosts/stationzebra/.config/kanshi/`).
+- **The LG TV docks are not kanshi profiles** (stationzebra, cltc-aus-lws03): both
+  TVs ship the same EDID with a placeholder serial, so only their live connector
+  names can order them. `dock-layout.sh` sorts those and applies geometry *and*
+  the workspace pins via `hyprctl keyword` at runtime; `local.conf` positions the
+  outputs `auto`. Two consequences to respect:
+  - **Each `hyprctl keyword monitor` re-resolves every position still set to
+    `auto`**, pushing them to the right of the new rightmost monitor. Set the TVs
+    first and eDP-1 (far right) last, or eDP-1 drags the TVs off past it.
+  - **A config reload discards all of it** — `hyprctl reload` from a theme switch,
+    or Hyprland's autoreload when `local.conf` is edited — so the layout silently
+    reverts to eDP-1-leftmost with no workspace pins on the TVs. `dock-monitor.sh`
+    therefore handles `configreloaded` as well as `monitoradded`, re-applying when
+    `layout_is_applied` reports drift. `keyword` commands do **not** emit
+    `configreloaded`, so the re-apply cannot loop.
 - GNOME settings are not files; manage them with `dotfiles dconf dump|load`
   (keyfile under `profiles/gnome/dconf/`).
 
