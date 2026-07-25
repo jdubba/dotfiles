@@ -42,6 +42,33 @@ print(sum(1 for m in mons if '${LG_DESC}' in m.get('description', '')))
 " 2>/dev/null || echo 0
 }
 
+# Is the dock layout (left TV, right TV, eDP-1 far right) actually in effect?
+# `hyprctl reload` — which `dotfiles theme set` runs on every theme switch —
+# re-applies local.conf, whose monitor rules deliberately use `auto` positions,
+# so the layout silently reverts to eDP-1-leftmost until it is applied again.
+layout_is_applied() {
+    hyprctl monitors -j 2>/dev/null \
+    | python3 -c "
+import json, sys
+
+mons = json.load(sys.stdin)
+lg = sorted(
+    (m for m in mons if '${LG_DESC}' in m.get('description', '')),
+    key=lambda m: m['name'],
+)
+internal = next((m for m in mons if m.get('name') == 'eDP-1'), None)
+
+ok = (
+    len(lg) == 2
+    and (lg[0].get('x'), lg[0].get('y')) == (0, 0)
+    and (lg[1].get('x'), lg[1].get('y')) == (3840, 0)
+    and internal is not None
+    and (internal.get('x'), internal.get('y')) == (7680, 0)
+)
+sys.exit(0 if ok else 1)
+" >/dev/null 2>&1
+}
+
 echo "dock-monitor: starting"
 
 # Track the last socket path for which we ran the startup check.
@@ -73,17 +100,30 @@ while true; do
     # Read events line by line; python reader exits when the socket closes (Hyprland restart)
     while IFS= read -r line; do
         event="${line%%>>*}"
-        # monitoradded fires once per monitor; wait until both LGs are present
-        if [[ "$event" == "monitoradded" ]]; then
-            count=$(lg_count)
-            echo "dock-monitor: monitoradded — ${count} LG TV(s) connected"
-            if [[ "$count" -ge 2 ]]; then
-                # Brief settle time so both monitors finish initialising
-                sleep 0.3
-                echo "dock-monitor: applying dock layout"
-                "$SCRIPT_DIR/dock-layout.sh" || echo "dock-monitor: dock-layout.sh failed (exit $?)" >&2
-            fi
-        fi
+        case "$event" in
+            # monitoradded fires once per monitor; wait until both LGs are present
+            monitoradded)
+                count=$(lg_count)
+                echo "dock-monitor: monitoradded — ${count} LG TV(s) connected"
+                if [[ "$count" -ge 2 ]]; then
+                    # Brief settle time so both monitors finish initialising
+                    sleep 0.3
+                    echo "dock-monitor: applying dock layout"
+                    "$SCRIPT_DIR/dock-layout.sh" || echo "dock-monitor: dock-layout.sh failed (exit $?)" >&2
+                fi
+                ;;
+            # A config reload (theme switch, `hyprctl reload`) throws the layout
+            # back to local.conf's `auto` positions and drops the runtime
+            # workspace pins, so put both back.  dock-layout.sh only issues
+            # `keyword` commands, which do NOT emit configreloaded — no loop.
+            configreloaded)
+                count=$(lg_count)
+                if [[ "$count" -ge 2 ]] && ! layout_is_applied; then
+                    echo "dock-monitor: configreloaded reset the layout — re-applying"
+                    "$SCRIPT_DIR/dock-layout.sh" || echo "dock-monitor: dock-layout.sh failed after reload (exit $?)" >&2
+                fi
+                ;;
+        esac
     done < <(python3 -c "
 import socket, sys
 s = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
