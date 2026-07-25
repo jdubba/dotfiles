@@ -7,6 +7,9 @@
    text, so the hue is a free aesthetic choice: selected-row text stays at
    8.03:1 over the resulting #2f3f40 blend. */
 @define-color accent_bg_color #458588;
+/* Selection tint, split out of accent_bg_color upstream. Held equal to it
+   here, which is what this theme already looked like when they were one key. */
+@define-color highlight_bg_color #458588;
 @define-color theme_fg_color  #ebdbb2;
 /* The one place walker puts text on a solid themed background. The generated
    pair was #282828 on #cc241d -- 2.69:1, a genuine failure. Cream on the

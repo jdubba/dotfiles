@@ -78,3 +78,26 @@ setup() { load test_helper; }
   done
   [ -z "$missing" ] || { echo "missing seams:$missing"; false; }
 }
+
+@test "every colour walker's stylesheets use is defined by every theme" {
+  # GTK drops a whole rule when it references an undefined @colour, so a missing
+  # one does not error -- it silently removes whatever that rule drew (e.g. the
+  # selected row's background). Overrides are whole files, so a theme carrying a
+  # hand-written walker palette misses any colour added to the emitter later;
+  # that is exactly how accent_bg_color/highlight_bg_color could have broken the
+  # two gruvbox themes when they were split.
+  local refs d name colour missing=""
+  # Colours referenced across every walker layout, minus the @import at-rule.
+  refs=$(grep -ho '@[a-z_]*' "$DF_SRC_REPO"/profiles/hyprland/.config/walker/themes/*/style.css \
+         | sed 's/^@//' | grep -vx 'import' | sort -u)
+  [ -n "$refs" ] || { echo "found no @colour references in walker stylesheets"; false; }
+  for d in "$DF_SRC_REPO"/themes/*/; do
+    name=$(basename -- "$d")
+    [ "$name" = "auto" ] && continue          # generated at runtime, gitignored
+    for colour in $refs; do
+      grep -q "^@define-color[[:space:]]\+$colour[[:space:]]" \
+        "$d/.config/walker/colors.css" || missing+=" $name:$colour"
+    done
+  done
+  [ -z "$missing" ] || { echo "undefined walker colours:$missing"; false; }
+}

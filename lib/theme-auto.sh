@@ -421,10 +421,19 @@ EOF
 EOF
 
   # walker
+  #
+  # accent_bg_color is the launcher's chrome -- window and preview borders.
+  # highlight_bg_color is the selected row alone. They were one key, so a theme
+  # could not give the selection a hue of its own; both default to c5 here, so
+  # splitting them changed no theme's appearance. Every colour walker's
+  # stylesheets reference must be defined here for every theme: an undefined
+  # @colour makes GTK drop the whole rule, which silently removes the selection
+  # background rather than erroring. tests/repo.bats asserts the pairing.
   cat >"$dest/.config/walker/colors.css" <<EOF
 /* ${tag} walker palette */
 @define-color window_bg_color ${bg};
 @define-color accent_bg_color ${c5};
+@define-color highlight_bg_color ${c5};
 @define-color theme_fg_color  ${fg};
 @define-color error_bg_color  ${c1};
 @define-color error_fg_color  ${bg};
