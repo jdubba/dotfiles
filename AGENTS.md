@@ -404,7 +404,9 @@ layer provides, so switching themes is just a relink + reload. Seams (see
 - **starship** — full-file swap (no include mechanism); **opencode** — full-file
   `tui.json` (`theme` key; built-in `catppuccin`/`gruvbox`); **nvim** — data file
   `lua/dotfiles_theme.lua` read by `lua/plugins/colorscheme.lua`, which bundles
-  every candidate colorscheme and applies the named one; **bat/fzf** — env vars
+  every candidate colorscheme and applies the named one; **btop** — a named theme
+  `themes/current.theme` selected once per machine by `color_theme = "current"`
+  in the (gitignored) `btop.conf`, i.e. press `t` in btop; **bat/fzf** — env vars
   from `shell/theme-env.sh` (sourced by `env.sh`); **wallpaper** —
   `~/.config/background` (hyprpaper + hyprlock both read it).
 - A **home-layer fallback** exists for seams that would otherwise error when no
@@ -422,6 +424,11 @@ layer provides, so switching themes is just a relink + reload. Seams (see
   alone clears it, which is the tell that the config is fine and the *reload*
   never ran. `theme set`/`unset` and `df_autotheme_apply` capture the status
   (`df_apply_plan || apply_rc=$?`), reload, then `return "$apply_rc"`.
+- **Every theme must ship every seam.** A missing seam silently falls back to the
+  home layer — and for `btop` it also changes which layers own `.config/btop`,
+  which is what made the fold described above possible. `tests/repo.bats` asserts
+  the full seam set for every `themes/*/` (except the generated `auto`), so a
+  theme added by hand instead of via `tools/build-themes.sh` fails the suite.
 - **`_df_theme_reload` must not fire in tests.** The sandbox sets
   `DF_TARGET==HOME`, so the `!= HOME` guard is insufficient; `test_helper`
   exports `DF_NO_RELOAD=1` and the reloader honours it. Scripted use can set it.
