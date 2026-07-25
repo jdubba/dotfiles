@@ -141,12 +141,14 @@ window#waybar.hidden {
   padding: 0 12px;
 }
 
-/* Battery isn't part of a group -- it's a standalone, single-module pill. Its
-   default (Full) state gets its own accent; the charge-level classes below
-   (higher specificity) still win when a threshold is active. */
+/* Battery isn't part of a group -- it's a standalone, single-module pill. It is
+   deliberately un-themed: the base (Full) state uses the same fixed
+   traffic-light palette as the charge-level classes below, so charge always
+   reads identically regardless of the active theme. The level classes (higher
+   specificity) still win when a threshold is active. */
 #battery {
-  background: @pill-batt-bg;
-  color: @pill-batt-fg;
+  background: @batt-green;
+  color: @batt-state-fg;
   margin-left: 4px;
   margin-right: 4px;
   border-radius: 15px;
@@ -247,11 +249,10 @@ window#waybar.hidden {
 }
 
 /* Battery charge-level colors. At 100% (status "Full") none of these
-   thresholds match, so it falls through to the plain bar-bg/bar-fg look
-   above -- exactly matching every other pill. Below that, capacity <= the
-   threshold activates a class (see config.jsonc "states"); rules are
-   ordered least-to-most severe so a lower level always wins the cascade
-   when multiple thresholds match at once. */
+   thresholds match, so it falls through to the batt-green base above.
+   Below that, capacity <= the threshold activates a class (see config.jsonc
+   "states"); rules are ordered least-to-most severe so a lower level always
+   wins the cascade when multiple thresholds match at once. */
 #battery.green {
   background: @batt-green;
   color: @batt-state-fg;
