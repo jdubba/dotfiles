@@ -1,7 +1,8 @@
 /* github-dark walker palette */
 @define-color window_bg_color #0d1117;
 @define-color accent_bg_color #bc8cff;
-@define-color highlight_bg_color #bc8cff;
+@define-color highlight_bg_color alpha(#bc8cff, 0.25);
+@define-color highlight_fg_color #c9d1d9;
 @define-color theme_fg_color  #c9d1d9;
 @define-color error_bg_color  #ff7b72;
 @define-color error_fg_color  #0d1117;

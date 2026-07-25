@@ -521,7 +521,18 @@ EOF
   # accent_bg_color is the launcher's chrome -- window and preview borders.
   # highlight_bg_color is the selected row alone. They were one key, so a theme
   # could not give the selection a hue of its own; both default to c5 here, so
-  # splitting them changed no theme's appearance. Every colour walker's
+  # splitting them changed no theme's appearance.
+  #
+  # highlight_bg_color carries its own alpha rather than the stylesheet applying
+  # one. With `alpha(@highlight_bg_color, 0.25)` hardcoded in the rule, the row
+  # could only ever be 25% of the way from the window background toward the
+  # accent, so a theme could not put the selection ON a palette colour: solving
+  # 0.25*H + 0.75*window = c2 green for a mauve window needs H = (442,734,437),
+  # far outside the gamut, and the brightest reachable row is #776b74. Keeping
+  # the alpha in the value emits an identical colour for every theme while
+  # letting one pin a solid accent. highlight_fg_color defaults to the shared
+  # foreground for the same reason -- it only matters once a theme makes the
+  # selection opaque. Every colour walker's
   # stylesheets reference must be defined here for every theme: an undefined
   # @colour makes GTK drop the whole rule, which silently removes the selection
   # background rather than erroring. tests/repo.bats asserts the pairing.
@@ -529,7 +540,8 @@ EOF
 /* ${tag} walker palette */
 @define-color window_bg_color ${bg};
 @define-color accent_bg_color ${c5};
-@define-color highlight_bg_color ${c5};
+@define-color highlight_bg_color alpha(${c5}, 0.25);
+@define-color highlight_fg_color ${fg};
 @define-color theme_fg_color  ${fg};
 @define-color error_bg_color  ${c1};
 @define-color error_fg_color  ${bg};

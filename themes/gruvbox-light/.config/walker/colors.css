@@ -8,7 +8,10 @@
 @define-color accent_bg_color #076678;
 /* Selection tint, split out of accent_bg_color upstream. Held equal to it
    here, which is what this theme already looked like when they were one key. */
-@define-color highlight_bg_color #076678;
+@define-color highlight_bg_color alpha(#076678, 0.25);
+/* Selected-row ink. The row is a 25% tint here, so this stays the shared
+   foreground -- it only diverges if a theme makes the selection opaque. */
+@define-color highlight_fg_color #3c3836;
 @define-color theme_fg_color  #3c3836;
 /* The one place walker puts text on a solid themed background. Cream on the
    darker gruvbox red reaches 7.60:1, against 4.82:1 for the generated #cc241d,

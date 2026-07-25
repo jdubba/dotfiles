@@ -42,8 +42,17 @@
  *   H = #ed8796  ->  band #a4c2bd   distance to #ed8796: 101.7, and cool
  *
  * So the band is a warm taupe rather than pink. It is as close to dusty rose as
- * a 25% tint over teal can get. Dark indigo ink reads 5.70:1 on it. */
-@define-color highlight_bg_color #ff0000;
+ * a 25% tint over teal can get. Dark indigo ink reads 5.70:1 on it.
+ *
+ * NOTE: the alpha now lives in this value rather than in style.css, so the
+ * constraint above is liftable -- pinning `#ed8796` solid (with an ink to suit
+ * in highlight_fg_color) would finally give this theme the real dusty rose.
+ * Left as the clamped tint here so this commit changes nothing; it is a
+ * deliberate open choice, not an oversight. */
+@define-color highlight_bg_color alpha(#ff0000, 0.25);
+/* Selected-row ink. The row is a 25% tint here, so this stays the shared
+   foreground -- it only diverges if a theme makes the selection opaque. */
+@define-color highlight_fg_color #24273a;
 /* Dark indigo, because the panel is light. See the note above. */
 @define-color theme_fg_color  #24273a;
 /* The one place walker puts text on a solid themed background. Sound as

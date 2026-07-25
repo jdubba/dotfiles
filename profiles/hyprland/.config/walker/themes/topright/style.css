@@ -104,10 +104,13 @@ child {
 /* child:hover .item-box, */
 /* The selection is the one thing drawn from highlight_bg_color rather than
    accent_bg_color, so a theme can give the selected row a hue distinct from the
-   launcher's chrome. Themes that want them identical simply set both the same. */
+   launcher's chrome. Themes that want them identical simply set both the same.
+
+   The alpha lives in the colour, not here -- see the default layout. */
 child:selected .item-box,
 row:selected .item-box {
-  background: alpha(@highlight_bg_color, 0.25);
+  background: @highlight_bg_color;
+  color: @highlight_fg_color;
 }
 
 .item-text-box {

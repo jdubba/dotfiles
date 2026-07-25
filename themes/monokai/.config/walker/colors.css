@@ -1,7 +1,8 @@
 /* monokai walker palette */
 @define-color window_bg_color #272822;
 @define-color accent_bg_color #ae81ff;
-@define-color highlight_bg_color #ae81ff;
+@define-color highlight_bg_color alpha(#ae81ff, 0.25);
+@define-color highlight_fg_color #f8f8f2;
 @define-color theme_fg_color  #f8f8f2;
 @define-color error_bg_color  #f92672;
 @define-color error_fg_color  #272822;

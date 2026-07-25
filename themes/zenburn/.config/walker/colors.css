@@ -1,7 +1,8 @@
 /* zenburn walker palette */
 @define-color window_bg_color #3f3f3f;
 @define-color accent_bg_color #dc8cc3;
-@define-color highlight_bg_color #dc8cc3;
+@define-color highlight_bg_color alpha(#dc8cc3, 0.25);
+@define-color highlight_fg_color #dcdccc;
 @define-color theme_fg_color  #dcdccc;
 @define-color error_bg_color  #cc9393;
 @define-color error_fg_color  #3f3f3f;
