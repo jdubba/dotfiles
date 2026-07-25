@@ -1,0 +1,19 @@
+/* catppuccin-macchiato walker palette */
+@define-color window_bg_color #24273a;
+/* Chrome -- the window and preview borders. Teal, the accent the bar gives its
+   primary pills: walker is launched from the brand pill, so the launcher's frame
+   echoes the button that opens it. Replaces the generated pink (c5). Reached only
+   via darker() for 1px borders, never as a background behind text. */
+@define-color accent_bg_color #8bd5ca;
+/* The selected row, and the reason accent and highlight were split upstream:
+   chrome and selection want different hues here. Dusty rose, the bar's workspace
+   dots and the prompt's connectors. Selected-row text reads at 6.36:1 over the
+   resulting #563f51 blend -- better than teal's 5.50:1, and better than the
+   generated pink's 5.37:1. */
+@define-color highlight_bg_color #ed8796;
+@define-color theme_fg_color  #cad3f5;
+/* The one place walker puts text on a solid themed background, and unlike
+   gruvbox-dark's generated pair (2.69:1, a real failure) this one is already
+   sound at 5.96:1 -- left as generated. */
+@define-color error_bg_color  #ed8796;
+@define-color error_fg_color  #24273a;
