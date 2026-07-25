@@ -1,18 +1,16 @@
 /* zenburn waybar palette */
 @define-color bar-bg          #3f3f3f;
 @define-color bar-fg          #dcdccc;
-@define-color ws-bg           #d0bf8f;
-@define-color ws-fg           #567d7f;
-@define-color ws-fg-occupied  #3c5354;
-@define-color ws-fg-active    #212929;
-@define-color pill-brand-bg   #dc8cc3;
+@define-color ws-bg           #f0dfaf;
+@define-color ws-fg           #6ea1a3;
+@define-color ws-fg-occupied  #4a696a;
+@define-color ws-fg-active    #263031;
+@define-color pill-brand-bg   #8cd0d3;
 @define-color pill-brand-fg   #141414;
-@define-color pill-stats-bg   #6ca0a3;
+@define-color pill-stats-bg   #8cd0d3;
 @define-color pill-stats-fg   #141414;
-@define-color pill-ctrl-bg    #93e0e3;
+@define-color pill-ctrl-bg    #8cd0d3;
 @define-color pill-ctrl-fg    #141414;
-@define-color pill-theme-bg   #d0bf8f;
+@define-color pill-theme-bg   #93e0e3;
 @define-color pill-theme-fg   #141414;
-@define-color pill-batt-bg    #7f9f7f;
-@define-color pill-batt-fg    #141414;
-@define-color ws-glow          #212929;
+@define-color ws-glow          #263031;

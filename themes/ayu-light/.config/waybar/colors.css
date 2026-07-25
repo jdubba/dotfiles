@@ -1,18 +1,16 @@
 /* ayu-light waybar palette */
 @define-color bar-bg          #fcfcfc;
 @define-color bar-fg          #5c6166;
-@define-color ws-bg           #f2ae49;
-@define-color ws-fg           #307cb2;
-@define-color ws-fg-occupied  #255273;
-@define-color ws-fg-active    #1a2934;
-@define-color pill-brand-bg   #a37acc;
+@define-color ws-bg           #a37acc;
+@define-color ws-fg           #3e9478;
+@define-color ws-fg-occupied  #2d6150;
+@define-color ws-fg-active    #1c2e28;
+@define-color pill-brand-bg   #4cbf99;
 @define-color pill-brand-fg   #141414;
-@define-color pill-stats-bg   #399ee6;
+@define-color pill-stats-bg   #4cbf99;
 @define-color pill-stats-fg   #141414;
 @define-color pill-ctrl-bg    #4cbf99;
 @define-color pill-ctrl-fg    #141414;
-@define-color pill-theme-bg   #f2ae49;
+@define-color pill-theme-bg   #399ee6;
 @define-color pill-theme-fg   #141414;
-@define-color pill-batt-bg    #86b300;
-@define-color pill-batt-fg    #141414;
-@define-color ws-glow          #1a2934;
+@define-color ws-glow          #1c2e28;

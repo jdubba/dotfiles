@@ -156,6 +156,13 @@ _dfa_hypr_var() {
   printf '$%s = rgb(%s)\n$%sAlpha = %s\n' "$n" "$h" "$n" "$h"
 }
 
+# Rec.601 perceived luminance (0-255) of a #RRGGBB colour.
+_dfa_lum() {
+  local h=${1#\#} r g b
+  r=$((16#${h:0:2})); g=$((16#${h:2:2})); b=$((16#${h:4:2}))
+  printf '%d' "$(( (299 * r + 587 * g + 114 * b) / 1000 ))"
+}
+
 # Pick a readable foreground (near-black / near-white) for a #RRGGBB background
 # using Rec.601 perceived luminance. Used for waybar pill text contrast.
 #
@@ -166,10 +173,41 @@ _dfa_hypr_var() {
 # shipped palettes actually use, 150 chose the worse of the two inks 22 times out
 # of 111 and 110 chooses it twice.
 _dfa_contrast_fg() {
-  local h=${1#\#} r g b lum
-  r=$((16#${h:0:2})); g=$((16#${h:2:2})); b=$((16#${h:4:2}))
-  lum=$(( (299 * r + 587 * g + 114 * b) / 1000 ))
+  local lum
+  lum=$(_dfa_lum "$1")
   if (( lum > 110 )); then printf '#141414'; else printf '#f0f0f0'; fi
+}
+
+# Of two variants of the same hue (normal and bright slot), print whichever sits
+# further from <base> in perceived luminance -- i.e. the one that will actually
+# read against it. On a dark bar that is usually the bright slot; on a light bar
+# it is often the normal one, and on palettes like gruvbox-light -- whose
+# "bright" slots are deliberately DARKER than its normal ones -- it flips again.
+# Comparing against the background rather than assuming a mode handles all three.
+#   _df_theme_pick_variant <hex-a> <hex-b> <base-hex>
+_df_theme_pick_variant() {
+  local la lb lbase da db
+  la=$(_dfa_lum "$1"); lb=$(_dfa_lum "$2"); lbase=$(_dfa_lum "$3")
+  da=$(( la > lbase ? la - lbase : lbase - la ))
+  db=$(( lb > lbase ? lb - lbase : lbase - lb ))
+  if (( db > da )); then printf '%s' "$2"; else printf '%s' "$1"; fi
+}
+
+# Deterministic 32-bit FNV-1a hash of a string, printed as a decimal integer.
+#
+# The waybar accent assignment is drawn per theme rather than being one fixed
+# pattern, but it must be *stable*: tools/build-themes.sh has to reproduce
+# themes/ byte-for-byte (tests/theme-build.bats enforces it), so a real random
+# source would rewrite all 40 themes on every run. Seeding from the theme's own
+# identity gives variety across themes and reproducibility within one.
+_df_theme_hash() {
+  local s=$1 i c h=2166136261
+  for (( i = 0; i < ${#s}; i++ )); do
+    printf -v c '%d' "'${s:i:1}"
+    h=$(( (h ^ c) & 0xFFFFFFFF ))
+    h=$(( (h * 16777619) & 0xFFFFFFFF ))
+  done
+  printf '%u' "$h"
 }
 
 # Mix two #rrggbb colours: _df_theme_mix <base> <toward> <percent-toward>.
@@ -302,23 +340,67 @@ EOF
   # outright in the 8 palettes where c0 IS the background (gruvbox, monokai/-pro,
   # onedark, oxocarbon, palenight, zenburn), since the bar draws @bar-bg.
   #
-  # Treat it as a pill instead: the c3 accent is the surface (shared with the
-  # theme switcher, the other centre-weighted control).
+  # Treat it as a pill instead, and assign the bar's accents like this:
   #
-  # The dots then ramp the c4 hue toward whichever ink contrasts with that
-  # surface, so every state carries hue instead of being grey, while emphasis
-  # still climbs empty < occupied < active. Ramping toward the *ink* rather than
-  # toward the surface is what keeps it legible: the ink flips with the surface
-  # (dark on a light c3, light on a dark c3), so one formula covers both
-  # polarities. The 25/55/85 stops were picked by measuring every palette -- they
-  # keep the ramp monotonic in all 41 and hold the faintest state near 2:1, which
-  # matches what the old achromatic ramp achieved while adding colour.
-  local ws_bg=$c3
+  #   both left pills + the primary right pill   one shared accent
+  #   workspaces                                 its own accent
+  #   theme switcher                             its own accent
+  #   battery                                    not themed at all -- the fixed
+  #                                              red-to-green traffic-light
+  #                                              palette in style.css
+  #
+  # Which hue lands where is drawn per theme instead of being the fixed
+  # c5/c4/c6/c3 order every theme used to share, which made the bars recognisably
+  # the same layout regardless of palette. The draw is seeded from the theme's
+  # own identity, so it varies between themes and is identical on every rebuild.
+  #
+  # Red is held out of the pool: it carries error semantics elsewhere (walker's
+  # error banner, starship's failure marker) and the battery's critical state.
+  # That leaves five hue families, each with a normal and a bright slot; the
+  # variant taken is whichever contrasts better with the bar.
+  local -a _fam_lo=("$c2" "$c3" "$c4" "$c5" "$c6")
+  local -a _fam_hi=("$c10" "$c11" "$c12" "$c13" "$c14")
+  local -a pool=()
+  local i j cand
+  for i in 0 1 2 3 4; do
+    cand=$(_df_theme_pick_variant "${_fam_lo[i]}" "${_fam_hi[i]}" "$bg")
+    # Skip a hue that duplicates one already chosen -- a few palettes reuse the
+    # same hex across slots, and "independent" has to mean visibly independent.
+    for j in "${pool[@]}"; do [[ "${j,,}" == "${cand,,}" ]] && continue 2; done
+    pool+=( "$cand" )
+  done
+  # Last-resort top-up for near-monochrome palettes, so three distinct accents
+  # always exist. Red is acceptable here because the alternative is a collision.
+  for cand in "$c1" "$c9" "$c7" "$c15"; do
+    (( ${#pool[@]} >= 3 )) && break
+    for j in "${pool[@]}"; do [[ "${j,,}" == "${cand,,}" ]] && continue 2; done
+    pool+=( "$cand" )
+  done
+
+  # Fisher-Yates over the pool, driven by an LCG seeded with the theme name and
+  # its hues. Including the palette (not just the name) means `theme auto`, which
+  # is always called "auto", still redraws when the wallpaper changes.
+  local seed tmp n=${#pool[@]}
+  seed=$(_df_theme_hash "${name}|${c1}${c2}${c3}${c4}${c5}${c6}")
+  for (( i = n - 1; i > 0; i-- )); do
+    seed=$(( (seed * 1103515245 + 12345) & 0x7FFFFFFF ))
+    j=$(( seed % (i + 1) ))
+    tmp=${pool[i]}; pool[i]=${pool[j]}; pool[j]=$tmp
+  done
+  local accent_pill=${pool[0]} accent_ws=${pool[1]} accent_theme=${pool[2]}
+
+  # The workspace dots ramp the *pill* accent toward the ink of the workspace
+  # surface: a guaranteed-different hue, so the dots carry colour of their own
+  # rather than being a darker wash of the surface they sit on. Ramping toward
+  # the ink (not the surface) keeps it legible in both polarities -- the ink
+  # flips with the surface. The 25/55/85 stops were picked by measuring every
+  # palette: they keep the ramp monotonic and hold the faintest state near 2:1.
+  local ws_bg=$accent_ws
   local ws_ink ws_occupied ws_empty ws_active
-  ws_ink=$(_dfa_contrast_fg "$c3")
-  ws_empty=$(_df_theme_mix "$c4" "$ws_ink" 25)
-  ws_occupied=$(_df_theme_mix "$c4" "$ws_ink" 55)
-  ws_active=$(_df_theme_mix "$c4" "$ws_ink" 85)
+  ws_ink=$(_dfa_contrast_fg "$accent_ws")
+  ws_empty=$(_df_theme_mix "$accent_pill" "$ws_ink" 25)
+  ws_occupied=$(_df_theme_mix "$accent_pill" "$ws_ink" 55)
+  ws_active=$(_df_theme_mix "$accent_pill" "$ws_ink" 85)
   cat >"$dest/.config/waybar/colors.css" <<EOF
 /* ${tag} waybar palette */
 @define-color bar-bg          ${bg};
@@ -327,16 +409,14 @@ EOF
 @define-color ws-fg           ${ws_empty};
 @define-color ws-fg-occupied  ${ws_occupied};
 @define-color ws-fg-active    ${ws_active};
-@define-color pill-brand-bg   ${c5};
-@define-color pill-brand-fg   $(_dfa_contrast_fg "$c5");
-@define-color pill-stats-bg   ${c4};
-@define-color pill-stats-fg   $(_dfa_contrast_fg "$c4");
-@define-color pill-ctrl-bg    ${c6};
-@define-color pill-ctrl-fg    $(_dfa_contrast_fg "$c6");
-@define-color pill-theme-bg   ${c3};
-@define-color pill-theme-fg   $(_dfa_contrast_fg "$c3");
-@define-color pill-batt-bg    ${c2};
-@define-color pill-batt-fg    $(_dfa_contrast_fg "$c2");
+@define-color pill-brand-bg   ${accent_pill};
+@define-color pill-brand-fg   $(_dfa_contrast_fg "$accent_pill");
+@define-color pill-stats-bg   ${accent_pill};
+@define-color pill-stats-fg   $(_dfa_contrast_fg "$accent_pill");
+@define-color pill-ctrl-bg    ${accent_pill};
+@define-color pill-ctrl-fg    $(_dfa_contrast_fg "$accent_pill");
+@define-color pill-theme-bg   ${accent_theme};
+@define-color pill-theme-fg   $(_dfa_contrast_fg "$accent_theme");
 @define-color ws-glow          ${ws_active};
 EOF
 

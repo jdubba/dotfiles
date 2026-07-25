@@ -1,18 +1,16 @@
 /* catppuccin-macchiato waybar palette */
 @define-color bar-bg          #24273a;
 @define-color bar-fg          #cad3f5;
-@define-color ws-bg           #eed49f;
-@define-color ws-fg           #6d87bc;
-@define-color ws-fg-occupied  #495979;
-@define-color ws-fg-active    #262b36;
-@define-color pill-brand-bg   #f5bde6;
+@define-color ws-bg           #a6da95;
+@define-color ws-fg           #6da59d;
+@define-color ws-fg-occupied  #4a6b66;
+@define-color ws-fg-active    #26312f;
+@define-color pill-brand-bg   #8bd5ca;
 @define-color pill-brand-fg   #141414;
-@define-color pill-stats-bg   #8aadf4;
+@define-color pill-stats-bg   #8bd5ca;
 @define-color pill-stats-fg   #141414;
 @define-color pill-ctrl-bg    #8bd5ca;
 @define-color pill-ctrl-fg    #141414;
-@define-color pill-theme-bg   #eed49f;
+@define-color pill-theme-bg   #f5bde6;
 @define-color pill-theme-fg   #141414;
-@define-color pill-batt-bg    #a6da95;
-@define-color pill-batt-fg    #141414;
-@define-color ws-glow          #262b36;
+@define-color ws-glow          #26312f;

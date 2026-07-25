@@ -1,18 +1,16 @@
 /* github-light waybar palette */
 @define-color bar-bg          #ffffff;
 @define-color bar-fg          #24292f;
-@define-color ws-bg           #4d2d00;
-@define-color ws-fg           #438be0;
-@define-color ws-fg-occupied  #88b3e6;
-@define-color ws-fg-active    #cddced;
-@define-color pill-brand-bg   #8250df;
-@define-color pill-brand-fg   #141414;
-@define-color pill-stats-bg   #0969da;
+@define-color ws-bg           #8250df;
+@define-color ws-fg           #196267;
+@define-color ws-fg-occupied  #174346;
+@define-color ws-fg-active    #152425;
+@define-color pill-brand-bg   #1b7c83;
+@define-color pill-brand-fg   #f0f0f0;
+@define-color pill-stats-bg   #1b7c83;
 @define-color pill-stats-fg   #f0f0f0;
 @define-color pill-ctrl-bg    #1b7c83;
 @define-color pill-ctrl-fg    #f0f0f0;
-@define-color pill-theme-bg   #4d2d00;
+@define-color pill-theme-bg   #0969da;
 @define-color pill-theme-fg   #f0f0f0;
-@define-color pill-batt-bg    #116329;
-@define-color pill-batt-fg    #f0f0f0;
-@define-color ws-glow          #cddced;
+@define-color ws-glow          #152425;

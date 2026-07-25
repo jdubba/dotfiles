@@ -494,14 +494,25 @@ light/dark branch entirely:
 **waybar specifics established by that pass:**
 - `window#waybar` draws `alpha(@bar-bg, 0.6)`. It was hardcoded to a dark slate,
   which every theme inherited — the single biggest cause of themes feeling alike.
-- The **workspaces group is a pill**, not chrome: `ws-bg` = `c3` (shared with the
-  theme switcher) and the dots ramp `c4`. Previously all five `ws-*` variables
-  came from achromatic slots (`c0`/`c7`/`c8`/`fg`/`fg`) while every hue went to
-  pills,
-  so the bar's centrepiece was the one module with no colour in any theme.
+- The **workspaces group is a pill**, not chrome. Previously all five `ws-*`
+  variables came from achromatic slots (`c0`/`c7`/`c8`/`fg`/`fg`) while every hue
+  went to pills, so the bar's centrepiece was the one module with no colour in
+  any theme.
+- **Accent assignment is drawn per theme, not fixed.** Both left pills and the
+  primary right pill share one accent; workspaces and the theme switcher each get
+  their own, distinct from it and each other; the battery is not themed at all.
+  Which hue lands where comes from a **deterministic** draw — a Fisher-Yates
+  shuffle over the five non-red hue families, seeded by `_df_theme_hash` over the
+  theme name plus its hues. It must stay deterministic: `build-themes.sh` has to
+  reproduce `themes/` byte-for-byte, so a real random source would rewrite all 40
+  themes every run. Seeding on the palette as well as the name is what lets
+  `theme auto` — always called `auto` — redraw when the wallpaper changes.
+  Red is held out of the pool (error semantics elsewhere), and of each family's
+  normal/bright pair the emitter takes whichever contrasts better with the bar.
 - The **battery pill is deliberately un-themed** — the `batt-*` traffic-light
-  palette in `style.css`, in every state. `@pill-batt-*` is still emitted for all
-  themes but unreferenced; dropping it is an emitter change plus a regeneration.
+  palette in `style.css`, in every state, red through green. The emitter no longer
+  emits `@pill-batt-*` at all; the 7 hand-written waybar overrides still carry the
+  (now dead) lines.
 - **`_dfa_contrast_fg` cuts at luminance 110, not the midpoint.** Its two inks sit
   at 20 and 240, so 150 was biased toward white text on mid-luminance accents, and
   WCAG's +0.05 offset pushes the real crossover lower than the 130 midpoint.

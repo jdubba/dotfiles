@@ -1,18 +1,16 @@
 /* tokyonight-moon waybar palette */
 @define-color bar-bg          #222436;
 @define-color bar-fg          #c8d3f5;
-@define-color ws-bg           #ffc777;
-@define-color ws-fg           #6785c4;
-@define-color ws-fg-occupied  #46587e;
-@define-color ws-fg-active    #252b37;
-@define-color pill-brand-bg   #c099ff;
+@define-color ws-bg           #86e1fc;
+@define-color ws-fg           #97b36f;
+@define-color ws-fg-occupied  #63734a;
+@define-color ws-fg-active    #2e3426;
+@define-color pill-brand-bg   #c3e88d;
 @define-color pill-brand-fg   #141414;
-@define-color pill-stats-bg   #82aaff;
+@define-color pill-stats-bg   #c3e88d;
 @define-color pill-stats-fg   #141414;
-@define-color pill-ctrl-bg    #86e1fc;
+@define-color pill-ctrl-bg    #c3e88d;
 @define-color pill-ctrl-fg    #141414;
 @define-color pill-theme-bg   #ffc777;
 @define-color pill-theme-fg   #141414;
-@define-color pill-batt-bg    #c3e88d;
-@define-color pill-batt-fg    #141414;
-@define-color ws-glow          #252b37;
+@define-color ws-glow          #2e3426;

@@ -1,18 +1,16 @@
 /* everforest-light waybar palette */
 @define-color bar-bg          #fdf6e3;
 @define-color bar-fg          #5c6a72;
-@define-color ws-bg           #dfa000;
+@define-color ws-bg           #35a77c;
 @define-color ws-fg           #317499;
 @define-color ws-fg-occupied  #254e64;
 @define-color ws-fg-active    #1a272f;
-@define-color pill-brand-bg   #df69ba;
+@define-color pill-brand-bg   #3a94c5;
 @define-color pill-brand-fg   #141414;
 @define-color pill-stats-bg   #3a94c5;
 @define-color pill-stats-fg   #141414;
-@define-color pill-ctrl-bg    #35a77c;
+@define-color pill-ctrl-bg    #3a94c5;
 @define-color pill-ctrl-fg    #141414;
-@define-color pill-theme-bg   #dfa000;
+@define-color pill-theme-bg   #8da101;
 @define-color pill-theme-fg   #141414;
-@define-color pill-batt-bg    #8da101;
-@define-color pill-batt-fg    #141414;
 @define-color ws-glow          #1a272f;

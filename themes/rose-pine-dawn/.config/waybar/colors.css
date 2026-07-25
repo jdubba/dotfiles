@@ -1,18 +1,16 @@
 /* rose-pine-dawn waybar palette */
 @define-color bar-bg          #faf4ed;
 @define-color bar-fg          #575279;
-@define-color ws-bg           #ea9d34;
-@define-color ws-fg           #46747c;
-@define-color ws-fg-occupied  #324e53;
-@define-color ws-fg-active    #1e2729;
+@define-color ws-bg           #286983;
+@define-color ws-fg           #a898bb;
+@define-color ws-fg-occupied  #c5bbd0;
+@define-color ws-fg-active    #e2dee5;
 @define-color pill-brand-bg   #907aa9;
 @define-color pill-brand-fg   #141414;
-@define-color pill-stats-bg   #56949f;
+@define-color pill-stats-bg   #907aa9;
 @define-color pill-stats-fg   #141414;
-@define-color pill-ctrl-bg    #d7827e;
+@define-color pill-ctrl-bg    #907aa9;
 @define-color pill-ctrl-fg    #141414;
 @define-color pill-theme-bg   #ea9d34;
 @define-color pill-theme-fg   #141414;
-@define-color pill-batt-bg    #286983;
-@define-color pill-batt-fg    #f0f0f0;
-@define-color ws-glow          #1e2729;
+@define-color ws-glow          #e2dee5;

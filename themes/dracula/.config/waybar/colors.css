@@ -1,18 +1,16 @@
 /* dracula waybar palette */
 @define-color bar-bg          #282a36;
 @define-color bar-fg          #f8f8f2;
-@define-color ws-bg           #f1fa8c;
-@define-color ws-fg           #9373c0;
-@define-color ws-fg-occupied  #604d7b;
-@define-color ws-fg-active    #2d2736;
-@define-color pill-brand-bg   #ff79c6;
+@define-color ws-bg           #ffffa5;
+@define-color ws-fg           #54c474;
+@define-color ws-fg-occupied  #3a7e4e;
+@define-color ws-fg-active    #213727;
+@define-color pill-brand-bg   #69ff94;
 @define-color pill-brand-fg   #141414;
-@define-color pill-stats-bg   #bd93f9;
+@define-color pill-stats-bg   #69ff94;
 @define-color pill-stats-fg   #141414;
-@define-color pill-ctrl-bg    #8be9fd;
+@define-color pill-ctrl-bg    #69ff94;
 @define-color pill-ctrl-fg    #141414;
-@define-color pill-theme-bg   #f1fa8c;
+@define-color pill-theme-bg   #a4ffff;
 @define-color pill-theme-fg   #141414;
-@define-color pill-batt-bg    #50fa7b;
-@define-color pill-batt-fg    #141414;
-@define-color ws-glow          #2d2736;
+@define-color ws-glow          #213727;
