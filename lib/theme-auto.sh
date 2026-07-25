@@ -288,6 +288,7 @@ EOF
 @define-color pill-theme-fg   $(_dfa_contrast_fg "$c3");
 @define-color pill-batt-bg    ${c2};
 @define-color pill-batt-fg    $(_dfa_contrast_fg "$c2");
+@define-color ws-glow          ${fg};
 EOF
 
   # walker
