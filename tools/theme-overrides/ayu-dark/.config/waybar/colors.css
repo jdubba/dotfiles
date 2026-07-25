@@ -3,8 +3,12 @@
 @define-color bar-fg          #b3b1ad;
 @define-color ws-bg           #01060e;
 @define-color ws-fg           #686868;
-@define-color ws-fg-occupied  #c7c7c7;
-@define-color ws-fg-active    #b3b1ad;
+/* Swapped: the active state was the WEAKER of the two (9.49:1 against occupied's
+   12.02:1), so the ramp ran backwards at the top and the current workspace read
+   as less emphatic than a merely occupied one. Now 9.49 for occupied, 12.02 for
+   active, with empty at 3.65. */
+@define-color ws-fg-occupied  #b3b1ad;
+@define-color ws-fg-active    #c7c7c7;
 @define-color pill-brand-bg   #212733;
 @define-color pill-brand-fg   #b3b1ad;
 @define-color pill-stats-bg   #212733;
