@@ -18,7 +18,8 @@ profile laptop-only {
     }
 
     # No workspace moves needed: when the dock disconnects Hyprland automatically
-    # relocates all workspaces to eDP-1.  Workspaces 7 and 8 are persistently
-    # pinned to eDP-1 via Hyprland workspace rules in local.conf; workspaces 1-6
-    # have no persistent rule and fall back to eDP-1 on dock removal.
+    # relocates all workspaces to eDP-1.  Workspaces 7-10 are persistently pinned
+    # to eDP-1 via Hyprland workspace rules in local.conf; workspaces 1-6 are
+    # pinned to the TVs only at runtime (dock-layout.sh), so they fall back to
+    # eDP-1 on dock removal.
 }

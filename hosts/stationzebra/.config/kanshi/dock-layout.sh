@@ -15,10 +15,11 @@
 set -euo pipefail
 
 LG_DESC="LG TV SSCR2"
+# Left TV -> 1,2,3   middle TV -> 4,5,6   eDP-1 (far right) -> 7,8,9,10.
 LEFT_WORKSPACES=(1 2 3)
 RIGHT_WORKSPACES=(4 5 6)
-# Workspaces 7 and 8 are pinned to eDP-1 via persistent Hyprland workspace
-# rules in local.conf; no runtime move needed here.
+# Workspaces 7-10 are pinned to eDP-1 via persistent Hyprland workspace rules in
+# local.conf (stable connector name); no runtime move needed here.
 
 # --- find the two LG TV connectors, sorted by name (= MST enumeration order) ---
 mapfile -t lg_monitors < <(
@@ -42,12 +43,30 @@ right="${lg_monitors[1]}"
 
 echo "dock-layout: left=$left  right=$right"
 
-# --- apply monitor geometry ---
+# --- apply monitor geometry (eDP-1 sits to the right of both TVs) ---
+# Order matters: every `keyword monitor` re-resolves the `auto` positions still
+# in effect from local.conf, so the two explicit TV positions have to land before
+# eDP-1 is nailed down at the far right edge (3840 + 3840).
 hyprctl keyword monitor "$left,3840x2160@30,0x0,1"
 hyprctl keyword monitor "$right,3840x2160@30,3840x0,1"
 hyprctl keyword monitor "eDP-1,2560x1600@180,7680x0,1"
 
-# --- move workspaces to LG TV outputs (runtime assignment; see local.conf for eDP-1) ---
+# --- pin the TV workspaces (mirrors the persistent rules local.conf uses for
+#     eDP-1; the TVs need the runtime connector names, see header) ---
+pin_workspaces() {
+    local target="$1"
+    shift
+    local cmds="" ws
+    for ws in "$@"; do
+        cmds="${cmds}keyword workspace ${ws}, monitor:${target}, persistent:true;"
+    done
+    hyprctl --batch "$cmds"
+}
+
+pin_workspaces "$left"  "${LEFT_WORKSPACES[@]}"
+pin_workspaces "$right" "${RIGHT_WORKSPACES[@]}"
+
+# --- and relocate any that already exist elsewhere ---
 "$(dirname "$0")/move-workspaces.sh" "$left"  "${LEFT_WORKSPACES[@]}"
 "$(dirname "$0")/move-workspaces.sh" "$right" "${RIGHT_WORKSPACES[@]}"
 
