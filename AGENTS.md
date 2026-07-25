@@ -544,10 +544,33 @@ light/dark branch entirely:
   WCAG's +0.05 offset pushes the real crossover lower than the 130 midpoint.
   Measured over every accent the shipped palettes use, 150 picked the worse ink 22
   times in 111 and 110 picks it twice.
-- starship's template **shares `color_fg_primary`** across the os, directory and
-  git-status segments. Giving one segment a different polarity needs a new palette
-  key (`color_os_fg`), and `style_root` breaks whenever `os_bg` becomes an accent
-  (its ANSI yellow disappears) — repoint it at `color_red`.
+- starship's template **used to share `color_fg_primary`** across the os,
+  directory and git-status segments, which was a systemic contrast failure: that
+  key is the palette's light text, and it was drawn on three *accent*
+  backgrounds, so on any palette whose accents are mid-to-light it was
+  light-on-light. A sweep found **all 40 themes** below AA on at least one pair
+  (190 distinct), worst `github-light` drawing `#24292f` on `#24292f` — an
+  invisible os/user segment — and `onedark`'s repo root at 1.00:1. The template
+  now takes a per-segment ink (`color_os_fg`, `color_dir_fg`,
+  `color_repo_change_fg`), each measured by `_dfa_pair_for` against its own
+  background, and every *generated* theme clears 4.5:1. The 11 themes whose
+  overrides pin the whole `starship.toml` keep their own values and are outside
+  the emitter's reach — that is by design, not lag.
+  `style_root` still breaks whenever `os_bg` becomes an accent (its ANSI yellow
+  disappears) — repoint it at `color_red`.
+- **`_dfa_pair_for <surface> <fg> <bg>`** returns a legible `surface ink` pair:
+  it picks the ink first (palette fg, else bg, else the near-black/near-white),
+  and only where the surface is mid-luminance and *no* ink reaches AA does it
+  move the surface away from the ink's pole, capped at 25%. Every shipped palette
+  that needed the escape cleared AA within 10% — a slight deepening of an accent,
+  not a replacement. `_dfa_ink_for` is the ink-only half, for callers that must
+  not touch the surface.
+- **The starship powerline separators are a separate, unfixed problem**: 71 pairs
+  across the themes measure under 3:1, because a separator glyph is drawn in one
+  pill's background *on* the next pill's, and adjacent accents are often close in
+  luminance. No text is involved, so it is cosmetic — two pills read as one. The
+  only real lever is assigning segment backgrounds by luminance separation, which
+  is an accent-assignment change, not a contrast fix.
 - **`hyprland/workspaces` has no `.occupied` class.** It marks the *empty*
   workspaces, not the occupied ones — the classes are `.active`, `.empty`,
   `.persistent`, `.visible`, `.special`, `.urgent`, `.hosting-monitor`. A

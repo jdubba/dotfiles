@@ -27,16 +27,18 @@ palette = 'starship_dubba'
 [palettes.starship_dubba]
 color_fg_primary = '#545464'
 color_os_bg = '#1f1f28'
+color_os_fg = '#f2ecbc'
 color_time_bg = '#b35b79'
 color_dir_bg = '#4d699b'
-color_dir_repo_fg = '#597b75'
+color_dir_fg = '#f2ecbc'
+color_dir_repo_fg = '#e8eaea'
 color_red = '#c84053'
 color_connector = '#4d699b'
-color_repo_fg = '#545464'
-color_repo_bg = '#b35b79'
-color_repo_change_fg = '#545464'
+color_repo_fg = '#141414'
+color_repo_bg = '#bb6b86'
+color_repo_change_fg = '#141414'
 color_repo_change_bg = '#8a8980'
-color_repo_diverge_fg = '#545464'
+color_repo_diverge_fg = '#f2ecbc'
 color_repo_diverge_bg = '#4d699b'
 color_fg_right = '#545464'
 color_fg_sep = '#8a8980'
@@ -44,7 +46,7 @@ color_fg_sep = '#8a8980'
 symbol = " "
 
 [os]
-style = "fg:color_fg_primary bg:color_os_bg"
+style = "fg:color_os_fg bg:color_os_bg"
 format = "[$symbol  ]($style)"
 disabled = false
 
@@ -74,26 +76,26 @@ Pop = ''
 disabled = false
 show_always = true
 style_root = "fg:yellow bg:color_os_bg"
-style_user = "fg:color_fg_primary bg:color_os_bg"
+style_user = "fg:color_os_fg bg:color_os_bg"
 format = "[$user]($style)"
 
 [hostname]
 disabled = false
 ssh_only = false
-style = "fg:color_fg_primary bg:color_os_bg"
+style = "fg:color_os_fg bg:color_os_bg"
 format = "[@$hostname ]($style)"
 
 [directory]
 truncation_length = 3
 truncate_to_repo = false
-repo_root_style = "fg:color_dir_repo_fg bg:color_dir_bg"
+repo_root_style = "fg:color_dir_repo_fg bg:color_dir_bg bold"
 #repo_root_style = "fg:color_dir_repo_fg bg:color_dir_bg"
 fish_style_pwd_dir_length = 2
 # Repo format
 repo_root_format = "[  $before_root_path]($style)[$repo_root]($repo_root_style)[$path]($style)"
 # Non repo format
 format = "[  $path ]($style)"
-style = "fg:color_fg_primary bg:color_dir_bg"
+style = "fg:color_dir_fg bg:color_dir_bg"
 
 [git_branch]
 format = '[](fg:color_repo_bg)[ $symbol$branch ]($style)'
@@ -120,7 +122,7 @@ format = """
 [](fg:color_repo_diverge_bg bg:color_repo_change_bg)\
 ([$ahead_behind](fg:color_repo_diverge_fg bg:color_repo_diverge_bg))\
 [](fg:color_repo_diverge_bg)"""
-style = "fg:color_fg_primary bg:color_repo_change_bg"
+style = "fg:color_repo_change_fg bg:color_repo_change_bg"
 
 [character]
 success_symbol = '[─](fg:color_connector)'

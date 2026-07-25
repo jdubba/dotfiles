@@ -220,6 +220,48 @@ _dfa_contrast_fg() {
   if (( lum > 110 )); then printf '#141414'; else printf '#f0f0f0'; fi
 }
 
+# Choose an ink for text drawn on a surface: _dfa_ink_for <surface> <fg> <bg>.
+#
+# Prefers the palette's own foreground, then its background, then the
+# near-black/near-white pair -- the first that measures AA against the surface,
+# so the result stays on-palette wherever the palette can manage it. Where the
+# surface is mid-luminance nothing may reach 4.5:1 (a saturated teal like #458588
+# admits no ink that does), so the last resort is whichever of the two extreme
+# inks contrasts best; that is the ceiling, not a failure of the caller.
+_dfa_ink_for() {
+  local surface=$1 pal_fg=$2 pal_bg=$3 cand
+  for cand in "$pal_fg" "$pal_bg"; do
+    if (( $(_dfa_contrast "$cand" "$surface") >= 4500 )); then
+      printf '%s' "$cand"; return
+    fi
+  done
+  _dfa_contrast_fg "$surface"
+}
+
+# Pick a legible surface+ink pair: _dfa_pair_for <surface> <fg> <bg>, printing
+# "<surface> <ink>".
+#
+# Choosing the ink is enough on most palettes. Where the surface is a
+# mid-luminance accent, no ink reaches AA against it at all -- so as a last
+# resort the surface itself moves, away from the ink's own pole, which is the
+# same escape the terminal-selection pairing uses for c8. It is capped at 25%:
+# the point is to deepen an accent slightly, not to replace it. Measured over the
+# shipped palettes, every case that needed this cleared AA within 10%.
+_dfa_pair_for() {
+  local surface=$1 pal_fg=$2 pal_bg=$3 ink pole q=0
+  ink=$(_dfa_ink_for "$surface" "$pal_fg" "$pal_bg")
+  if (( $(_dfa_contrast "$ink" "$surface") >= 4500 )); then
+    printf '%s %s' "$surface" "$ink"; return
+  fi
+  if (( $(_dfa_lum "$ink") > 110 )); then pole='#000000'; else pole='#ffffff'; fi
+  local moved=$surface
+  while (( q < 25 )) && (( $(_dfa_contrast "$ink" "$moved") < 4500 )); do
+    q=$(( q + 5 ))
+    moved=$(_df_theme_mix "$surface" "$pole" "$q")
+  done
+  printf '%s %s' "$moved" "$ink"
+}
+
 # Of two variants of the same hue (normal and bright slot), print whichever sits
 # further from <base> in perceived luminance -- i.e. the one that will actually
 # read against it. On a dark bar that is usually the bright slot; on a light bar
@@ -652,21 +694,61 @@ EOF
   # starship: reuse the shared file's structure, swap only the palette block.
   local base_starship="$DF_REPO/$DF_HOME_LAYER/.config/starship.toml"
   if [[ -f "$base_starship" ]]; then
+    # Every segment's ink is measured against its OWN background rather than
+    # sharing the palette foreground. Sharing it was a systemic contrast failure:
+    # color_fg_primary is the palette's light text, and the template drew it on
+    # the os, path and git-status accents, so on any palette whose accents are
+    # mid-to-light it was light-on-light. Sweeping the shipped themes before this
+    # change, all 40 had at least one starship pair under 4.5:1 across 190
+    # distinct pairs -- worst were github-light drawing #24292f on #24292f (an
+    # invisible os/user segment) and onedark's repo root at 1.00:1.
+    local star_os_bg star_os_fg star_dir_bg star_dir_fg star_repo_bg star_repo_fg
+    local star_change_fg star_diverge_fg
+    read -r star_os_bg star_os_fg <<<"$(_dfa_pair_for "$c0" "$fg" "$bg")"
+    read -r star_dir_bg star_dir_fg <<<"$(_dfa_pair_for "$c4" "$fg" "$bg")"
+    read -r star_repo_bg star_repo_fg <<<"$(_dfa_pair_for "$c5" "$fg" "$bg")"
+    # The ahead/behind segment draws on the same c4 as the path, so it takes the
+    # same pair -- letting them diverge would put two nearly-identical blues on
+    # the one line.
+    star_diverge_fg=$star_dir_fg
+    # The git-status change segment draws text on c8 -- the same surface, and the
+    # same problem, as terminal selection. Reuse that already-measured pair rather
+    # than solving it twice: it keeps c8 where c8 reads and moves the surface only
+    # on the palettes where no ink can clear AA against it, which is the one case
+    # _dfa_ink_for cannot fix on its own (it may only choose the ink).
+    star_change_fg=$sel_fg
+    local star_change_bg=$sel_bg
+
+    # The repo-root name sits inside the path pill, so it needs to be legible on
+    # the path accent while staying a hue of its own -- the same problem the
+    # workspace dots have, solved the same way: start at the palette's cyan and
+    # ramp it toward the ink of that surface only as far as AA requires, so
+    # palettes where cyan already reads keep cyan exactly.
+    local star_repo_root=$c6 _rr_stop=0 _rr_ink
+    _rr_ink=$(_dfa_contrast_fg "$star_dir_bg")
+    while (( _rr_stop < 100 )) \
+      && (( $(_dfa_contrast "$star_repo_root" "$star_dir_bg") < 4500 )); do
+      _rr_stop=$(( _rr_stop + 5 ))
+      star_repo_root=$(_df_theme_mix "$c6" "$_rr_ink" "$_rr_stop")
+    done
+
     local block; block=$(mktemp)
     {
       printf "color_fg_primary = '%s'\n" "$fg"
-      printf "color_os_bg = '%s'\n" "$c0"
+      printf "color_os_bg = '%s'\n" "$star_os_bg"
+      printf "color_os_fg = '%s'\n" "$star_os_fg"
       printf "color_time_bg = '%s'\n" "$c5"
-      printf "color_dir_bg = '%s'\n" "$c4"
-      printf "color_dir_repo_fg = '%s'\n" "$c6"
+      printf "color_dir_bg = '%s'\n" "$star_dir_bg"
+      printf "color_dir_fg = '%s'\n" "$star_dir_fg"
+      printf "color_dir_repo_fg = '%s'\n" "$star_repo_root"
       printf "color_red = '%s'\n" "$c1"
       printf "color_connector = '%s'\n" "$c4"
-      printf "color_repo_fg = '%s'\n" "$fg"
-      printf "color_repo_bg = '%s'\n" "$c5"
-      printf "color_repo_change_fg = '%s'\n" "$fg"
-      printf "color_repo_change_bg = '%s'\n" "$c8"
-      printf "color_repo_diverge_fg = '%s'\n" "$fg"
-      printf "color_repo_diverge_bg = '%s'\n" "$c4"
+      printf "color_repo_fg = '%s'\n" "$star_repo_fg"
+      printf "color_repo_bg = '%s'\n" "$star_repo_bg"
+      printf "color_repo_change_fg = '%s'\n" "$star_change_fg"
+      printf "color_repo_change_bg = '%s'\n" "$star_change_bg"
+      printf "color_repo_diverge_fg = '%s'\n" "$star_diverge_fg"
+      printf "color_repo_diverge_bg = '%s'\n" "$star_dir_bg"
       printf "color_fg_right = '%s'\n" "$c7"
       printf "color_fg_sep = '%s'\n" "$c8"
     } >"$block"
