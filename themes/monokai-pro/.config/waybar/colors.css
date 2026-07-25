@@ -1,10 +1,10 @@
 /* monokai-pro waybar palette */
 @define-color bar-bg          #2d2a2e;
 @define-color bar-fg          #fcfcfa;
-@define-color ws-bg           #2d2a2e;
-@define-color ws-fg           #727072;
-@define-color ws-fg-occupied  #fcfcfa;
-@define-color ws-fg-active    #fcfcfa;
+@define-color ws-bg           #ffd866;
+@define-color ws-fg           #c27752;
+@define-color ws-fg-occupied  #7c4f39;
+@define-color ws-fg-active    #372820;
 @define-color pill-brand-bg   #ab9df2;
 @define-color pill-brand-fg   #141414;
 @define-color pill-stats-bg   #fc9867;
@@ -15,4 +15,4 @@
 @define-color pill-theme-fg   #141414;
 @define-color pill-batt-bg    #a9dc76;
 @define-color pill-batt-fg    #141414;
-@define-color ws-glow          #fcfcfa;
+@define-color ws-glow          #372820;

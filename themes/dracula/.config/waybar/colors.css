@@ -1,10 +1,10 @@
 /* dracula waybar palette */
 @define-color bar-bg          #282a36;
 @define-color bar-fg          #f8f8f2;
-@define-color ws-bg           #21222c;
-@define-color ws-fg           #6272a4;
-@define-color ws-fg-occupied  #f8f8f2;
-@define-color ws-fg-active    #f8f8f2;
+@define-color ws-bg           #f1fa8c;
+@define-color ws-fg           #9373c0;
+@define-color ws-fg-occupied  #604d7b;
+@define-color ws-fg-active    #2d2736;
 @define-color pill-brand-bg   #ff79c6;
 @define-color pill-brand-fg   #141414;
 @define-color pill-stats-bg   #bd93f9;
@@ -15,4 +15,4 @@
 @define-color pill-theme-fg   #141414;
 @define-color pill-batt-bg    #50fa7b;
 @define-color pill-batt-fg    #141414;
-@define-color ws-glow          #f8f8f2;
+@define-color ws-glow          #2d2736;

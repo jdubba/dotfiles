@@ -1,10 +1,10 @@
 /* dawnfox waybar palette */
 @define-color bar-bg          #faf4ed;
 @define-color bar-fg          #575279;
-@define-color ws-bg           #f2e9e1;
-@define-color ws-fg           #938aa4;
-@define-color ws-fg-occupied  #575279;
-@define-color ws-fg-active    #575279;
+@define-color ws-bg           #ac5402;
+@define-color ws-fg           #5a8b9e;
+@define-color ws-fg-occupied  #96b3bf;
+@define-color ws-fg-active    #d2dce0;
 @define-color pill-brand-bg   #6e33ce;
 @define-color pill-brand-fg   #f0f0f0;
 @define-color pill-stats-bg   #286983;
@@ -15,4 +15,4 @@
 @define-color pill-theme-fg   #f0f0f0;
 @define-color pill-batt-bg    #396847;
 @define-color pill-batt-fg    #f0f0f0;
-@define-color ws-glow          #575279;
+@define-color ws-glow          #d2dce0;

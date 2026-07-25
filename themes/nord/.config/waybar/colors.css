@@ -1,10 +1,10 @@
 /* nord waybar palette */
 @define-color bar-bg          #2e3440;
 @define-color bar-fg          #d8dee9;
-@define-color ws-bg           #3b4252;
-@define-color ws-fg           #4c566a;
-@define-color ws-fg-occupied  #e5e9f0;
-@define-color ws-fg-active    #d8dee9;
+@define-color ws-bg           #ebcb8b;
+@define-color ws-fg           #667e96;
+@define-color ws-fg-occupied  #455362;
+@define-color ws-fg-active    #24292e;
 @define-color pill-brand-bg   #b48ead;
 @define-color pill-brand-fg   #141414;
 @define-color pill-stats-bg   #81a1c1;
@@ -15,4 +15,4 @@
 @define-color pill-theme-fg   #141414;
 @define-color pill-batt-bg    #a3be8c;
 @define-color pill-batt-fg    #141414;
-@define-color ws-glow          #d8dee9;
+@define-color ws-glow          #24292e;

@@ -165,6 +165,22 @@ _dfa_contrast_fg() {
   if (( lum > 150 )); then printf '#141414'; else printf '#f0f0f0'; fi
 }
 
+# Mix two #rrggbb colours: _df_theme_mix <base> <toward> <percent-toward>.
+# Integer bash arithmetic only -- the core tool stays dependency-free, so this
+# must not reach for python even though the auto-theme palette backends may.
+_df_theme_mix() {
+  local a=${1#\#} b=${2#\#} p=$3 i out=''
+  local -a av=() bv=()
+  for i in 0 2 4; do
+    av+=( "$((16#${a:i:2}))" )
+    bv+=( "$((16#${b:i:2}))" )
+  done
+  for i in 0 1 2; do
+    out+=$(printf '%02x' "$(( (av[i]*(100-p) + bv[i]*p + 50) / 100 ))")
+  done
+  printf '#%s' "$out"
+}
+
 # Emit every non-wallpaper seam file for a theme into <dest> from the caller's
 # PAL palette (dynamic scope). Shared by auto-theming and the curated build tool.
 #   $1 dest       theme directory (…/themes/<name>)
@@ -270,14 +286,40 @@ EOF
   } >"$dest/.config/hypr/current-theme.conf"
 
   # waybar
+  #
+  # The workspaces group is the bar's centrepiece, but it used to draw entirely
+  # from the achromatic slots -- ws-bg=c0, ws-fg=c8, ws-fg-occupied=c7,
+  # ws-fg-active=fg -- while every hue in the palette went to the pills. So it
+  # rendered as grey chrome, and because each theme's grey ramp is tonally
+  # similar it looked near-identical across all 41 themes. It also disappeared
+  # outright in the 8 palettes where c0 IS the background (gruvbox, monokai/-pro,
+  # onedark, oxocarbon, palenight, zenburn), since the bar draws @bar-bg.
+  #
+  # Treat it as a pill instead: the c3 accent is the surface (shared with the
+  # theme switcher, the other centre-weighted control).
+  #
+  # The dots then ramp the c4 hue toward whichever ink contrasts with that
+  # surface, so every state carries hue instead of being grey, while emphasis
+  # still climbs empty < occupied < active. Ramping toward the *ink* rather than
+  # toward the surface is what keeps it legible: the ink flips with the surface
+  # (dark on a light c3, light on a dark c3), so one formula covers both
+  # polarities. The 25/55/85 stops were picked by measuring every palette -- they
+  # keep the ramp monotonic in all 41 and hold the faintest state near 2:1, which
+  # matches what the old achromatic ramp achieved while adding colour.
+  local ws_bg=$c3
+  local ws_ink ws_occupied ws_empty ws_active
+  ws_ink=$(_dfa_contrast_fg "$c3")
+  ws_empty=$(_df_theme_mix "$c4" "$ws_ink" 25)
+  ws_occupied=$(_df_theme_mix "$c4" "$ws_ink" 55)
+  ws_active=$(_df_theme_mix "$c4" "$ws_ink" 85)
   cat >"$dest/.config/waybar/colors.css" <<EOF
 /* ${tag} waybar palette */
 @define-color bar-bg          ${bg};
 @define-color bar-fg          ${fg};
-@define-color ws-bg           ${c0};
-@define-color ws-fg           ${c8};
-@define-color ws-fg-occupied  ${c7};
-@define-color ws-fg-active    ${fg};
+@define-color ws-bg           ${ws_bg};
+@define-color ws-fg           ${ws_empty};
+@define-color ws-fg-occupied  ${ws_occupied};
+@define-color ws-fg-active    ${ws_active};
 @define-color pill-brand-bg   ${c5};
 @define-color pill-brand-fg   $(_dfa_contrast_fg "$c5");
 @define-color pill-stats-bg   ${c4};
@@ -288,7 +330,7 @@ EOF
 @define-color pill-theme-fg   $(_dfa_contrast_fg "$c3");
 @define-color pill-batt-bg    ${c2};
 @define-color pill-batt-fg    $(_dfa_contrast_fg "$c2");
-@define-color ws-glow          ${fg};
+@define-color ws-glow          ${ws_active};
 EOF
 
   # walker

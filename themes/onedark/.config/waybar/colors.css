@@ -1,10 +1,10 @@
 /* onedark waybar palette */
 @define-color bar-bg          #282c34;
 @define-color bar-fg          #abb2bf;
-@define-color ws-bg           #282c34;
-@define-color ws-fg           #545862;
-@define-color ws-fg-occupied  #abb2bf;
-@define-color ws-fg-active    #abb2bf;
+@define-color ws-bg           #e5c07b;
+@define-color ws-fg           #4e88b8;
+@define-color ws-fg-occupied  #375a77;
+@define-color ws-fg-active    #202b35;
 @define-color pill-brand-bg   #c678dd;
 @define-color pill-brand-fg   #141414;
 @define-color pill-stats-bg   #61afef;
@@ -15,4 +15,4 @@
 @define-color pill-theme-fg   #141414;
 @define-color pill-batt-bg    #98c379;
 @define-color pill-batt-fg    #141414;
-@define-color ws-glow          #abb2bf;
+@define-color ws-glow          #202b35;

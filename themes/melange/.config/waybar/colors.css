@@ -1,10 +1,10 @@
 /* melange waybar palette */
 @define-color bar-bg          #292522;
 @define-color bar-fg          #ece1d7;
-@define-color ws-bg           #34302c;
-@define-color ws-fg           #867462;
-@define-color ws-fg-occupied  #c1a78e;
-@define-color ws-fg-active    #ece1d7;
+@define-color ws-bg           #ebc06d;
+@define-color ws-fg           #7f84a0;
+@define-color ws-fg-occupied  #545768;
+@define-color ws-fg-active    #292a30;
 @define-color pill-brand-bg   #b380b0;
 @define-color pill-brand-fg   #f0f0f0;
 @define-color pill-stats-bg   #a3a9ce;
@@ -15,4 +15,4 @@
 @define-color pill-theme-fg   #141414;
 @define-color pill-batt-bg    #78997a;
 @define-color pill-batt-fg    #f0f0f0;
-@define-color ws-glow          #ece1d7;
+@define-color ws-glow          #292a30;
