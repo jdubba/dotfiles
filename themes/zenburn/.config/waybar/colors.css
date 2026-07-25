@@ -8,11 +8,11 @@
 @define-color pill-brand-bg   #dc8cc3;
 @define-color pill-brand-fg   #141414;
 @define-color pill-stats-bg   #6ca0a3;
-@define-color pill-stats-fg   #f0f0f0;
+@define-color pill-stats-fg   #141414;
 @define-color pill-ctrl-bg    #93e0e3;
 @define-color pill-ctrl-fg    #141414;
 @define-color pill-theme-bg   #d0bf8f;
 @define-color pill-theme-fg   #141414;
 @define-color pill-batt-bg    #7f9f7f;
-@define-color pill-batt-fg    #f0f0f0;
+@define-color pill-batt-fg    #141414;
 @define-color ws-glow          #212929;

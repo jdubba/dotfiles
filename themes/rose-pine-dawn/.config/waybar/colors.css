@@ -6,9 +6,9 @@
 @define-color ws-fg-occupied  #324e53;
 @define-color ws-fg-active    #1e2729;
 @define-color pill-brand-bg   #907aa9;
-@define-color pill-brand-fg   #f0f0f0;
+@define-color pill-brand-fg   #141414;
 @define-color pill-stats-bg   #56949f;
-@define-color pill-stats-fg   #f0f0f0;
+@define-color pill-stats-fg   #141414;
 @define-color pill-ctrl-bg    #d7827e;
 @define-color pill-ctrl-fg    #141414;
 @define-color pill-theme-bg   #ea9d34;

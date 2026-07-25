@@ -502,6 +502,11 @@ light/dark branch entirely:
 - The **battery pill is deliberately un-themed** — the `batt-*` traffic-light
   palette in `style.css`, in every state. `@pill-batt-*` is still emitted for all
   themes but unreferenced; dropping it is an emitter change plus a regeneration.
+- **`_dfa_contrast_fg` cuts at luminance 110, not the midpoint.** Its two inks sit
+  at 20 and 240, so 150 was biased toward white text on mid-luminance accents, and
+  WCAG's +0.05 offset pushes the real crossover lower than the 130 midpoint.
+  Measured over every accent the shipped palettes use, 150 picked the worse ink 22
+  times in 111 and 110 picks it twice.
 - starship's template **shares `color_fg_primary`** across the os, directory and
   git-status segments. Giving one segment a different polarity needs a new palette
   key (`color_os_fg`), and `style_root` breaks whenever `os_bg` becomes an accent
