@@ -489,6 +489,13 @@ EOF
   (( ws_active_stop > 100 )) && ws_active_stop=100
   ws_occupied=$(_df_theme_mix "$accent_pill" "$ws_ink" "$ws_stop")
   ws_active=$(_df_theme_mix "$accent_pill" "$ws_ink" "$ws_active_stop")
+  # The volume/backlight sliders live inside the right-controls pill, and
+  # style.css used to draw their fill straight from @ws-bg. That is invisible
+  # wherever the workspace surface and the ctrl pill are both accents of similar
+  # luminance -- 36 of the 40 shipped themes measured under 3:1, two of them at
+  # exactly 1.00:1. @slider-fg gives the fill a seam of its own so a theme can
+  # break away from that; it defaults to @ws-bg, so emitting it changes nothing
+  # anywhere until a theme's override pins it to something legible.
   cat >"$dest/.config/waybar/colors.css" <<EOF
 /* ${tag} waybar palette */
 @define-color bar-bg          ${bg};
@@ -506,6 +513,7 @@ EOF
 @define-color pill-theme-bg   ${accent_theme};
 @define-color pill-theme-fg   $(_dfa_contrast_fg "$accent_theme");
 @define-color ws-glow          ${ws_active};
+@define-color slider-fg       ${ws_bg};
 EOF
 
   # walker

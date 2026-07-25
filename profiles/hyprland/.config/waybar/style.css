@@ -90,18 +90,19 @@ window#waybar.hidden {
 
 /* Slider fill (selected/left portion) and drag thumb.
    Without these, GTK falls back to the system theme's default purple.
-   @pill-theme-bg is the per-theme accent used here so the slider color
-   travels with the active theme automatically. */
+   @slider-fg is a seam of its own -- it defaults to @ws-bg (which is what this
+   used to read directly), but a theme can pin it to something that actually
+   contrasts the ctrl pill the slider is drawn on. */
 #backlight-slider highlight,
 #pulseaudio-slider highlight {
-  background: @ws-bg;
+  background: @slider-fg;
   min-height: 6px;
   border-radius: 3px;
 }
 
 #backlight-slider slider,
 #pulseaudio-slider slider {
-  background: @ws-bg;
+  background: @slider-fg;
   border-radius: 50%;
   min-width: 12px;
   min-height: 12px;
