@@ -11,7 +11,12 @@
 #
 # Wallpapers: generated from the palette (lib/theme-auto/wallpaper.py) only when
 # themes/<name>/.config/background is absent, so real drop-in wallpapers are
-# preserved. Re-run any time; it's idempotent.
+# preserved.
+#
+# Hand-tuned seams the formula cannot derive live in tools/theme-overrides/<name>/
+# and are overlaid after emission (see apply_overrides). Re-running this script
+# is idempotent and reproduces themes/ exactly -- tests/theme-build.bats proves
+# it, so a change here that would clobber committed themes fails the suite.
 #
 # Usage: tools/build-themes.sh [name ...]   (no args = all)
 
@@ -48,6 +53,34 @@ gen_wallpaper() {
   python3 "$DF_REPO/lib/theme-auto/wallpaper.py" "$bgfile" "$bg" "$accent" "" "$mode" 2>/dev/null || true
 }
 
+# Overlay tools/theme-overrides/<name>/ onto the generated theme.
+#
+# The emitter derives every seam from the 16-colour palette by formula, which is
+# right for ~all themes but cannot express the hand-tuning a few carry: an
+# upstream-published base16 palette (nightfox/ayu ship their own, which is not a
+# remapping of the 16 ANSI slots), a vendor's official ghostty file, panel/accent
+# colours that simply are not in the palette (ayu's #E6B450), or a deliberately
+# different pill assignment. Without this overlay, re-running this script
+# silently reverted all of it.
+#
+# An override is a whole file mirroring its path under themes/<name>/, applied
+# after emission. Adding one is a decision to maintain that file by hand: it no
+# longer tracks palette or seam-format changes, so keep them few and delete one
+# as soon as the generic formula can express it.
+apply_overrides() {
+  local dest=$1 name=$2 src="$DF_REPO/tools/theme-overrides/$name"
+  [[ -d "$src" ]] || return 0
+  local f rel n=0
+  while IFS= read -r -d '' f; do
+    rel=${f#"$src"/}
+    mkdir -p -- "$(dirname "$dest/$rel")"
+    cp -- "$f" "$dest/$rel"
+    n=$((n+1))
+  done < <(find "$src" -type f -print0)
+  (( n )) && printf '    (%d override(s))\n' "$n"
+  return 0
+}
+
 # build_theme <name> <nvim> <bat> <opencode> <mode> <bg> <fg> <c0..c15>
 build_theme() {
   _wanted "$1" || return 0
@@ -61,6 +94,7 @@ build_theme() {
   df_theme_emit_seams "$dest" "$name" "$nvim" "$bat" "$opencode"
   gen_wallpaper "$dest" "${PAL[background]}" "${PAL[color4]}" "$mode"
   printf '  %s\n' "$name"
+  apply_overrides "$dest" "$name"
 }
 
 df_info "building themes into $DF_THEMES_DIR/ ..."

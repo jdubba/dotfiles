@@ -390,6 +390,20 @@ else `ansi`; opencode uses a built-in theme where one exists, else `system`.
 Wallpapers without a real drop-in are generated as a subtle palette gradient
 (`lib/theme-auto/wallpaper.py`).
 
+**Hand-tuning goes in `tools/theme-overrides/<theme>/`, never in `themes/`.**
+The emitter derives every seam from the 16-colour palette by formula, which a few
+themes legitimately need to escape: an upstream-published base16 palette
+(nightfox/ayu ship their own, which is *not* a remapping of the 16 ANSI slots), a
+vendor's official ghostty file, a panel/accent colour that simply isn't in the
+palette (ayu's `#E6B450`), or a deliberately different waybar pill assignment.
+An override is a whole file mirroring its path under `themes/<name>/`, overlaid
+after emission by `apply_overrides`. Currently the 7 "polished" themes
+(`ayu-{dark,light,mirage}`, `carbonfox`, `catppuccin-{frappe,latte}`, `dracula`)
+carry 28 between them. Adding one is a decision to maintain that file by hand —
+it stops tracking palette and seam-format changes — so keep them few and delete
+one as soon as the generic formula can express it. **Editing `themes/` directly is
+always wrong**: the next `build-themes.sh` run silently reverts it.
+
 **Seam design.** Each themed tool reads a stable path that only the active theme
 layer provides, so switching themes is just a relink + reload. Seams (see
 `lib/commands/theme.sh` `_df_theme_seam_source` and `theme status`):
@@ -424,6 +438,15 @@ layer provides, so switching themes is just a relink + reload. Seams (see
   alone clears it, which is the tell that the config is fine and the *reload*
   never ran. `theme set`/`unset` and `df_autotheme_apply` capture the status
   (`df_apply_plan || apply_rc=$?`), reload, then `return "$apply_rc"`.
+- **`tools/build-themes.sh` must reproduce `themes/` byte-for-byte.** It is the
+  only thing standing between the generator and silently reverting committed
+  theme work — which it did for months: the emitter never learned
+  `@define-color ws-glow`, so every re-run dropped it from all 40 themes, along
+  with the polished themes' pill/starship/base16 tuning.
+  `tests/theme-build.bats` runs the real script against a throwaway copy of the
+  repo and diffs the result, so any drift fails the suite. When it does, either
+  teach the emitter the difference (if it generalises) or record it in
+  `tools/theme-overrides/<theme>/` (if it doesn't) — never re-edit `themes/`.
 - **Every theme must ship every seam.** A missing seam silently falls back to the
   home layer — and for `btop` it also changes which layers own `.config/btop`,
   which is what made the fold described above possible. `tests/repo.bats` asserts
