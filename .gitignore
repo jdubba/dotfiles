@@ -35,10 +35,11 @@ __pycache__/
 # Lazy plugin version tracking (intentionally not pinned in the repo)
 /home/.config/nvim/lazy-lock.json
 
-# btop rewrites its own config on exit (machine-local). ~/.config/btop folds into
-# whichever layer solely owns it, so the file lands in the repo: the home layer,
-# and -- once a theme ships .config/btop/themes/current.theme -- the ACTIVE THEME
-# layer instead. Ignore it wherever it appears; only current.theme is tracked.
+# btop rewrites its own config on exit (machine-local), through the symlink into
+# the home layer. .config/btop and .config/btop/themes are container dirs (see
+# dotfiles.conf), so btop.conf can only ever land in the home layer -- the
+# themes/ rule is belt-and-braces against that guarantee being lost. Only
+# themes/<name>/.config/btop/themes/current.theme is tracked.
 /home/.config/btop/btop.conf
 /themes/*/.config/btop/btop.conf
 

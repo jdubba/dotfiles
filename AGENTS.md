@@ -98,13 +98,17 @@ container, so adopting genuinely general-purpose scripts there is fine too.
 - systemd `*.wants/` enablement symlinks (machine-local; some point into
   `/usr/lib`). Re-enable per machine with `systemctl --user enable <unit>`
   (and `systemctl --user daemon-reload` after adopting a unit).
-- Self-rewriting configs that fold into the repo: `nvim/lazy-lock.json` and
-  `btop/btop.conf` (btop rewrites it on exit through the folded `~/.config/btop`
-  symlink) — both gitignored, like machine-local state. Note `btop.conf` lands in
-  whichever layer *solely owns* `.config/btop`: once a theme ships
-  `.config/btop/themes/current.theme`, the fold points at the **active theme
-  layer**, so the ignore covers `/themes/*/.config/btop/btop.conf` too. Only
-  `current.theme` is tracked there.
+- Self-rewriting configs: `nvim/lazy-lock.json` and `btop/btop.conf` (btop
+  rewrites it on exit through its symlink into the home layer) — both gitignored,
+  like machine-local state. **`.config/btop` and `.config/btop/themes` are both
+  container dirs** (`dotfiles.conf`) precisely because the set of layers owning
+  them varies with the active theme: a theme shipping
+  `.config/btop/themes/current.theme` makes that layer sole owner of `themes/`,
+  while a theme *without* the seam leaves the home layer sole owner of
+  `.config/btop`. Either way the sole-owner dir gets folded, and the fold
+  collides with the real directory the previously active theme left behind →
+  `CONFLICT` → the whole theme switch aborts. As containers, only `btop.conf`
+  and `themes/current.theme` are linked, as individual children.
 - Secrets (see Environment & scope).
 
 ### Current inventory (snapshot)

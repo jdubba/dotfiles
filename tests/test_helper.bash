@@ -72,3 +72,10 @@ mk_theme_default() {
   mkdir -p "$DF_TEST_REPO/themes"
   printf '%s\n' "$1" >"$DF_TEST_REPO/themes/default"
 }
+
+# mk_repo_conf <line...>  - author the sandbox repo's dotfiles.conf. The real
+# repo's dotfiles.conf is deliberately NOT copied into the sandbox, so tests
+# that need repo config (e.g. extra container dirs) declare their own.
+mk_repo_conf() {
+  printf '%s\n' "$@" >"$DF_TEST_REPO/dotfiles.conf"
+}

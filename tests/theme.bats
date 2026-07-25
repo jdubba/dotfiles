@@ -263,3 +263,46 @@ teardown() { teardown_sandbox; }
   [ -e "$HOME/.config/background" ]
   grep -q "gruvbox-image-bytes" "$HOME/.config/background"
 }
+
+# --- .config/btop must be a container --------------------------------------
+#
+# Regression: which layers own .config/btop varies with the active theme (only
+# some themes ship a btop seam), so a sole-owner layer got the directory folded
+# into one symlink -- which collided with the real directory the previously
+# active theme left behind and reported a CONFLICT, breaking the switch.
+
+@test "a container dir with a single owning layer is not folded" {
+  mk_repo_conf 'DF_CONTAINER_DIRS+=(".config/btop" ".config/btop/themes")'
+  mk_home ".config/btop/btop.conf" "btop-settings"
+  mk_theme_default gruvbox-dark
+
+  run "$DOTFILES" link
+  [ "$status" -eq 0 ]
+  [ ! -L "$HOME/.config/btop" ]                 # real directory, never folded
+  [ -d "$HOME/.config/btop" ]
+  [ -L "$HOME/.config/btop/btop.conf" ]         # only the child is linked
+}
+
+@test "switching to a theme with no btop seam does not conflict on .config/btop" {
+  mk_repo_conf 'DF_CONTAINER_DIRS+=(".config/btop" ".config/btop/themes")'
+  mk_home ".config/btop/btop.conf" "btop-settings"
+  # themed: ships a btop seam; plain: does not.
+  mk_theme themed ".config/btop/themes/current.theme" "themed-btop"
+  mk_theme plain ".config/starship.toml" "plain-starship"
+  mk_theme_default themed
+
+  run "$DOTFILES" theme set themed
+  [ "$status" -eq 0 ]
+  [ ! -L "$HOME/.config/btop" ]                 # container: real dir
+  [ ! -L "$HOME/.config/btop/themes" ]          # nested container: also real
+  [ -L "$HOME/.config/btop/themes/current.theme" ]
+  grep -q "themed-btop" "$HOME/.config/btop/themes/current.theme"
+
+  # Now the home layer is the only owner of .config/btop -- the fold that used
+  # to happen here is what produced the conflict.
+  run "$DOTFILES" theme set plain
+  [ "$status" -eq 0 ]
+  [[ "$output" != *"CONFLICT"* ]]
+  [ ! -L "$HOME/.config/btop" ]
+  [ -L "$HOME/.config/btop/btop.conf" ]
+}
