@@ -661,6 +661,38 @@ instead of erroring.
   on start); there is no config-reload IPC, so only a structural `hyprpaper.conf`
   change needs `systemctl --user restart hyprpaper.service`.
 
+**Brave is aligned, not themed** (`_df_theme_brave_apply` in
+`lib/commands/theme.sh` + `lib/theme-brave.py`). Chromium's custom-color theme is
+a *seed*, not a palette: it derives the whole chrome from one colour via Material
+You, so the bar accent (`@define-color pill-brand-bg`) plus the theme's polarity
+is the entire input. This deliberately has **no seam of its own** — the accent is
+read back out of the linked `waybar/colors.css` and the polarity out of
+`nvim/lua/dotfiles_theme.lua` (`background = "dark"|"light"`), both of which every
+theme including generated `auto` already ships. Adding a seam would mean an
+emitter change plus regenerating all 41 themes for a cosmetic extra.
+- Prefs live per profile in `~/.config/BraveSoftware/Brave-Browser/<Profile>/Preferences`
+  (only `Default` is managed): `browser.theme.user_color2` is a **signed** 32-bit
+  ARGB `SkColor`, `color_scheme2` is `1` light / `2` dark (`0` = system, verified
+  by screenshotting both), `color_variant2` is the Material variant (left alone),
+  and `extensions.theme.id = "user_color_theme_id"` is what selects custom-colour
+  mode at all.
+- **Brave must not be running when the write lands.** It holds prefs in memory,
+  rewrites the file from that copy throughout the session *and on quit*, and never
+  re-reads it — so a write while it is open is silently discarded, and there is no
+  live-reload path like waybar/kitty. `_df_theme_brave_running` therefore checks
+  `SingletonLock` (a symlink to `<host>-<pid>`, data-dir-specific, but it also
+  outlives a crash → verify the pid is alive) and skips with a note; the change is
+  reported as applying at the next launch.
+- Neither key touched is in `Preferences`' `protection.macs` (which covers only
+  `browser.show_home_button` and `extensions.install.*`, with no `super_mac`), so
+  the external write does not trip Chromium's preference-tamper reset. Check this
+  again if the set of keys ever widens.
+- The `BrowserThemeColor` enterprise policy (`/etc/brave/policies/managed/`, and
+  the string *is* in the shipped binary) is the alternative: it applies live and
+  cannot be clobbered, but it needs a root-owned file outside `$HOME` — so outside
+  the symlink farm — covers all profiles, and marks the browser "managed by your
+  organization" with the picker disabled. Rejected for cosmetics.
+
 **Auto-theming** (`dotfiles theme auto`, `lib/theme-auto.sh`) derives a palette
 from the wallpaper and generates the whole `themes/auto/` tree (gitignored).
 Full detail + the GNOME/KDE detection backlog live in **`docs/auto-theming.md`**.
