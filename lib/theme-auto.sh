@@ -548,12 +548,26 @@ EOF
 EOF
 
   # tmux
+  #
+  # status-style is the modern option; status-bg/status-fg are the deprecated
+  # pair it replaced. Setting status-bg does NOT update status-style (`show -g
+  # status-style` keeps reporting its own value), but at render time the
+  # deprecated pair WINS -- verified by capturing what a client emits: with
+  # status-style left at its default green and only status-bg set, tmux writes
+  # the status-bg colour.
+  #
+  # That precedence is why the seam has to clear them. tmux options live in the
+  # server, not the config file, so a long-running server that ever sourced an
+  # older seam still holds its status-bg, and it would override every later
+  # theme's status-style forever -- the bar would simply stop following the
+  # theme. `set -gu` is idempotent, so this is harmless where they were never set.
   cat >"$dest/.config/tmux/current-theme.conf" <<EOF
 # ${tag} tmux colors
 set -g pane-border-style fg=${c8}
 set -g pane-active-border-style fg=${c5}
-set -g status-bg '${bg}'
-set -g status-fg '${fg}'
+set -gu status-bg
+set -gu status-fg
+set -g status-style 'bg=${bg},fg=${fg}'
 set -g status-left '#[fg=${c6}]#S #[fg=${c3}]|'
 set -g status-right '#[fg=${c6}]%Y-%m-%d #[fg=${fg}]%H:%M #[fg=${c3}][#(whoami)]'
 setw -g window-status-format '#I:#W'
