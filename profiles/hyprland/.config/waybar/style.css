@@ -17,8 +17,13 @@
   font-size: 15px;
 }
 
+/* The bar's own base must follow the active theme. This was hardcoded to
+   rgba(34, 36, 54, 0.6) -- a dark slate that every theme inherited regardless of
+   its palette, so the strip behind the pills looked identical in all 40 themes
+   and light themes wore a dark-theme bar. @bar-bg is defined by every theme's
+   colors.css; alpha() keeps the original 60% translucency. */
 window#waybar {
-  background: rgba(34, 36, 54, 0.6);
+  background: alpha(@bar-bg, 0.6);
 }
 
 window#waybar.hidden {
