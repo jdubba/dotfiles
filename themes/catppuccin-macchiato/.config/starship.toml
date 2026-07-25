@@ -38,10 +38,14 @@ color_os_bg = '#a6da95'
 color_os_fg = '#181926'
 color_time_bg = '#f5bde6'
 color_dir_bg = '#8aadf4'
-# The path reads at 4.99:1 and the repo name at 7.77:1, so the repo root is the
-# stronger of the two -- emphasis by tone, since no hue survives on periwinkle.
+# The repo root is set apart from the rest of the path by hue AND weight, not by
+# tone. Both inks have to be dark to stay legible on periwinkle -- a mid-luminance
+# saturated surface, where only near-black or near-white survives -- so they are
+# always in the same tonal family, and merely darkening one reads as the same
+# colour. Plum is mauve #c6a0f6 ramped 75% toward the ink; vivid mauve itself
+# measures 1.04:1 here and vanishes. Bold supplies the second axis for free.
 color_dir_fg = '#363a4f'
-color_dir_repo_fg = '#181926'
+color_dir_repo_fg = '#41374d'
 color_red = '#ed8796'
 color_connector = '#ed8796'
 # The branch and ahead/behind pills keep their backgrounds and take a dark ink
@@ -105,7 +109,7 @@ format = "[@$hostname ]($style)"
 [directory]
 truncation_length = 3
 truncate_to_repo = false
-repo_root_style = "fg:color_dir_repo_fg bg:color_dir_bg"
+repo_root_style = "bold fg:color_dir_repo_fg bg:color_dir_bg"
 #repo_root_style = "fg:color_dir_repo_fg bg:color_dir_bg"
 fish_style_pwd_dir_length = 2
 # Repo format
