@@ -1,19 +1,35 @@
-/* catppuccin-macchiato walker palette */
-@define-color window_bg_color #24273a;
-/* Chrome -- the window and preview borders. Teal, the accent the bar gives its
-   primary pills: walker is launched from the brand pill, so the launcher's frame
-   echoes the button that opens it. Replaces the generated pink (c5). Reached only
-   via darker() for 1px borders, never as a background behind text. */
-@define-color accent_bg_color #8bd5ca;
-/* The selected row, and the reason accent and highlight were split upstream:
-   chrome and selection want different hues here. Dusty rose, the bar's workspace
-   dots and the prompt's connectors. Selected-row text reads at 6.36:1 over the
-   resulting #563f51 blend -- better than teal's 5.50:1, and better than the
-   generated pink's 5.37:1. */
+/* catppuccin-macchiato walker palette
+ *
+ * The launcher deliberately inverts the rest of the theme: a bright teal panel
+ * with dark indigo ink, rather than the dark indigo panel every other theme
+ * generates. Teal is the accent the bar gives its primary pills, and walker is
+ * launched from one, so the panel reads as that button opening up.
+ *
+ * The inversion is why theme_fg_color moves. Everything walker draws text on is
+ * now light, so the generated light ink (#cad3f5) would have left every label at
+ * 1.13:1 on the teal. Dark indigo on the same surface reads at 8.74:1, and every
+ * derived surface stays clear of 4.5:1:
+ *
+ *   ink on the teal panel                             8.74:1
+ *   ink on the panel as drawn, alpha .85 over the wallpaper   6.73:1
+ *   ink on the rose selection tint    (#a4c2bd)        7.73:1
+ *   ink on the periwinkle F-key chip  (#8bcbd4)        8.13:1
+ *   ink on the solid error background                  5.96:1
+ *
+ * style.css also draws lighter(@window_bg_color) for the search field; lightening
+ * a light panel only raises contrast against a dark ink, so those are safe too.
+ */
+@define-color window_bg_color #8bd5ca;
+/* Chrome: the window and preview borders, and the F-key activation chips.
+   Periwinkle, the bar's workspaces surface and the prompt's directory pill.
+   Reached via darker() for the 1px borders and alpha(..., 0.25) for the chips. */
+@define-color accent_bg_color #8aadf4;
+/* The selected row alone. Dusty rose, the bar's workspace dots and the prompt's
+   connectors. Split from accent_bg_color so chrome and selection can differ. */
 @define-color highlight_bg_color #ed8796;
-@define-color theme_fg_color  #cad3f5;
-/* The one place walker puts text on a solid themed background, and unlike
-   gruvbox-dark's generated pair (2.69:1, a real failure) this one is already
-   sound at 5.96:1 -- left as generated. */
+/* Dark indigo, because the panel is light. See the note above. */
+@define-color theme_fg_color  #24273a;
+/* The one place walker puts text on a solid themed background. Sound as
+   generated at 5.96:1, and the ink is unchanged by the inversion. */
 @define-color error_bg_color  #ed8796;
 @define-color error_fg_color  #24273a;
