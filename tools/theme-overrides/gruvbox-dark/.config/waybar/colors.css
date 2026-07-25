@@ -1,10 +1,16 @@
 /* gruvbox-dark waybar palette */
 @define-color bar-bg          #282828;
 @define-color bar-fg          #ebdbb2;
-@define-color ws-bg           #282828;
-@define-color ws-fg           #928374;
-@define-color ws-fg-occupied  #a89984;
-@define-color ws-fg-active    #ebdbb2;
+/* Workspaces: treated as a pill in the c3 yellow accent -- the same #d79921 the
+   theme switcher uses -- rather than the achromatic c0/c7/c8/fg the emitter used
+   to assign, which made this module read as grey chrome and look identical in
+   every theme. The dots ramp gruvbox's own blue #458588 toward the surface ink
+   so every state carries hue rather than being grey, while emphasis still climbs:
+   empty 2.49:1, occupied 4.05:1, active 6.33:1. ws-glow tracks the active dot. */
+@define-color ws-bg           #d79921;
+@define-color ws-fg           #39696b;
+@define-color ws-fg-occupied  #2a4748;
+@define-color ws-fg-active    #1b2525;
 /* Both left pills and the primary right pill share one accent -- gruvbox
    neutral blue -- so the bar reads as a single unit instead of a rainbow.
    fg is gruvbox fg0 rather than a generic near-white to stay on-palette. */
@@ -21,4 +27,4 @@
    Kept because the emitter emits the full pill set for every theme. */
 @define-color pill-batt-bg    #98971a;
 @define-color pill-batt-fg    #f0f0f0;
-@define-color ws-glow          #ebdbb2;
+@define-color ws-glow          #1b2525;
