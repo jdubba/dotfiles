@@ -14,3 +14,11 @@ export FZF_DEFAULT_OPTS="
     --border
     --preview 'bat --style=numbers --color=always {}'
 "
+
+# Ctrl+R (history) — see the note in zsh/fzf.zsh: overrides the bat preview above,
+# which cannot apply to history lines.
+export FZF_CTRL_R_OPTS="
+    --preview 'printf %s {2..}'
+    --preview-window up:3:hidden:wrap
+    --bind 'ctrl-/:toggle-preview'
+"

@@ -16,6 +16,16 @@ export FZF_DEFAULT_OPTS="
     --preview 'bat --style=numbers --color=always {}'
 "
 
+# Ctrl+R (history). fzf's widget appends FZF_CTRL_R_OPTS *after* FZF_DEFAULT_OPTS,
+# so this is also what stops the bat preview above from being applied to history
+# lines (bat would just error on "command not a file"). Preview the selected
+# command itself instead — hidden until toggled, for long/multi-line entries.
+export FZF_CTRL_R_OPTS="
+    --preview 'printf %s {2..}'
+    --preview-window up:3:hidden:wrap
+    --bind 'ctrl-/:toggle-preview'
+"
+
 _fzf_file_no_hidden() {
     local cmd result
     cmd="${FZF_DEFAULT_COMMAND/--hidden }"
