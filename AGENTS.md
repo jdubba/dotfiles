@@ -426,7 +426,16 @@ after emission by `apply_overrides`. Currently the 9 "polished" themes
 (`ayu-{dark,light,mirage}`, `carbonfox`, `catppuccin-{frappe,latte}`, `dracula`,
 `gruvbox-{dark,light}`) carry 36 between them. Adding one is a decision to
 maintain that file by hand — it stops tracking palette and seam-format changes —
-so keep them few and delete one as soon as the generic formula can express it.
+so add one deliberately rather than by habit.
+
+**An override that diverges from the default is not drift.** The generated
+assignment is a *default*, and a theme is free to want something else entirely —
+a full rainbow across the pills, or a different alignment of roles to hues. So
+when an emitter change lands, do not treat the themes it cannot reach as lagging
+behind or reconcile them to match: note that they keep their own treatment and
+leave them alone unless asked. Retiring an override is only obvious when it
+exists *solely* to work around something the formula has since learned to
+express.
 **Editing `themes/` directly is always wrong**: the next `build-themes.sh` run
 silently reverts it.
 
@@ -523,11 +532,13 @@ light/dark branch entirely:
   key (`color_os_fg`), and `style_root` breaks whenever `os_bg` becomes an accent
   (its ANSI yellow disappears) — repoint it at `color_red`.
 
-**An override pins a value, so emitter improvements skip that theme.** After
-changing the emitter, check which `tools/theme-overrides/*/` files hardcode what
-you just improved and update them too, or say which themes now lag. As of this
-writing `ayu-dark`, `ayu-mirage`, `carbonfox`, `catppuccin-{frappe,latte}` still
-carry the old achromatic workspaces.
+**An override pins a value, so emitter changes do not reach that theme.** After
+changing the emitter, report which `tools/theme-overrides/*/` files hardcode what
+you just changed, so the difference is visible — but treat that as information,
+not a to-do list. Those themes keep their own treatment by design; see the
+override note above. As of this writing `ayu-dark`, `ayu-mirage`, `carbonfox`,
+`catppuccin-{frappe,latte}` keep achromatic workspaces, and `gruvbox-{dark,light}`
+give the workspaces and switcher a shared hue — all deliberate.
 
 **Verify by rendering, not by reading the file.** `starship prompt --status=0
 --path=<dir>` prints real escape sequences — parse them to confirm which colours
