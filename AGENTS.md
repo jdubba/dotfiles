@@ -544,29 +544,39 @@ light/dark branch entirely:
   binary is not evidence the class exists — probe the live bar with sentinel
   colours instead.
 
-**Outstanding — fold into the next contrast pass.** Fixing that dead selector lit
-`@ws-fg-occupied` up in all 40 themes for the first time, and the ramp does not
-clear the 3.0 dot target everywhere: **16 of 40 measure under it**, worst
-`catppuccin-latte` at 1.29:1 (`#acb0be` on `#04a5e5`), then terafox 1.92,
-ayu-light 2.12, github-light and monokai-pro 2.16. The cause is structural rather
-than a bad constant: the ramp mixes the **pill** accent toward the **surface's**
-ink, so nothing in the formula constrains the result against the surface it is
-drawn on, and the 25/55/85 stops were chosen for a monotonic ramp and a ~2:1
-faintest state — the occupied state was invisible, so it was never measurable.
-`catppuccin-macchiato` is fine at 3.33:1.
+**The emitter can measure contrast — use it.** `_dfa_contrast <a> <b>` in
+`lib/theme-auto.sh` returns a real WCAG ratio scaled by 1000 (`4500` == 4.5:1),
+backed by `_dfa_wcag_lum` and the 256-entry `_DFA_LIN` sRGB linearisation table.
+Integer bash, no dependencies, because `theme auto` runs the emitter at runtime.
+The table exists because WCAG's transform needs a 2.4 power shell arithmetic
+cannot express; it agrees with a float implementation to ~0.001 in ratio terms.
+Do **not** reach for `_dfa_lum` when the question is legibility — that is Rec.601
+luma, useful only for the near-black/near-white ink choice in `_dfa_contrast_fg`.
 
-**Also outstanding — terminal selection contrast.** The emitter pairs
-`selection_foreground = fg` with `selection_background = c8` for kitty and
-ghostty, and on many palettes `c8` sits too close to `fg` in luminance: **26 of
-40 themes put selected text under 4.5:1**, worst `solarized-light` at 1.21:1
-(`#657b83` on `#586e75` — effectively invisible), then kanagawa-dragon 1.47,
-catppuccin-latte 1.62, solarized-dark 1.70, ayu-light 1.96. Light themes
-dominate the failures because their `c8` is a mid grey close to their `fg`.
-A generic fix wants the selection surface chosen by *measuring* against `fg`
-(walk the palette's own surface tones, or mix `bg` toward `fg` until the pair
-clears 4.5) rather than always taking `c8`. `catppuccin-macchiato` is fixed in
-its override (surface1, 5.59:1); every other theme still carries the generated
-pairing.
+Two long-standing defects came from the emitter assigning by palette slot with no
+way to check the result, and both are now measured rather than assumed:
+
+- **Workspace dots.** The occupied stop was a fixed 55% along a ramp starting from
+  a *different* hue than the surface, so where the pill accent sat near the
+  workspace surface in luminance the middle of the ramp landed on top of it — 16
+  of 40 themes under the 3:1 dot target, worst `catppuccin-latte` at 1.29:1. The
+  stop now starts at 55 and walks up until it measures 3:1 against the surface, so
+  themes that already passed keep their exact colours; active keeps a 15-point
+  lead to preserve the ordering, and empty stays fixed and faint because it is
+  chrome.
+- **Terminal selection.** `selection_foreground = fg` over `selection_background =
+  c8` left selected text under 4.5:1 in 26 of 40 themes (`solarized-light` 1.21:1
+  — selecting text made it invisible). `c8` is kept, being the palette's own
+  selection tone, and the ink is chosen by measurement: `fg`, else `bg`, else the
+  near-black/near-white that must work. Where `c8` is mid-luminance and no ink can
+  clear 4.5 (5 palettes), the surface moves instead, mixing `c8` away from the
+  `fg`'s own pole.
+
+No shipped theme is now under either target — worst occupied 3.01:1, worst
+selected text 4.53:1. **When adding a pairing to the emitter, measure it across
+every palette rather than picking a constant that looks right on the theme in
+front of you**; that is what both of these got wrong, and a sweep over
+`themes/*/` catches it in seconds.
 
 **An override pins a value, so emitter changes do not reach that theme.** After
 changing the emitter, report which `tools/theme-overrides/*/` files hardcode what
