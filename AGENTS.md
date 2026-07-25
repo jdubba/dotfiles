@@ -91,7 +91,8 @@ container, so adopting genuinely general-purpose scripts there is fine too.
 - opencode's own state under `~/.config/opencode` (`node_modules`,
   `package.json`/`package-lock.json`, `.gitignore`) and machine-local, unmanaged
   content such as `agent/`. Only `opencode.jsonc` (**host layer** — its MCP
-  servers are per-machine: corporate endpoints, `AWS_PROFILE`-keyed servers) and
+  servers are per-machine: corporate endpoints, `AWS_PROFILE`-keyed servers;
+  `home/` carries only a schema-only stub, which any host file shadows) and
   `tui.json` (theme seam, with a `home/` fallback) are managed; the dir is a
   container in `dotfiles.conf` so the rest can't be folded into the repo or
   adopted.
