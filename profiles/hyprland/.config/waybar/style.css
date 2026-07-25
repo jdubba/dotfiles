@@ -181,17 +181,27 @@ window#waybar.hidden {
   padding: 0 6px;
 }
 
+/* waybar's hyprland/workspaces marks the EMPTY workspaces, not the occupied
+   ones -- its classes are .active/.empty/.persistent/.visible/.special/.urgent/
+   .hosting-monitor, and there is NO .occupied. So a `button.occupied` rule
+   matches nothing and @ws-fg-occupied never renders, which is how every theme's
+   occupied state stayed invisible: empty and occupied both fell through to the
+   base rule. Carry the occupied ink on the base and let .empty dim it back down.
+   Verified against the live bar: of eight persistent workspaces, only the one
+   holding a window lacked .empty. */
 #workspaces button {
-  color: @ws-fg;
+  color: @ws-fg-occupied;
   background: transparent;
   padding: 2px 4px;
   transition: color 0.3s ease, text-shadow 0.3s ease, transform 0.3s ease;
 }
 
-#workspaces button.occupied {
-  color: @ws-fg-occupied;
+#workspaces button.empty {
+  color: @ws-fg;
 }
 
+/* Equal specificity to .empty, so this must stay AFTER it -- an active
+   workspace with nothing on it still has to read as active. */
 #workspaces button.active {
   color: @ws-fg-active;
   text-shadow: 0 0 4px @ws-glow;
