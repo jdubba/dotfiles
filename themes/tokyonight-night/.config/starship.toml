@@ -26,7 +26,7 @@ palette = 'starship_dubba'
 
 [palettes.starship_dubba]
 color_fg_primary = '#c0caf5'
-color_os_bg = '#15161e'
+color_os_bg = '#333545'
 color_os_fg = '#c0caf5'
 color_time_bg = '#bb9af7'
 color_dir_bg = '#7aa2f7'

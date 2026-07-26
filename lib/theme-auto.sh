@@ -271,6 +271,29 @@ _dfa_pair_for() {
 # discipline the workspace-dot and repo-root ramps use. Give it the ink that
 # contrasts with <surface> as <toward> and the ramp works in both polarities:
 # it darkens on a light surface and lightens on a dark one.
+# Manhattan distance in sRGB between two colours: |dR| + |dG| + |dB|, 0..765.
+#
+# A cheap stand-in for perceptual difference, for the one question WCAG cannot
+# answer: are two adjacent FILLED SHAPES distinguishable? WCAG measures relative
+# luminance only, which is right for text and wrong here -- a powerline cap of
+# amber on plum measures 1.39:1 and is unmistakable, because the hues are ~80
+# CIELAB dE apart. Using WCAG for shape boundaries flags 108 of the 240 shipped
+# adjacencies; only 35 of those are actually indistinguishable.
+#
+# Real CIELAB needs a cube root, which integer bash cannot do and which the
+# emitter cannot afford anyway (theme auto runs it). Calibrated against CIELAB
+# over every shipped palette, this tracks it well enough for the purpose: across
+# the 40 os caps, every pair under dE 20 measures <= 124 here and every pair over
+# it measures >= 144, so the two agree on which caps are the problem.
+_dfa_rgb_dist() {
+  local a=${1#\#} b=${2#\#} d=0 i x y
+  for i in 0 2 4; do
+    x=$((16#${a:$i:2})); y=$((16#${b:$i:2}))
+    if (( x > y )); then d=$(( d + x - y )); else d=$(( d + y - x )); fi
+  done
+  printf '%d' "$d"
+}
+
 _dfa_ramp_to() {
   local start=$1 toward=$2 surface=$3 target=$4 out=$1 q=0
   while (( q < 100 )) && (( $(_dfa_contrast "$out" "$surface") < target )); do
@@ -768,7 +791,26 @@ EOF
     # invisible os/user segment) and onedark's repo root at 1.00:1.
     local star_os_bg star_os_fg star_dir_bg star_dir_fg star_repo_bg star_repo_fg
     local star_change_fg star_diverge_fg
-    read -r star_os_bg star_os_fg <<<"$(_dfa_pair_for "$c0" "$fg" "$bg")"
+    # The os segment opens with a  cap drawn in color_os_bg ON the terminal
+    # background, so the pill's leading edge exists only if those two differ.
+    # os_bg is c0 -- and c0 IS the background in 8 of the 41 palettes, so on
+    # monokai, monokai-pro, onedark, oxocarbon, palenight and zenburn the cap was
+    # drawn in exactly the background colour and did not render at all. Another
+    # dozen palettes put c0 within a few dE of bg, which is a cap you have to look
+    # for. It reads as a squared-off pill rather than a bug, which is why it
+    # survived every contrast sweep: WCAG says a shape on an identical background
+    # is 1.00:1, and 1.00:1 was filed under "cosmetic powerline separators".
+    #
+    # Lift the surface off the background until the cap is actually a shape,
+    # measuring with _dfa_rgb_dist because the question is visibility of a fill,
+    # not legibility of text. Palettes whose c0 already stands apart -- 21 of
+    # them -- keep c0 exactly.
+    local star_os_surface=$c0 _os_q=0
+    while (( _os_q < 60 )) && (( $(_dfa_rgb_dist "$star_os_surface" "$bg") < 60 )); do
+      _os_q=$(( _os_q + 5 ))
+      star_os_surface=$(_df_theme_mix "$bg" "$fg" "$_os_q")
+    done
+    read -r star_os_bg star_os_fg <<<"$(_dfa_pair_for "$star_os_surface" "$fg" "$bg")"
     read -r star_dir_bg star_dir_fg <<<"$(_dfa_pair_for "$c4" "$fg" "$bg")"
     read -r star_repo_bg star_repo_fg <<<"$(_dfa_pair_for "$c5" "$fg" "$bg")"
     # The ahead/behind segment draws on the same c4 as the path, so it takes the

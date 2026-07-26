@@ -26,7 +26,7 @@ palette = 'starship_dubba'
 
 [palettes.starship_dubba]
 color_fg_primary = '#e6eaea'
-color_os_bg = '#2f3239'
+color_os_bg = '#2a393b'
 color_os_fg = '#e6eaea'
 color_time_bg = '#ad5c7c'
 color_dir_bg = '#5a93aa'
@@ -42,7 +42,7 @@ color_repo_diverge_fg = '#152528'
 color_repo_diverge_bg = '#5a93aa'
 color_fg_right = '#eaeeee'
 color_fg_sep = '#6e7176'
-color_root_fg = '#ea7a71'
+color_root_fg = '#ea8179'
 [fill]
 symbol = " "
 

@@ -565,12 +565,36 @@ light/dark branch entirely:
   that needed the escape cleared AA within 10% — a slight deepening of an accent,
   not a replacement. `_dfa_ink_for` is the ink-only half, for callers that must
   not touch the surface.
-- **The starship powerline separators are a separate, unfixed problem**: 71 pairs
-  across the themes measure under 3:1, because a separator glyph is drawn in one
-  pill's background *on* the next pill's, and adjacent accents are often close in
-  luminance. No text is involved, so it is cosmetic — two pills read as one. The
-  only real lever is assigning segment backgrounds by luminance separation, which
-  is an accent-assignment change, not a contrast fix.
+- **Do not use WCAG contrast on the starship powerline separators** — it is the
+  wrong instrument and it produced a wrong conclusion here for a long time. A
+  separator is a *filled shape*: one pill's background drawn as a `` glyph on
+  the next pill's background. WCAG measures relative luminance only, which is
+  correct for text (where hue cannot be relied on) and badly wrong for "are these
+  two blocks distinguishable". dawnfox's os→directory cap measures **1.39:1** and
+  is unmistakable — amber on plum, ~79 CIELAB ΔE apart.
+  Measured both ways over the 240 shipped adjacencies: **108 fail WCAG 3:1, but
+  only 35 fail ΔE 20.** This note used to cite the WCAG figure ("71 pairs") and
+  conclude the whole class was cosmetic and only fixable by reassigning accents.
+  That hid a real bug inside the noise for months.
+  Use **`_dfa_rgb_dist`** for shape-vs-shape questions and `_dfa_contrast` only
+  for text. `_dfa_rgb_dist` is Manhattan distance in sRGB, calibrated against
+  CIELAB across every shipped palette (under ΔE 20 ⇒ ≤124; over ⇒ ≥144, a clean
+  gap), because real CIELAB needs a cube root integer bash cannot do.
+- **The os segment's leading cap was invisible on 8 palettes, now fixed.** It is
+  drawn in `color_os_bg` on the terminal background, and `color_os_bg` is `c0` —
+  which **is the background** in monokai, monokai-pro, onedark, oxocarbon,
+  palenight and zenburn, so the cap rendered as nothing at all (ΔE 0), and sat
+  within a few ΔE of it on a dozen more. It looked like a squared-off pill rather
+  than a defect, and every sweep filed its 1.00:1 under "cosmetic separators".
+  `_dfa_emit_starship` now lifts the os surface off the background
+  (`_dfa_rgb_dist` ≥ 60, ≈ ΔE 10) before `_dfa_pair_for` picks the ink; the 21
+  palettes whose `c0` already stands apart keep `c0` exactly. No zero-distance cap
+  remains.
+  What is genuinely left of this class is small and needs no framework: seven
+  adjacent-pill pairs merge (`branch→changes` on gruvbox ×2, kanagawa-dragon and
+  rose-pine-dawn; `changes→ahead/behind` on kanagawa-dragon and zenburn;
+  `os→directory` on ayu-dark). Those are close in *both* hue and luminance, and
+  fixing them really would mean reassigning accents as a sequence.
 - **`hyprland/workspaces` has no `.occupied` class.** It marks the *empty*
   workspaces, not the occupied ones — the classes are `.active`, `.empty`,
   `.persistent`, `.visible`, `.special`, `.urgent`, `.hosting-monitor`. A
