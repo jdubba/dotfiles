@@ -141,6 +141,38 @@
   <span class="sw-hex">#575279</span>
   <span class="sw-sub">bg 6.66 · fg 1.00</span>
 </div></div><p class="legend">Note: <code>fg</code>, <code>c7</code>, <code>c15</code> are all <code>#575279</code>; <code>c1</code>, <code>c9</code> are all <code>#b4637a</code>; <code>c2</code>, <code>c10</code> are all <code>#286983</code>; <code>c3</code>, <code>c11</code> are all <code>#ea9d34</code>; <code>c4</code>, <code>c12</code> are all <code>#56949f</code>; <code>c5</code>, <code>c13</code> are all <code>#907aa9</code>; <code>c6</code>, <code>c14</code> are all <code>#d7827e</code>; <code>c0</code> (<code>#f2e9e1</code>) is all but the background.</p>
+<h2>Beyond the ANSI slots</h2>
+<p class="note">Roles this theme's upstream spec defines that the sixteen
+  ANSI slots cannot carry. <strong>Usable in waybar, walker, hypr/hyprlock,
+  starship and tmux</strong> &mdash; GTK CSS, raw hex and truecolor escapes take any
+  colour. <strong>Not usable in kitty/ghostty</strong>, whose palette is the sixteen,
+  nor in bat/fzf, which follow it. Using one means hand-maintaining that seam:
+  the emitter derives only from the ANSI slots.</p>
+<div class="grid"><div class="sw" style="background:#fffaf3;color:#141414">
+  <span class="sw-label">surface</span>
+  <span class="sw-hex">#FFFAF3</span>
+  <span class="sw-sub">1.05 on bg</span>
+</div><div class="sw" style="background:#f4ede8;color:#141414">
+  <span class="sw-label">highlight_low</span>
+  <span class="sw-hex">#F4EDE8</span>
+  <span class="sw-sub">1.06 on bg</span>
+</div><div class="sw" style="background:#dfdad9;color:#141414">
+  <span class="sw-label">highlight_med</span>
+  <span class="sw-hex">#DFDAD9</span>
+  <span class="sw-sub">1.27 on bg</span>
+</div><div class="sw" style="background:#cecacd;color:#141414">
+  <span class="sw-label">highlight_high</span>
+  <span class="sw-hex">#CECACD</span>
+  <span class="sw-sub">1.48 on bg</span>
+</div><div class="sw" style="background:#797593;color:#141414">
+  <span class="sw-label">subtle</span>
+  <span class="sw-hex">#797593</span>
+  <span class="sw-sub">4.02 on bg</span>
+</div><div class="sw" style="background:#6d8f89;color:#141414">
+  <span class="sw-label">leaf</span>
+  <span class="sw-hex">#6D8F89</span>
+  <span class="sw-sub">3.24 on bg</span>
+</div></div><div class="tablewrap"><table><tr><th>role</th><th>sample</th><th>hex</th><th>vs bg</th><th>&Delta;E</th><th>intent</th></tr><tr><td class="role">surface</td><td><span class="chip" style="background:#fffaf3;color:#575279">&nbsp;Ag&nbsp;</span></td><td class="mono">#FFFAF3</td><td class="ratio">1.05:1</td><td class="target">2</td><td>panel ground, one step above base</td></tr><tr><td class="role">highlight_low</td><td><span class="chip" style="background:#f4ede8;color:#575279">&nbsp;Ag&nbsp;</span></td><td class="mono">#F4EDE8</td><td class="ratio">1.06:1</td><td class="target">3</td><td>subtlest row highlight</td></tr><tr><td class="role">highlight_med</td><td><span class="chip" style="background:#dfdad9;color:#575279">&nbsp;Ag&nbsp;</span></td><td class="mono">#DFDAD9</td><td class="ratio">1.27:1</td><td class="target">10</td><td>selection</td></tr><tr><td class="role">highlight_high</td><td><span class="chip" style="background:#cecacd;color:#575279">&nbsp;Ag&nbsp;</span></td><td class="mono">#CECACD</td><td class="ratio">1.48:1</td><td class="target">16</td><td>borders and dividers</td></tr><tr><td class="role">subtle</td><td><span class="chip" style="background:#797593;color:#faf4ed">&nbsp;Ag&nbsp;</span></td><td class="mono">#797593</td><td class="ratio">4.02:1</td><td class="target">51</td><td>dim ink between muted and text</td></tr><tr><td class="role">leaf</td><td><span class="chip" style="background:#6d8f89;color:#faf4ed">&nbsp;Ag&nbsp;</span></td><td class="mono">#6D8F89</td><td class="ratio">3.24:1</td><td class="target">42</td><td>a seventh accent — the palette&#x27;s only green</td></tr></table></div>
 <h2>Waybar seams</h2>
 
 <div class="grid"><div class="sw" style="background:#faf4ed;color:#141414">

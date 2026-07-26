@@ -39,6 +39,48 @@ SLOT_NAMES = ["black", "red", "green", "yellow", "blue", "magenta", "cyan", "whi
               "br black", "br red", "br green", "br yellow", "br blue", "br magenta",
               "br cyan", "br white"]
 
+# Colours a theme's upstream spec defines that the 16 ANSI slots cannot carry.
+#
+# The seams split into two groups. kitty/ghostty publish an ANSI palette and
+# bat/fzf follow it, so those are locked to the sixteen. Everything else --
+# waybar and walker (GTK CSS), hypr and hyprlock (raw hex), starship and tmux
+# (truecolor escapes) -- takes any colour at all, so a theme with roles outside
+# its ANSI mapping can still use them there. Recording them here puts them in
+# front of the eye during a tuning session instead of buried in a vendor repo.
+#
+# Rose Pine is the clearest case: a ROLE-based spec of nineteen colours squeezed
+# into sixteen slots, so upstream's own kitty port duplicates all seven
+# normal/bright pairs and six roles never appear at all -- including `leaf`, a
+# whole accent hue, and a three-step highlight ramp that is exactly what a bar
+# wants for surfaces. Dracula is the same shape (#44475a, #ffb86c) and could be
+# added here; its overrides currently carry those by hand.
+OFF_SLOT = {
+    "rose-pine": [
+        ("surface", "#1f1d2e", "panel ground, one step above base"),
+        ("highlight_low", "#21202e", "subtlest row highlight"),
+        ("highlight_med", "#403d52", "selection — upstream kitty uses this"),
+        ("highlight_high", "#524f67", "borders and dividers"),
+        ("subtle", "#908caa", "dim ink between muted and text"),
+        ("leaf", "#95b1ac", "a seventh accent — the palette's only green"),
+    ],
+    "rose-pine-moon": [
+        ("surface", "#2a273f", "panel ground, one step above base"),
+        ("highlight_low", "#2a283e", "subtlest row highlight"),
+        ("highlight_med", "#44415a", "selection"),
+        ("highlight_high", "#56526e", "borders and dividers"),
+        ("subtle", "#908caa", "dim ink between muted and text"),
+        ("leaf", "#95b1ac", "a seventh accent — the palette's only green"),
+    ],
+    "rose-pine-dawn": [
+        ("surface", "#fffaf3", "panel ground, one step above base"),
+        ("highlight_low", "#f4ede8", "subtlest row highlight"),
+        ("highlight_med", "#dfdad9", "selection"),
+        ("highlight_high", "#cecacd", "borders and dividers"),
+        ("subtle", "#797593", "dim ink between muted and text"),
+        ("leaf", "#6d8f89", "a seventh accent — the palette's only green"),
+    ],
+}
+
 
 # --- colour maths -----------------------------------------------------------
 
@@ -321,6 +363,33 @@ def build(name):
     parts.append(section("Normal (c0&ndash;c7)", f'<div class="grid">{"".join(normals)}</div>'))
     parts.append(section("Bright (c8&ndash;c15)",
                          f'<div class="grid">{"".join(brights)}</div>' + quirk_html))
+
+    # Off-slot roles: usable everywhere except the terminal's ANSI palette.
+    off = OFF_SLOT.get(name)
+    if off:
+        tiles = "".join(
+            swatch(hexv, role, f"{contrast(hexv, BG):.2f} on bg") for role, hexv, _ in off)
+        rows = "".join(
+            f'<tr><td class="role">{html.escape(role)}</td>'
+            f'<td><span class="chip" style="background:{hexv};color:'
+            f'{FG if contrast(FG, hexv) >= contrast(BG, hexv) else BG}">&nbsp;Ag&nbsp;</span></td>'
+            f'<td class="mono">{hexv.upper()}</td>'
+            f'<td class="ratio">{contrast(hexv, BG):.2f}:1</td>'
+            f'<td class="target">{delta_e(hexv, BG):.0f}</td>'
+            f'<td>{html.escape(note)}</td></tr>'
+            for role, hexv, note in off)
+        note = ("""<p class="note">Roles this theme's upstream spec defines that the sixteen
+  ANSI slots cannot carry. <strong>Usable in waybar, walker, hypr/hyprlock,
+  starship and tmux</strong> &mdash; GTK CSS, raw hex and truecolor escapes take any
+  colour. <strong>Not usable in kitty/ghostty</strong>, whose palette is the sixteen,
+  nor in bat/fzf, which follow it. Using one means hand-maintaining that seam:
+  the emitter derives only from the ANSI slots.</p>""")
+        parts.append(section("Beyond the ANSI slots",
+                             f'<div class="grid">{tiles}</div>'
+                             f'<div class="tablewrap"><table>'
+                             f'<tr><th>role</th><th>sample</th><th>hex</th>'
+                             f'<th>vs bg</th><th>&Delta;E</th><th>intent</th></tr>'
+                             f'{rows}</table></div>', note))
     if wb_sw:
         parts.append(section("Waybar seams", f'<div class="grid">{"".join(wb_sw)}</div>'))
     if wb_pairs:
