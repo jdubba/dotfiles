@@ -18,6 +18,9 @@
 # is idempotent and reproduces themes/ exactly -- tests/theme-build.bats proves
 # it, so a change here that would clobber committed themes fails the suite.
 #
+# Finishes by refreshing docs/palettes/ (the per-theme swatch pages), so those
+# cannot drift from the themes they document. Optional: skipped without python3.
+#
 # Usage: tools/build-themes.sh [name ...]   (no args = all)
 
 set -euo pipefail
@@ -177,5 +180,21 @@ build_theme zenburn               base16               ansi                 syst
 
 # --- Palenight ---
 build_theme palenight             base16               ansi                 system                dark  292d3e a6accd 292d3e f07178 c3e88d ffcb6b 82aaff c792ea 89ddff d0d0d0 434758 ff8b92 ddffa7 ffe585 9cc4ff e1acff a3f7ff ffffff
+
+# Refresh docs/palettes/ so a swatch page can never describe colours that are no
+# longer shipped. The pages are read straight out of themes/, so leaving them to
+# a separate manual step meant they went stale exactly when they matter -- they
+# are consulted while deciding what to change next.
+#
+# Guarded on python3 the same way gen_wallpaper is, and non-fatal: this script
+# must still do its real job without it, just with staler docs.
+# tests/palette-pages.bats is the backstop that catches that case.
+if command -v python3 &>/dev/null; then
+  if python3 "$DF_REPO/tools/build-palette-pages.py" ${ONLY[@]+"${ONLY[@]}"} >/dev/null 2>&1; then
+    printf '  palette pages refreshed\n'
+  else
+    df_warn "palette page generation failed; run tools/build-palette-pages.py"
+  fi
+fi
 
 df_ok "done."
