@@ -710,14 +710,27 @@ instead of erroring.
 - **hyprpaper 0.8.x IPC** dropped `preload`/`unload`/`listloaded`/`reload` (the
   `invalid hyprpaper request` error lives in `hyprctl`, not the daemon; NOT a
   version skew — 0.55.4 hyprctl ↔ 0.8.4 hyprpaper is a matched pair). Only
-  `wallpaper "<mon>,<abspath>"` (loads+applies in one shot, optional
-  `contain:`/`cover:`/`tile:` prefix) and `listactive` survive. `_df_theme_reload`
+  `wallpaper "<mon>,<abspath>"` (loads+applies in one shot) and `listactive`
+  survive. It takes a **bare path only** — a `cover:`/`contain:`/`tile:` prefix
+  is rejected outright (`error: bad path: cover:/home/…`), so the fit mode comes
+  from `hyprpaper.conf` and cannot be set per-push. `_df_theme_reload`
   pushes the new wallpaper live per-monitor
   (`hyprctl monitors | awk '/^Monitor /{print $2}'`, `wallpaper "$mon,$HOME/.config/background"`)
   — no daemon restart, works for both the systemd-service (stationzebra) and
   exec-once (Fedora) setups. Persistence is via `hyprpaper.conf`'s `path=` (read
   on start); there is no config-reload IPC, so only a structural `hyprpaper.conf`
   change needs `systemctl --user restart hyprpaper.service`.
+- **`fit_mode = fill` means STRETCH in hyprpaper, not "fill the screen".** Its
+  parser is `if (sv.starts_with("fill")) return IMAGE_FIT_MODE_STRETCH;`
+  (`src/ui/UI.cpp`), and the accepted set is `contain` / `cover` / `tile` /
+  `fill`, defaulting to `cover`. The shared config said `fill` for a long time
+  and therefore threw aspect ratio away on any output whose ratio differs from
+  the image's. It was invisible on the 16:9 externals — the wallpapers are 16:9 —
+  and only showed on eDP-1 at 16:10, where it distorts by 1.111x. Nothing warns:
+  `fill` is a *valid* value, just the wrong one. Use **`cover`**, which crops the
+  overflow instead. Verify with a round object: the dracula moon measures
+  836x844 in the source and 618x624 on eDP-1, i.e. h/w 1.010 both, distortion
+  1.000.
 
 **Brave is aligned, not themed** (`_df_theme_brave_apply` in
 `lib/commands/theme.sh` + `lib/theme-brave.py`). Chromium's custom-color theme is
