@@ -1,0 +1,413 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>onedark &mdash; palette &amp; seams</title>
+<style>
+  :root {
+    --bg: #282c34; --fg: #abb2bf; --line: rgba(255,255,255,.14);
+    --mono: ui-monospace, "JetBrainsMono Nerd Font", "SFMono-Regular", Menlo, monospace;
+  }
+  body {
+    margin: 0; padding: 2.5rem clamp(1rem, 4vw, 3rem) 5rem;
+    background: var(--bg); color: var(--fg);
+    font: 15px/1.55 ui-sans-serif, "DM Sans", system-ui, sans-serif;
+  }
+  header { margin-bottom: 2.5rem; }
+  h1 { font-size: 2rem; margin: 0 0 .35rem; letter-spacing: -.02em; }
+  .lede { opacity: .75; max-width: 60ch; margin: 0; }
+  h2 {
+    font-size: .82rem; text-transform: uppercase; letter-spacing: .12em;
+    opacity: .6; margin: 2.75rem 0 .9rem; font-weight: 600;
+  }
+  h2 + .note { margin-top: -.5rem; }
+  .note { font-size: .85rem; opacity: .7; margin: 0 0 1rem; max-width: 70ch; }
+  .grid {
+    display: grid; gap: .6rem;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  }
+  .sw {
+    border-radius: 10px; padding: .85rem .8rem 0.7rem;
+    min-height: 78px; display: flex; flex-direction: column; gap: .1rem;
+    border: 1px solid rgba(128,128,128,.35);
+  }
+  .sw-label { font-size: .8rem; font-weight: 600; }
+  .sw-hex { font-family: var(--mono); font-size: .78rem; opacity: .9; }
+  .sw-sub { font-family: var(--mono); font-size: .68rem; opacity: .72; margin-top: auto; }
+  .tablewrap { overflow-x: auto; }
+  table { border-collapse: collapse; width: 100%; min-width: 560px; }
+  th, td { text-align: left; padding: .4rem .7rem; border-bottom: 1px solid var(--line); }
+  th {
+    font-size: .7rem; text-transform: uppercase; letter-spacing: .09em;
+    opacity: .55; font-weight: 600;
+  }
+  .role { font-weight: 500; }
+  .mono, .ratio, .target, .verdict { font-family: var(--mono); font-size: .82rem; }
+  .target { opacity: .45; }
+  .chip {
+    display: inline-block; padding: .18rem .7rem; border-radius: 999px;
+    font-size: .82rem; white-space: nowrap;
+  }
+  .ratio.ok, .verdict.ok { color: #7fcf9a; }
+  .ratio.warn, .verdict.warn { color: #e0b070; }
+  .ratio.bad, .verdict.bad { color: #f08d8d; font-weight: 700; }
+  .legend { font-size: .8rem; opacity: .7; margin-top: .6rem; }
+</style>
+</head><body>
+<header>
+  <h1>onedark</h1>
+  <p class="lede">The dark palette as shipped in
+  <code>themes/onedark/</code>, plus the seams derived from it.
+  Slot names (<code>c0</code>&ndash;<code>c15</code>, <code>bg</code>,
+  <code>fg</code>) are the vocabulary for talking about a theme &mdash; use them
+  rather than hex. Text pairs are WCAG: 4.5:1 for text, 3.0:1 for chrome.</p>
+</header><h2>Base</h2>
+
+<div class="grid"><div class="sw" style="background:#282c34;color:#f0f0f0">
+  <span class="sw-label">background</span>
+  <span class="sw-hex">#282C34</span>
+  <span class="sw-sub">vs fg 6.57:1</span>
+</div><div class="sw" style="background:#abb2bf;color:#141414">
+  <span class="sw-label">foreground</span>
+  <span class="sw-hex">#ABB2BF</span>
+  <span class="sw-sub">vs bg 6.57:1</span>
+</div></div>
+<h2>Normal (c0&ndash;c7)</h2>
+
+<div class="grid"><div class="sw" style="background:#282c34;color:#f0f0f0">
+  <span class="sw-label">c0 · black</span>
+  <span class="sw-hex">#282C34</span>
+  <span class="sw-sub">bg 1.00 · fg 6.57</span>
+</div><div class="sw" style="background:#e06c75;color:#141414">
+  <span class="sw-label">c1 · red</span>
+  <span class="sw-hex">#E06C75</span>
+  <span class="sw-sub">bg 4.38 · fg 1.50</span>
+</div><div class="sw" style="background:#98c379;color:#141414">
+  <span class="sw-label">c2 · green</span>
+  <span class="sw-hex">#98C379</span>
+  <span class="sw-sub">bg 6.94 · fg 1.06</span>
+</div><div class="sw" style="background:#e5c07b;color:#141414">
+  <span class="sw-label">c3 · yellow</span>
+  <span class="sw-hex">#E5C07B</span>
+  <span class="sw-sub">bg 8.10 · fg 1.23</span>
+</div><div class="sw" style="background:#61afef;color:#141414">
+  <span class="sw-label">c4 · blue</span>
+  <span class="sw-hex">#61AFEF</span>
+  <span class="sw-sub">bg 5.92 · fg 1.11</span>
+</div><div class="sw" style="background:#c678dd;color:#141414">
+  <span class="sw-label">c5 · magenta</span>
+  <span class="sw-hex">#C678DD</span>
+  <span class="sw-sub">bg 4.75 · fg 1.38</span>
+</div><div class="sw" style="background:#56b6c2;color:#141414">
+  <span class="sw-label">c6 · cyan</span>
+  <span class="sw-hex">#56B6C2</span>
+  <span class="sw-sub">bg 5.91 · fg 1.11</span>
+</div><div class="sw" style="background:#abb2bf;color:#141414">
+  <span class="sw-label">c7 · white</span>
+  <span class="sw-hex">#ABB2BF</span>
+  <span class="sw-sub">bg 6.57 · fg 1.00</span>
+</div></div>
+<h2>Bright (c8&ndash;c15)</h2>
+
+<div class="grid"><div class="sw" style="background:#545862;color:#f0f0f0">
+  <span class="sw-label">c8 · br black</span>
+  <span class="sw-hex">#545862</span>
+  <span class="sw-sub">bg 1.97 · fg 3.34</span>
+</div><div class="sw" style="background:#e06c75;color:#141414">
+  <span class="sw-label">c9 · br red</span>
+  <span class="sw-hex">#E06C75</span>
+  <span class="sw-sub">bg 4.38 · fg 1.50</span>
+</div><div class="sw" style="background:#98c379;color:#141414">
+  <span class="sw-label">c10 · br green</span>
+  <span class="sw-hex">#98C379</span>
+  <span class="sw-sub">bg 6.94 · fg 1.06</span>
+</div><div class="sw" style="background:#e5c07b;color:#141414">
+  <span class="sw-label">c11 · br yellow</span>
+  <span class="sw-hex">#E5C07B</span>
+  <span class="sw-sub">bg 8.10 · fg 1.23</span>
+</div><div class="sw" style="background:#61afef;color:#141414">
+  <span class="sw-label">c12 · br blue</span>
+  <span class="sw-hex">#61AFEF</span>
+  <span class="sw-sub">bg 5.92 · fg 1.11</span>
+</div><div class="sw" style="background:#c678dd;color:#141414">
+  <span class="sw-label">c13 · br magenta</span>
+  <span class="sw-hex">#C678DD</span>
+  <span class="sw-sub">bg 4.75 · fg 1.38</span>
+</div><div class="sw" style="background:#56b6c2;color:#141414">
+  <span class="sw-label">c14 · br cyan</span>
+  <span class="sw-hex">#56B6C2</span>
+  <span class="sw-sub">bg 5.91 · fg 1.11</span>
+</div><div class="sw" style="background:#c8ccd4;color:#141414">
+  <span class="sw-label">c15 · br white</span>
+  <span class="sw-hex">#C8CCD4</span>
+  <span class="sw-sub">bg 8.70 · fg 1.32</span>
+</div></div><p class="legend">Note: <code>fg</code>, <code>c7</code> are all <code>#abb2bf</code>; <code>c1</code>, <code>c9</code> are all <code>#e06c75</code>; <code>c2</code>, <code>c10</code> are all <code>#98c379</code>; <code>c3</code>, <code>c11</code> are all <code>#e5c07b</code>; <code>c4</code>, <code>c12</code> are all <code>#61afef</code>; <code>c5</code>, <code>c13</code> are all <code>#c678dd</code>; <code>c6</code>, <code>c14</code> are all <code>#56b6c2</code>; <code>c0</code> (<code>#282c34</code>) is all but the background.</p>
+<h2>Waybar seams</h2>
+
+<div class="grid"><div class="sw" style="background:#282c34;color:#f0f0f0">
+  <span class="sw-label">bar-bg</span>
+  <span class="sw-hex">#282C34</span>
+  <span class="sw-sub"></span>
+</div><div class="sw" style="background:#abb2bf;color:#141414">
+  <span class="sw-label">bar-fg</span>
+  <span class="sw-hex">#ABB2BF</span>
+  <span class="sw-sub"></span>
+</div><div class="sw" style="background:#56b6c2;color:#141414">
+  <span class="sw-label">ws-bg</span>
+  <span class="sw-hex">#56B6C2</span>
+  <span class="sw-sub"></span>
+</div><div class="sw" style="background:#4e88b8;color:#141414">
+  <span class="sw-label">ws-fg</span>
+  <span class="sw-hex">#4E88B8</span>
+  <span class="sw-sub"></span>
+</div><div class="sw" style="background:#375a77;color:#f0f0f0">
+  <span class="sw-label">ws-fg-occupied</span>
+  <span class="sw-hex">#375A77</span>
+  <span class="sw-sub"></span>
+</div><div class="sw" style="background:#202b35;color:#f0f0f0">
+  <span class="sw-label">ws-fg-active</span>
+  <span class="sw-hex">#202B35</span>
+  <span class="sw-sub"></span>
+</div><div class="sw" style="background:#61afef;color:#141414">
+  <span class="sw-label">pill-brand-bg</span>
+  <span class="sw-hex">#61AFEF</span>
+  <span class="sw-sub"></span>
+</div><div class="sw" style="background:#282c34;color:#f0f0f0">
+  <span class="sw-label">pill-brand-fg</span>
+  <span class="sw-hex">#282C34</span>
+  <span class="sw-sub"></span>
+</div><div class="sw" style="background:#61afef;color:#141414">
+  <span class="sw-label">pill-stats-bg</span>
+  <span class="sw-hex">#61AFEF</span>
+  <span class="sw-sub"></span>
+</div><div class="sw" style="background:#282c34;color:#f0f0f0">
+  <span class="sw-label">pill-stats-fg</span>
+  <span class="sw-hex">#282C34</span>
+  <span class="sw-sub"></span>
+</div><div class="sw" style="background:#61afef;color:#141414">
+  <span class="sw-label">pill-ctrl-bg</span>
+  <span class="sw-hex">#61AFEF</span>
+  <span class="sw-sub"></span>
+</div><div class="sw" style="background:#282c34;color:#f0f0f0">
+  <span class="sw-label">pill-ctrl-fg</span>
+  <span class="sw-hex">#282C34</span>
+  <span class="sw-sub"></span>
+</div><div class="sw" style="background:#98c379;color:#141414">
+  <span class="sw-label">pill-theme-bg</span>
+  <span class="sw-hex">#98C379</span>
+  <span class="sw-sub"></span>
+</div><div class="sw" style="background:#282c34;color:#f0f0f0">
+  <span class="sw-label">pill-theme-fg</span>
+  <span class="sw-hex">#282C34</span>
+  <span class="sw-sub"></span>
+</div><div class="sw" style="background:#202b35;color:#f0f0f0">
+  <span class="sw-label">ws-glow</span>
+  <span class="sw-hex">#202B35</span>
+  <span class="sw-sub"></span>
+</div><div class="sw" style="background:#56b6c2;color:#141414">
+  <span class="sw-label">slider-fg</span>
+  <span class="sw-hex">#56B6C2</span>
+  <span class="sw-sub"></span>
+</div></div>
+<h2>Waybar measured pairs</h2>
+
+<div class="tablewrap"><table>
+  <tr><th>role</th><th>sample</th><th>fg</th><th>bg</th><th>ratio</th><th>target</th></tr>
+  <tr>
+  <td class="role">bar text</td>
+  <td><span class="chip" style="background:#282c34;color:#abb2bf">Ag sample</span></td>
+  <td class="mono">#ABB2BF</td>
+  <td class="mono">#282C34</td>
+  <td class="ratio ok">6.57:1</td>
+  <td class="target">4.5</td>
+</tr><tr>
+  <td class="role">brand pill</td>
+  <td><span class="chip" style="background:#61afef;color:#282c34">Ag sample</span></td>
+  <td class="mono">#282C34</td>
+  <td class="mono">#61AFEF</td>
+  <td class="ratio ok">5.92:1</td>
+  <td class="target">4.5</td>
+</tr><tr>
+  <td class="role">stats pill</td>
+  <td><span class="chip" style="background:#61afef;color:#282c34">Ag sample</span></td>
+  <td class="mono">#282C34</td>
+  <td class="mono">#61AFEF</td>
+  <td class="ratio ok">5.92:1</td>
+  <td class="target">4.5</td>
+</tr><tr>
+  <td class="role">ctrl pill</td>
+  <td><span class="chip" style="background:#61afef;color:#282c34">Ag sample</span></td>
+  <td class="mono">#282C34</td>
+  <td class="mono">#61AFEF</td>
+  <td class="ratio ok">5.92:1</td>
+  <td class="target">4.5</td>
+</tr><tr>
+  <td class="role">theme pill</td>
+  <td><span class="chip" style="background:#98c379;color:#282c34">Ag sample</span></td>
+  <td class="mono">#282C34</td>
+  <td class="mono">#98C379</td>
+  <td class="ratio ok">6.94:1</td>
+  <td class="target">4.5</td>
+</tr><tr>
+  <td class="role">ws dot empty</td>
+  <td><span class="chip" style="background:#56b6c2;color:#4e88b8">Ag sample</span></td>
+  <td class="mono">#4E88B8</td>
+  <td class="mono">#56B6C2</td>
+  <td class="ratio bad">1.60:1</td>
+  <td class="target">3.0</td>
+</tr><tr>
+  <td class="role">ws dot occupied</td>
+  <td><span class="chip" style="background:#56b6c2;color:#375a77">Ag sample</span></td>
+  <td class="mono">#375A77</td>
+  <td class="mono">#56B6C2</td>
+  <td class="ratio ok">3.07:1</td>
+  <td class="target">3.0</td>
+</tr><tr>
+  <td class="role">ws dot active</td>
+  <td><span class="chip" style="background:#56b6c2;color:#202b35">Ag sample</span></td>
+  <td class="mono">#202B35</td>
+  <td class="mono">#56B6C2</td>
+  <td class="ratio ok">6.08:1</td>
+  <td class="target">3.0</td>
+</tr><tr>
+  <td class="role">ws pill on bar</td>
+  <td><span class="chip" style="background:#282c34;color:#56b6c2">Ag sample</span></td>
+  <td class="mono">#56B6C2</td>
+  <td class="mono">#282C34</td>
+  <td class="ratio ok">5.91:1</td>
+  <td class="target">3.0</td>
+</tr></table></div>
+<h2>Starship measured pairs</h2>
+
+<div class="tablewrap"><table>
+  <tr><th>segment</th><th>sample</th><th>fg</th><th>bg</th><th>ratio</th><th>target</th></tr>
+  <tr>
+  <td class="role">os / user / host</td>
+  <td><span class="chip" style="background:#3c4049;color:#abb2bf">Ag sample</span></td>
+  <td class="mono">#ABB2BF</td>
+  <td class="mono">#3C4049</td>
+  <td class="ratio ok">4.87:1</td>
+  <td class="target">4.5</td>
+</tr><tr>
+  <td class="role">directory path</td>
+  <td><span class="chip" style="background:#61afef;color:#282c34">Ag sample</span></td>
+  <td class="mono">#282C34</td>
+  <td class="mono">#61AFEF</td>
+  <td class="ratio ok">5.92:1</td>
+  <td class="target">4.5</td>
+</tr><tr>
+  <td class="role">repo root</td>
+  <td><span class="chip" style="background:#61afef;color:#253d40">Ag sample</span></td>
+  <td class="mono">#253D40</td>
+  <td class="mono">#61AFEF</td>
+  <td class="ratio ok">4.88:1</td>
+  <td class="target">4.5</td>
+</tr><tr>
+  <td class="role">git branch</td>
+  <td><span class="chip" style="background:#c678dd;color:#282c34">Ag sample</span></td>
+  <td class="mono">#282C34</td>
+  <td class="mono">#C678DD</td>
+  <td class="ratio ok">4.75:1</td>
+  <td class="target">4.5</td>
+</tr><tr>
+  <td class="role">git change counts</td>
+  <td><span class="chip" style="background:#545862;color:#f0f0f0">Ag sample</span></td>
+  <td class="mono">#F0F0F0</td>
+  <td class="mono">#545862</td>
+  <td class="ratio ok">6.25:1</td>
+  <td class="target">4.5</td>
+</tr><tr>
+  <td class="role">git ahead/behind</td>
+  <td><span class="chip" style="background:#61afef;color:#282c34">Ag sample</span></td>
+  <td class="mono">#282C34</td>
+  <td class="mono">#61AFEF</td>
+  <td class="ratio ok">5.92:1</td>
+  <td class="target">4.5</td>
+</tr><tr>
+  <td class="role">root-shell warning</td>
+  <td><span class="chip" style="background:#3c4049;color:#e69aa0">Ag sample</span></td>
+  <td class="mono">#E69AA0</td>
+  <td class="mono">#3C4049</td>
+  <td class="ratio ok">4.70:1</td>
+  <td class="target">4.5</td>
+</tr><tr>
+  <td class="role">time / ip</td>
+  <td><span class="chip" style="background:#282c34;color:#abb2bf">Ag sample</span></td>
+  <td class="mono">#ABB2BF</td>
+  <td class="mono">#282C34</td>
+  <td class="ratio ok">6.57:1</td>
+  <td class="target">4.5</td>
+</tr><tr>
+  <td class="role">separators (chrome)</td>
+  <td><span class="chip" style="background:#282c34;color:#73767e">Ag sample</span></td>
+  <td class="mono">#73767E</td>
+  <td class="mono">#282C34</td>
+  <td class="ratio ok">3.08:1</td>
+  <td class="target">3.0</td>
+</tr></table></div>
+<h2>Starship powerline separators</h2>
+<p class="note">A separator is a filled glyph &mdash; one pill's background
+  drawn on the next pill's &mdash; so it is judged by perceptual distance
+  (CIELAB &Delta;E), not WCAG. WCAG measures luminance only and rates plainly
+  visible pairs as failures: amber on plum is 1.39:1 and unmistakable at
+  79&nbsp;&Delta;E. Under 12&nbsp;&Delta;E the two pills genuinely merge.</p>
+<div class="tablewrap"><table>
+  <tr><th>seam</th><th>sample</th><th>glyph</th><th>on</th><th>&Delta;E</th><th>WCAG</th><th>reads as</th></tr>
+  <tr>
+  <td class="role">os cap → terminal</td>
+  <td><span class="chip" style="background:#282c34;color:#3c4049">&#xe0b0;&#xe0b0;</span></td>
+  <td class="mono">#3C4049</td>
+  <td class="mono">#282C34</td>
+  <td class="ratio bad">9</td>
+  <td class="target">1.35:1</td>
+  <td class="verdict bad">merges</td>
+</tr><tr>
+  <td class="role">os → directory</td>
+  <td><span class="chip" style="background:#61afef;color:#3c4049">&#xe0b0;&#xe0b0;</span></td>
+  <td class="mono">#3C4049</td>
+  <td class="mono">#61AFEF</td>
+  <td class="ratio ok">54</td>
+  <td class="target">4.40:1</td>
+  <td class="verdict ok">distinct</td>
+</tr><tr>
+  <td class="role">directory cap → terminal</td>
+  <td><span class="chip" style="background:#282c34;color:#61afef">&#xe0b0;&#xe0b0;</span></td>
+  <td class="mono">#61AFEF</td>
+  <td class="mono">#282C34</td>
+  <td class="ratio ok">61</td>
+  <td class="target">5.92:1</td>
+  <td class="verdict ok">distinct</td>
+</tr><tr>
+  <td class="role">branch cap → terminal</td>
+  <td><span class="chip" style="background:#282c34;color:#c678dd">&#xe0b0;&#xe0b0;</span></td>
+  <td class="mono">#C678DD</td>
+  <td class="mono">#282C34</td>
+  <td class="ratio ok">73</td>
+  <td class="target">4.75:1</td>
+  <td class="verdict ok">distinct</td>
+</tr><tr>
+  <td class="role">branch → changes</td>
+  <td><span class="chip" style="background:#c678dd;color:#545862">&#xe0b0;&#xe0b0;</span></td>
+  <td class="mono">#545862</td>
+  <td class="mono">#C678DD</td>
+  <td class="ratio ok">62</td>
+  <td class="target">2.42:1</td>
+  <td class="verdict ok">distinct</td>
+</tr><tr>
+  <td class="role">changes → ahead/behind</td>
+  <td><span class="chip" style="background:#545862;color:#61afef">&#xe0b0;&#xe0b0;</span></td>
+  <td class="mono">#61AFEF</td>
+  <td class="mono">#545862</td>
+  <td class="ratio ok">46</td>
+  <td class="target">3.01:1</td>
+  <td class="verdict ok">distinct</td>
+</tr><tr>
+  <td class="role">ahead/behind cap → terminal</td>
+  <td><span class="chip" style="background:#282c34;color:#61afef">&#xe0b0;&#xe0b0;</span></td>
+  <td class="mono">#61AFEF</td>
+  <td class="mono">#282C34</td>
+  <td class="ratio ok">61</td>
+  <td class="target">5.92:1</td>
+  <td class="verdict ok">distinct</td>
+</tr></table></div>
+
+</body></html>
