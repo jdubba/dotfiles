@@ -79,9 +79,20 @@ _autotheme_flag() { printf '%s/dotfiles/auto-theme' "$XDG_STATE_HOME"; }
   grep -q "colorscheme = \"base16\"" "$DF_TEST_REPO/themes/auto/.config/nvim/lua/dotfiles_theme.lua"
   grep -q "\"theme\": \"system\"" "$DF_TEST_REPO/themes/auto/.config/opencode/tui.json"
   grep -q "BAT_THEME=\"ansi\"" "$DF_TEST_REPO/themes/auto/.config/shell/theme-env.sh"
-  # Waybar section pills are colorful (accent bg + contrast fg), not the dark base.
+  # Waybar section pills are colorful (accent bg + a measured ink), not the dark
+  # base. The ink used to be near-black or near-white and nothing else, because
+  # it came from _dfa_contrast_fg; it is now whatever _dfa_pair_for measures as
+  # legible, which may be the palette's own fg or bg. Assert the property that
+  # actually matters -- that the pair clears AA -- rather than two literals.
   grep -q "pill-brand-bg" "$DF_TEST_REPO/themes/auto/.config/waybar/colors.css"
-  grep -qE "pill-brand-fg +#(141414|f0f0f0)" "$DF_TEST_REPO/themes/auto/.config/waybar/colors.css"
+  local css="$DF_TEST_REPO/themes/auto/.config/waybar/colors.css" p_bg p_fg
+  p_bg=$(awk '$2=="pill-brand-bg" {gsub(/;/,"",$3); print $3}' "$css")
+  p_fg=$(awk '$2=="pill-brand-fg" {gsub(/;/,"",$3); print $3}' "$css")
+  [ -n "$p_bg" ] && [ -n "$p_fg" ]
+  ( DF_REPO="$DF_SRC_REPO"; export DF_REPO
+    source "$DF_SRC_REPO/lib/core.sh"; source "$DF_SRC_REPO/lib/config.sh"
+    source "$DF_SRC_REPO/lib/theme-auto.sh"
+    (( $(_dfa_contrast "$p_fg" "$p_bg") >= 4500 )) )
   # Wallpaper copied into the theme.
   [ -f "$DF_TEST_REPO/themes/auto/.config/background" ]
   # Auto became active and was linked into the target.
