@@ -3,6 +3,8 @@
 @define-color accent_bg_color #b48ead;
 @define-color highlight_bg_color alpha(#b48ead, 0.25);
 @define-color highlight_fg_color #d8dee9;
+@define-color quick_bg_color  alpha(#b48ead, 0.25);
+@define-color quick_fg_color  #d8dee9;
 @define-color theme_fg_color  #d8dee9;
 @define-color error_bg_color  #bf616a;
 @define-color error_fg_color  #2e3440;

@@ -13,6 +13,8 @@
 /* Selected-row ink. The row is a 25% tint here, so this stays the shared
    foreground -- it only diverges if a theme makes the selection opaque. */
 @define-color highlight_fg_color #ebdbb2;
+@define-color quick_bg_color  alpha(#458588, 0.25);
+@define-color quick_fg_color  #ebdbb2;
 @define-color theme_fg_color  #ebdbb2;
 /* The one place walker puts text on a solid themed background. The generated
    pair was #282828 on #cc241d -- 2.69:1, a genuine failure. Cream on the

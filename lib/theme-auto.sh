@@ -599,6 +599,13 @@ EOF
   # could not give the selection a hue of its own; both default to c5 here, so
   # splitting them changed no theme's appearance.
   #
+  # quick_bg_color is the .item-quick-activation badge that sits inside a row.
+  # It drew alpha(@accent_bg_color, 0.25), which is the same bind the selection
+  # had: the badge could not take a colour of its own, and a wash at 0.25 over a
+  # selected row of a similar hue is invisible (c3 over c11 lands #be711e against
+  # #c47b28). Same remedy, same default -- it emits the colour the hardcoded rule
+  # produced, so no theme's appearance changes until one pins it.
+  #
   # highlight_bg_color carries its own alpha rather than the stylesheet applying
   # one. With `alpha(@highlight_bg_color, 0.25)` hardcoded in the rule, the row
   # could only ever be 25% of the way from the window background toward the
@@ -618,6 +625,8 @@ EOF
 @define-color accent_bg_color ${c5};
 @define-color highlight_bg_color alpha(${c5}, 0.25);
 @define-color highlight_fg_color ${fg};
+@define-color quick_bg_color  alpha(${c5}, 0.25);
+@define-color quick_fg_color  ${fg};
 @define-color theme_fg_color  ${fg};
 @define-color error_bg_color  ${c1};
 @define-color error_fg_color  ${bg};

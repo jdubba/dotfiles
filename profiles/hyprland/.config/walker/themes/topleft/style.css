@@ -95,8 +95,14 @@ child {
   padding: 10px;
 }
 
+/* The quick-activation badge sits inside a row, so it needs a colour of its own
+   for the same reason the selection does: at alpha(<accent>, 0.25) it can only
+   ever be a faint wash of the chrome, which vanishes on a selected row of a
+   similar hue. @quick_bg_color defaults to exactly that wash, so this renders
+   identically until a theme pins it. */
 .item-quick-activation {
-  background: alpha(@accent_bg_color, 0.25);
+  background: @quick_bg_color;
+  color: @quick_fg_color;
   border-radius: 5px;
   padding: 10px;
 }
