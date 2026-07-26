@@ -6,12 +6,12 @@
 @define-color ws-fg-occupied  #63734a;
 @define-color ws-fg-active    #2e3426;
 @define-color pill-brand-bg   #c3e88d;
-@define-color pill-brand-fg   #141414;
+@define-color pill-brand-fg   #222436;
 @define-color pill-stats-bg   #c3e88d;
-@define-color pill-stats-fg   #141414;
+@define-color pill-stats-fg   #222436;
 @define-color pill-ctrl-bg    #c3e88d;
-@define-color pill-ctrl-fg    #141414;
+@define-color pill-ctrl-fg    #222436;
 @define-color pill-theme-bg   #ffc777;
-@define-color pill-theme-fg   #141414;
+@define-color pill-theme-fg   #222436;
 @define-color ws-glow          #2e3426;
 @define-color slider-fg       #86e1fc;

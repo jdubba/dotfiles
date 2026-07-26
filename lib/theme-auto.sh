@@ -262,6 +262,24 @@ _dfa_pair_for() {
   printf '%s %s' "$moved" "$ink"
 }
 
+# Ramp <start> toward <toward> in 5% steps until it measures <target> against
+# <surface>, and print the result.
+#   _dfa_ramp_to <start> <toward> <surface> <target>
+#
+# A colour that already measures is returned unchanged, so palettes where the
+# raw slot reads keep their exact value and only the failures move -- the same
+# discipline the workspace-dot and repo-root ramps use. Give it the ink that
+# contrasts with <surface> as <toward> and the ramp works in both polarities:
+# it darkens on a light surface and lightens on a dark one.
+_dfa_ramp_to() {
+  local start=$1 toward=$2 surface=$3 target=$4 out=$1 q=0
+  while (( q < 100 )) && (( $(_dfa_contrast "$out" "$surface") < target )); do
+    q=$(( q + 5 ))
+    out=$(_df_theme_mix "$start" "$toward" "$q")
+  done
+  printf '%s' "$out"
+}
+
 # Of two variants of the same hue (normal and bright slot), print whichever sits
 # further from <base> in perceived luminance -- i.e. the one that will actually
 # read against it. On a dark bar that is usually the bright slot; on a light bar
@@ -499,6 +517,22 @@ EOF
   done
   local accent_pill=${pool[0]} accent_ws=${pool[1]} accent_theme=${pool[2]}
 
+  # The pill inks used to come from _dfa_contrast_fg, which picks near-black or
+  # near-white by Rec.601 luma and never measures the result -- exactly what
+  # AGENTS.md warns against when the question is legibility. On a mid-luminance
+  # accent neither ink reaches AA (dawnfox's #3f83a6 tops out at 4.37:1 with
+  # #141414), so the pill text sat just under target with nothing to catch it.
+  #
+  # _dfa_pair_for is the tool that already solves this for the starship
+  # segments: it picks the ink by measurement and, only where no ink can clear
+  # AA, deepens the surface itself by at most 25%. Assign the corrected accent
+  # back over accent_pill/accent_theme so everything downstream -- including the
+  # workspace-dot ramp, which uses the pill accent as its hue source -- sees the
+  # colour the bar will actually show.
+  local pill_ink theme_ink
+  read -r accent_pill pill_ink <<<"$(_dfa_pair_for "$accent_pill" "$fg" "$bg")"
+  read -r accent_theme theme_ink <<<"$(_dfa_pair_for "$accent_theme" "$fg" "$bg")"
+
   # The workspace dots ramp the *pill* accent toward the ink of the workspace
   # surface: a guaranteed-different hue, so the dots carry colour of their own
   # rather than being a darker wash of the surface they sit on. Ramping toward
@@ -547,13 +581,13 @@ EOF
 @define-color ws-fg-occupied  ${ws_occupied};
 @define-color ws-fg-active    ${ws_active};
 @define-color pill-brand-bg   ${accent_pill};
-@define-color pill-brand-fg   $(_dfa_contrast_fg "$accent_pill");
+@define-color pill-brand-fg   ${pill_ink};
 @define-color pill-stats-bg   ${accent_pill};
-@define-color pill-stats-fg   $(_dfa_contrast_fg "$accent_pill");
+@define-color pill-stats-fg   ${pill_ink};
 @define-color pill-ctrl-bg    ${accent_pill};
-@define-color pill-ctrl-fg    $(_dfa_contrast_fg "$accent_pill");
+@define-color pill-ctrl-fg    ${pill_ink};
 @define-color pill-theme-bg   ${accent_theme};
-@define-color pill-theme-fg   $(_dfa_contrast_fg "$accent_theme");
+@define-color pill-theme-fg   ${theme_ink};
 @define-color ws-glow          ${ws_active};
 @define-color slider-fg       ${ws_bg};
 EOF
@@ -732,6 +766,31 @@ EOF
       star_repo_root=$(_df_theme_mix "$c6" "$_rr_ink" "$_rr_stop")
     done
 
+    # The IP row draws straight onto the terminal background, and both of its
+    # colours were raw palette slots that nothing measured:
+    #
+    #   color_fg_sep    the  /  angle brackets and the "/" divider.
+    #                   These are chrome -- they carry no information and are
+    #                   meant to recede -- so the target is 3:1, not 4.5:1.
+    #                   c8 missed even that in 24 of 40 themes (palenight 1.48:1).
+    #   color_fg_right  the clock, local IP and external IP. That is content, so
+    #                   4.5:1. c7 missed in 4 themes (solarized-light 1.13:1).
+    #
+    # Ramp each toward the background's own contrasting ink only as far as its
+    # target needs, so the themes already passing keep their exact slot.
+    local star_fg_sep star_fg_right _bg_ink
+    _bg_ink=$(_dfa_contrast_fg "$bg")
+    star_fg_sep=$(_dfa_ramp_to "$c8" "$_bg_ink" "$bg" 3000)
+    star_fg_right=$(_dfa_ramp_to "$c7" "$_bg_ink" "$bg" 4500)
+
+    # style_root marks a root shell. The shared template hardcoded ANSI `yellow`
+    # on color_os_bg, which disappears whenever os_bg is light or a mid accent --
+    # 10 themes measured under 4.5:1, dawnfox at 1.11:1 and rose-pine-dawn the
+    # same. Derive it from the palette's own red, ramped against the os segment
+    # it actually sits on, so the warning stays a warning colour and stays legible.
+    local star_root_fg
+    star_root_fg=$(_dfa_ramp_to "$c1" "$(_dfa_contrast_fg "$star_os_bg")" "$star_os_bg" 4500)
+
     local block; block=$(mktemp)
     {
       printf "color_fg_primary = '%s'\n" "$fg"
@@ -749,8 +808,9 @@ EOF
       printf "color_repo_change_bg = '%s'\n" "$star_change_bg"
       printf "color_repo_diverge_fg = '%s'\n" "$star_diverge_fg"
       printf "color_repo_diverge_bg = '%s'\n" "$star_dir_bg"
-      printf "color_fg_right = '%s'\n" "$c7"
-      printf "color_fg_sep = '%s'\n" "$c8"
+      printf "color_fg_right = '%s'\n" "$star_fg_right"
+      printf "color_fg_sep = '%s'\n" "$star_fg_sep"
+      printf "color_root_fg = '%s'\n" "$star_root_fg"
     } >"$block"
     awk -v rf="$block" '
       /^\[palettes\.starship_dubba\]/ { print; while ((getline line < rf) > 0) print line; close(rf); skip=1; next }

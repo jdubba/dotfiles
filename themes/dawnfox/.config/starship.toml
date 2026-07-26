@@ -41,7 +41,8 @@ color_repo_change_bg = '#938aa4'
 color_repo_diverge_fg = '#faf4ed'
 color_repo_diverge_bg = '#286983'
 color_fg_right = '#575279'
-color_fg_sep = '#938aa4'
+color_fg_sep = '#8d849d'
+color_root_fg = '#a5222f'
 [fill]
 symbol = " "
 
@@ -75,7 +76,7 @@ Pop = ''
 [username]
 disabled = false
 show_always = true
-style_root = "fg:yellow bg:color_os_bg"
+style_root = "fg:color_root_fg bg:color_os_bg"
 style_user = "fg:color_os_fg bg:color_os_bg"
 format = "[$user]($style)"
 
