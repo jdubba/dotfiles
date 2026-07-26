@@ -360,17 +360,111 @@ def build(name):
     return out
 
 
+INDEX_CSS = """
+  :root {
+    --bg: #fbfbfc; --fg: #1c1c22; --card: #ffffff; --line: rgba(0,0,0,.10);
+    --mono: ui-monospace, "JetBrainsMono Nerd Font", "SFMono-Regular", Menlo, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #16161a; --fg: #e8e8ee; --card: #1e1e24; --line: rgba(255,255,255,.12);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #16161a; --fg: #e8e8ee; --card: #1e1e24; --line: rgba(255,255,255,.12);
+  }
+  :root[data-theme="light"] {
+    --bg: #fbfbfc; --fg: #1c1c22; --card: #ffffff; --line: rgba(0,0,0,.10);
+  }
+  body {
+    margin: 0; padding: 2.5rem clamp(1rem, 4vw, 3rem) 5rem;
+    background: var(--bg); color: var(--fg);
+    font: 15px/1.55 ui-sans-serif, "DM Sans", system-ui, sans-serif;
+  }
+  header { margin-bottom: 2.5rem; }
+  h1 { font-size: 2rem; margin: 0 0 .35rem; letter-spacing: -.02em; }
+  .lede { opacity: .75; max-width: 62ch; margin: 0; }
+  h2 {
+    font-size: .82rem; text-transform: uppercase; letter-spacing: .12em;
+    opacity: .6; margin: 2.75rem 0 .9rem; font-weight: 600;
+  }
+  .cards { display: grid; gap: .9rem; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+  a.card {
+    display: block; text-decoration: none; color: inherit; background: var(--card);
+    border: 1px solid var(--line); border-radius: 12px; overflow: hidden;
+    transition: transform .12s ease, border-color .12s ease;
+  }
+  a.card:hover { transform: translateY(-2px); border-color: currentColor; }
+  .prev { display: block; height: 64px; position: relative; }
+  .ramp { display: flex; height: 26px; }
+  .ramp i { flex: 1 1 0; display: block; }
+  .meta { display: flex; align-items: baseline; gap: .5rem; padding: .6rem .75rem .7rem; }
+  .nm { font-weight: 600; font-size: .95rem; }
+  .mode { font-family: var(--mono); font-size: .68rem; opacity: .5; margin-left: auto; }
+  .legend { font-size: .8rem; opacity: .65; margin-top: 2rem; }
+"""
+
+
+def build_index(names):
+    """A card per theme: its own bg/fg with the 16 slots as a ramp beneath."""
+    groups = {"light": [], "dark": []}
+    for name in names:
+        pal = read_kitty(os.path.join(THEMES, name))
+        if "bg" not in pal or "c15" not in pal:
+            continue
+        dark = lum(pal["bg"]) < 0.18
+        ramp = "".join(f'<i style="background:{pal["c%d" % i]}"></i>' for i in range(16))
+        card = f"""<a class="card" href="{html.escape(name)}.html">
+  <span class="prev" style="background:{pal['bg']};color:{pal['fg']}">
+    <span style="display:block;padding:.55rem .75rem;font-weight:600">Ag &mdash; {html.escape(name)}</span>
+    <span class="ramp" style="position:absolute;bottom:0;left:0;right:0">{ramp}</span>
+  </span>
+  <span class="meta"><span class="nm">{html.escape(name)}</span>
+  <span class="mode">{'dark' if dark else 'light'}</span></span>
+</a>"""
+        groups["dark" if dark else "light"].append(card)
+
+    body = ""
+    for mode in ("dark", "light"):
+        if groups[mode]:
+            body += (f'<h2>{mode} ({len(groups[mode])})</h2>\n'
+                     f'<div class="cards">{"".join(groups[mode])}</div>\n')
+
+    doc = f"""<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Theme palettes</title>
+<style>{INDEX_CSS}</style>
+</head><body>
+<header>
+  <h1>Theme palettes</h1>
+  <p class="lede">One swatch page per theme, generated from the shipped seams by
+  <code>tools/build-palette-pages.py</code>. Each page names every colour by its
+  slot (<code>c0</code>&ndash;<code>c15</code>, <code>bg</code>,
+  <code>fg</code>) &mdash; that is the vocabulary for steering a theme, and it
+  beats reading hex aloud.</p>
+</header>
+{body}<p class="legend">Cards show each theme's own background and foreground,
+with its sixteen palette slots as the strip beneath. <code>themes/auto</code> is
+wallpaper-derived and machine-local, so it has no page.</p>
+</body></html>
+"""
+    os.makedirs(OUTDIR, exist_ok=True)
+    out = os.path.join(OUTDIR, "index.html")
+    with open(out, "w") as fh:
+        fh.write(doc)
+    return out
+
+
 def main():
     want = sys.argv[1:]
     names = sorted(n for n in os.listdir(THEMES)
                    if os.path.isdir(os.path.join(THEMES, n)) and n != "auto")
-    if want:
-        names = [n for n in names if n in want]
-    n = 0
-    for name in names:
-        if build(name):
-            n += 1
-    print(f"wrote {n} palette pages to docs/palettes/")
+    built = [n for n in names if (not want or n in want) and build(n)]
+    # The index always covers every theme, not just the ones rebuilt, so a
+    # single-theme run cannot silently drop the others from it.
+    build_index(names)
+    print(f"wrote {len(built)} palette pages + index to docs/palettes/")
 
 
 if __name__ == "__main__":

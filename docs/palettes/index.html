@@ -1,0 +1,344 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Theme palettes</title>
+<style>
+  :root {
+    --bg: #fbfbfc; --fg: #1c1c22; --card: #ffffff; --line: rgba(0,0,0,.10);
+    --mono: ui-monospace, "JetBrainsMono Nerd Font", "SFMono-Regular", Menlo, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #16161a; --fg: #e8e8ee; --card: #1e1e24; --line: rgba(255,255,255,.12);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #16161a; --fg: #e8e8ee; --card: #1e1e24; --line: rgba(255,255,255,.12);
+  }
+  :root[data-theme="light"] {
+    --bg: #fbfbfc; --fg: #1c1c22; --card: #ffffff; --line: rgba(0,0,0,.10);
+  }
+  body {
+    margin: 0; padding: 2.5rem clamp(1rem, 4vw, 3rem) 5rem;
+    background: var(--bg); color: var(--fg);
+    font: 15px/1.55 ui-sans-serif, "DM Sans", system-ui, sans-serif;
+  }
+  header { margin-bottom: 2.5rem; }
+  h1 { font-size: 2rem; margin: 0 0 .35rem; letter-spacing: -.02em; }
+  .lede { opacity: .75; max-width: 62ch; margin: 0; }
+  h2 {
+    font-size: .82rem; text-transform: uppercase; letter-spacing: .12em;
+    opacity: .6; margin: 2.75rem 0 .9rem; font-weight: 600;
+  }
+  .cards { display: grid; gap: .9rem; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+  a.card {
+    display: block; text-decoration: none; color: inherit; background: var(--card);
+    border: 1px solid var(--line); border-radius: 12px; overflow: hidden;
+    transition: transform .12s ease, border-color .12s ease;
+  }
+  a.card:hover { transform: translateY(-2px); border-color: currentColor; }
+  .prev { display: block; height: 64px; position: relative; }
+  .ramp { display: flex; height: 26px; }
+  .ramp i { flex: 1 1 0; display: block; }
+  .meta { display: flex; align-items: baseline; gap: .5rem; padding: .6rem .75rem .7rem; }
+  .nm { font-weight: 600; font-size: .95rem; }
+  .mode { font-family: var(--mono); font-size: .68rem; opacity: .5; margin-left: auto; }
+  .legend { font-size: .8rem; opacity: .65; margin-top: 2rem; }
+</style>
+</head><body>
+<header>
+  <h1>Theme palettes</h1>
+  <p class="lede">One swatch page per theme, generated from the shipped seams by
+  <code>tools/build-palette-pages.py</code>. Each page names every colour by its
+  slot (<code>c0</code>&ndash;<code>c15</code>, <code>bg</code>,
+  <code>fg</code>) &mdash; that is the vocabulary for steering a theme, and it
+  beats reading hex aloud.</p>
+</header>
+<h2>dark (30)</h2>
+<div class="cards"><a class="card" href="ayu-dark.html">
+  <span class="prev" style="background:#0a0e14;color:#b3b1ad">
+    <span style="display:block;padding:.55rem .75rem;font-weight:600">Ag &mdash; ayu-dark</span>
+    <span class="ramp" style="position:absolute;bottom:0;left:0;right:0"><i style="background:#01060e"></i><i style="background:#ea6c73"></i><i style="background:#91b362"></i><i style="background:#f9af4f"></i><i style="background:#53bdfa"></i><i style="background:#fae994"></i><i style="background:#90e1c6"></i><i style="background:#c7c7c7"></i><i style="background:#686868"></i><i style="background:#f07178"></i><i style="background:#c2d94c"></i><i style="background:#ffb454"></i><i style="background:#59c2ff"></i><i style="background:#ffee99"></i><i style="background:#95e6cb"></i><i style="background:#ffffff"></i></span>
+  </span>
+  <span class="meta"><span class="nm">ayu-dark</span>
+  <span class="mode">dark</span></span>
+</a><a class="card" href="ayu-mirage.html">
+  <span class="prev" style="background:#1f2430;color:#cbccc6">
+    <span style="display:block;padding:.55rem .75rem;font-weight:600">Ag &mdash; ayu-mirage</span>
+    <span class="ramp" style="position:absolute;bottom:0;left:0;right:0"><i style="background:#191e2a"></i><i style="background:#ed8274"></i><i style="background:#a6cc70"></i><i style="background:#fad07b"></i><i style="background:#6dcbfa"></i><i style="background:#cfbafa"></i><i style="background:#90e1c6"></i><i style="background:#c7c7c7"></i><i style="background:#686868"></i><i style="background:#f28779"></i><i style="background:#bae67e"></i><i style="background:#ffd580"></i><i style="background:#73d0ff"></i><i style="background:#d4bfff"></i><i style="background:#95e6cb"></i><i style="background:#ffffff"></i></span>
+  </span>
+  <span class="meta"><span class="nm">ayu-mirage</span>
+  <span class="mode">dark</span></span>
+</a><a class="card" href="carbonfox.html">
+  <span class="prev" style="background:#161616;color:#f2f4f8">
+    <span style="display:block;padding:.55rem .75rem;font-weight:600">Ag &mdash; carbonfox</span>
+    <span class="ramp" style="position:absolute;bottom:0;left:0;right:0"><i style="background:#282828"></i><i style="background:#ee5396"></i><i style="background:#25be6a"></i><i style="background:#08bdba"></i><i style="background:#78a9ff"></i><i style="background:#be95ff"></i><i style="background:#33b1ff"></i><i style="background:#dfdfe0"></i><i style="background:#484848"></i><i style="background:#f16da6"></i><i style="background:#46c880"></i><i style="background:#3fc7c5"></i><i style="background:#8cb6ff"></i><i style="background:#c8a5ff"></i><i style="background:#52bdff"></i><i style="background:#f2f4f8"></i></span>
+  </span>
+  <span class="meta"><span class="nm">carbonfox</span>
+  <span class="mode">dark</span></span>
+</a><a class="card" href="catppuccin-frappe.html">
+  <span class="prev" style="background:#303446;color:#c6d0f5">
+    <span style="display:block;padding:.55rem .75rem;font-weight:600">Ag &mdash; catppuccin-frappe</span>
+    <span class="ramp" style="position:absolute;bottom:0;left:0;right:0"><i style="background:#51576d"></i><i style="background:#e78284"></i><i style="background:#a6d189"></i><i style="background:#e5c890"></i><i style="background:#8caaee"></i><i style="background:#f4b8e4"></i><i style="background:#81c8be"></i><i style="background:#a5adce"></i><i style="background:#626880"></i><i style="background:#e78284"></i><i style="background:#a6d189"></i><i style="background:#e5c890"></i><i style="background:#8caaee"></i><i style="background:#f4b8e4"></i><i style="background:#81c8be"></i><i style="background:#b5bfe2"></i></span>
+  </span>
+  <span class="meta"><span class="nm">catppuccin-frappe</span>
+  <span class="mode">dark</span></span>
+</a><a class="card" href="catppuccin-macchiato.html">
+  <span class="prev" style="background:#24273a;color:#cad3f5">
+    <span style="display:block;padding:.55rem .75rem;font-weight:600">Ag &mdash; catppuccin-macchiato</span>
+    <span class="ramp" style="position:absolute;bottom:0;left:0;right:0"><i style="background:#494d64"></i><i style="background:#ed8796"></i><i style="background:#a6da95"></i><i style="background:#eed49f"></i><i style="background:#8aadf4"></i><i style="background:#f5bde6"></i><i style="background:#8bd5ca"></i><i style="background:#a5adcb"></i><i style="background:#5b6078"></i><i style="background:#ed8796"></i><i style="background:#a6da95"></i><i style="background:#eed49f"></i><i style="background:#8aadf4"></i><i style="background:#f5bde6"></i><i style="background:#8bd5ca"></i><i style="background:#b8c0e0"></i></span>
+  </span>
+  <span class="meta"><span class="nm">catppuccin-macchiato</span>
+  <span class="mode">dark</span></span>
+</a><a class="card" href="catppuccin-mocha.html">
+  <span class="prev" style="background:#1e1e2e;color:#cdd6f4">
+    <span style="display:block;padding:.55rem .75rem;font-weight:600">Ag &mdash; catppuccin-mocha</span>
+    <span class="ramp" style="position:absolute;bottom:0;left:0;right:0"><i style="background:#45475a"></i><i style="background:#f38ba8"></i><i style="background:#a6e3a1"></i><i style="background:#f9e2af"></i><i style="background:#89b4fa"></i><i style="background:#f5c2e7"></i><i style="background:#94e2d5"></i><i style="background:#a6adc8"></i><i style="background:#585b70"></i><i style="background:#f38ba8"></i><i style="background:#a6e3a1"></i><i style="background:#f9e2af"></i><i style="background:#89b4fa"></i><i style="background:#f5c2e7"></i><i style="background:#94e2d5"></i><i style="background:#bac2de"></i></span>
+  </span>
+  <span class="meta"><span class="nm">catppuccin-mocha</span>
+  <span class="mode">dark</span></span>
+</a><a class="card" href="dracula.html">
+  <span class="prev" style="background:#282a36;color:#f8f8f2">
+    <span style="display:block;padding:.55rem .75rem;font-weight:600">Ag &mdash; dracula</span>
+    <span class="ramp" style="position:absolute;bottom:0;left:0;right:0"><i style="background:#21222c"></i><i style="background:#ff5555"></i><i style="background:#50fa7b"></i><i style="background:#f1fa8c"></i><i style="background:#bd93f9"></i><i style="background:#ff79c6"></i><i style="background:#8be9fd"></i><i style="background:#f8f8f2"></i><i style="background:#6272a4"></i><i style="background:#ff6e6e"></i><i style="background:#69ff94"></i><i style="background:#ffffa5"></i><i style="background:#d6acff"></i><i style="background:#ff92df"></i><i style="background:#a4ffff"></i><i style="background:#ffffff"></i></span>
+  </span>
+  <span class="meta"><span class="nm">dracula</span>
+  <span class="mode">dark</span></span>
+</a><a class="card" href="duskfox.html">
+  <span class="prev" style="background:#232136;color:#e0def4">
+    <span style="display:block;padding:.55rem .75rem;font-weight:600">Ag &mdash; duskfox</span>
+    <span class="ramp" style="position:absolute;bottom:0;left:0;right:0"><i style="background:#393552"></i><i style="background:#eb6f92"></i><i style="background:#a3be8c"></i><i style="background:#f6c177"></i><i style="background:#569fba"></i><i style="background:#c4a7e7"></i><i style="background:#9ccfd8"></i><i style="background:#e0def4"></i><i style="background:#47407d"></i><i style="background:#eb98b5"></i><i style="background:#b1d196"></i><i style="background:#f9cb8c"></i><i style="background:#65b1cd"></i><i style="background:#d3b8f2"></i><i style="background:#aadceb"></i><i style="background:#e2e0f7"></i></span>
+  </span>
+  <span class="meta"><span class="nm">duskfox</span>
+  <span class="mode">dark</span></span>
+</a><a class="card" href="everforest-dark.html">
+  <span class="prev" style="background:#2d353b;color:#d3c6aa">
+    <span style="display:block;padding:.55rem .75rem;font-weight:600">Ag &mdash; everforest-dark</span>
+    <span class="ramp" style="position:absolute;bottom:0;left:0;right:0"><i style="background:#475258"></i><i style="background:#e67e80"></i><i style="background:#a7c080"></i><i style="background:#dbbc7f"></i><i style="background:#7fbbb3"></i><i style="background:#d699b6"></i><i style="background:#83c092"></i><i style="background:#d3c6aa"></i><i style="background:#475258"></i><i style="background:#e67e80"></i><i style="background:#a7c080"></i><i style="background:#dbbc7f"></i><i style="background:#7fbbb3"></i><i style="background:#d699b6"></i><i style="background:#83c092"></i><i style="background:#d3c6aa"></i></span>
+  </span>
+  <span class="meta"><span class="nm">everforest-dark</span>
+  <span class="mode">dark</span></span>
+</a><a class="card" href="github-dark.html">
+  <span class="prev" style="background:#0d1117;color:#c9d1d9">
+    <span style="display:block;padding:.55rem .75rem;font-weight:600">Ag &mdash; github-dark</span>
+    <span class="ramp" style="position:absolute;bottom:0;left:0;right:0"><i style="background:#484f58"></i><i style="background:#ff7b72"></i><i style="background:#3fb950"></i><i style="background:#d29922"></i><i style="background:#58a6ff"></i><i style="background:#bc8cff"></i><i style="background:#39c5cf"></i><i style="background:#b1bac4"></i><i style="background:#6e7681"></i><i style="background:#ffa198"></i><i style="background:#56d364"></i><i style="background:#e3b341"></i><i style="background:#79c0ff"></i><i style="background:#d2a8ff"></i><i style="background:#56d4dd"></i><i style="background:#f0f6fc"></i></span>
+  </span>
+  <span class="meta"><span class="nm">github-dark</span>
+  <span class="mode">dark</span></span>
+</a><a class="card" href="gruvbox-dark.html">
+  <span class="prev" style="background:#282828;color:#ebdbb2">
+    <span style="display:block;padding:.55rem .75rem;font-weight:600">Ag &mdash; gruvbox-dark</span>
+    <span class="ramp" style="position:absolute;bottom:0;left:0;right:0"><i style="background:#282828"></i><i style="background:#cc241d"></i><i style="background:#98971a"></i><i style="background:#d79921"></i><i style="background:#458588"></i><i style="background:#b16286"></i><i style="background:#689d6a"></i><i style="background:#a89984"></i><i style="background:#928374"></i><i style="background:#fb4934"></i><i style="background:#b8bb26"></i><i style="background:#fabd2f"></i><i style="background:#83a598"></i><i style="background:#d3869b"></i><i style="background:#8ec07c"></i><i style="background:#ebdbb2"></i></span>
+  </span>
+  <span class="meta"><span class="nm">gruvbox-dark</span>
+  <span class="mode">dark</span></span>
+</a><a class="card" href="kanagawa-dragon.html">
+  <span class="prev" style="background:#181616;color:#c5c9c5">
+    <span style="display:block;padding:.55rem .75rem;font-weight:600">Ag &mdash; kanagawa-dragon</span>
+    <span class="ramp" style="position:absolute;bottom:0;left:0;right:0"><i style="background:#0d0c0c"></i><i style="background:#c4746e"></i><i style="background:#8a9a7b"></i><i style="background:#c4b28a"></i><i style="background:#8ba4b0"></i><i style="background:#a292a3"></i><i style="background:#8ea4a2"></i><i style="background:#c8c093"></i><i style="background:#a6a69c"></i><i style="background:#e46876"></i><i style="background:#87a987"></i><i style="background:#e6c384"></i><i style="background:#7fb4ca"></i><i style="background:#938aa9"></i><i style="background:#7aa89f"></i><i style="background:#c5c9c5"></i></span>
+  </span>
+  <span class="meta"><span class="nm">kanagawa-dragon</span>
+  <span class="mode">dark</span></span>
+</a><a class="card" href="kanagawa-wave.html">
+  <span class="prev" style="background:#1f1f28;color:#dcd7ba">
+    <span style="display:block;padding:.55rem .75rem;font-weight:600">Ag &mdash; kanagawa-wave</span>
+    <span class="ramp" style="position:absolute;bottom:0;left:0;right:0"><i style="background:#090618"></i><i style="background:#c34043"></i><i style="background:#76946a"></i><i style="background:#c0a36e"></i><i style="background:#7e9cd8"></i><i style="background:#957fb8"></i><i style="background:#6a9589"></i><i style="background:#c8c093"></i><i style="background:#727169"></i><i style="background:#e82424"></i><i style="background:#98bb6c"></i><i style="background:#e6c384"></i><i style="background:#7fb4ca"></i><i style="background:#938aa9"></i><i style="background:#7aa89f"></i><i style="background:#dcd7ba"></i></span>
+  </span>
+  <span class="meta"><span class="nm">kanagawa-wave</span>
+  <span class="mode">dark</span></span>
+</a><a class="card" href="material.html">
+  <span class="prev" style="background:#263238;color:#eeffff">
+    <span style="display:block;padding:.55rem .75rem;font-weight:600">Ag &mdash; material</span>
+    <span class="ramp" style="position:absolute;bottom:0;left:0;right:0"><i style="background:#000000"></i><i style="background:#f07178"></i><i style="background:#c3e88d"></i><i style="background:#ffcb6b"></i><i style="background:#82aaff"></i><i style="background:#c792ea"></i><i style="background:#89ddff"></i><i style="background:#eeffff"></i><i style="background:#546e7a"></i><i style="background:#f07178"></i><i style="background:#c3e88d"></i><i style="background:#ffcb6b"></i><i style="background:#82aaff"></i><i style="background:#c792ea"></i><i style="background:#89ddff"></i><i style="background:#ffffff"></i></span>
+  </span>
+  <span class="meta"><span class="nm">material</span>
+  <span class="mode">dark</span></span>
+</a><a class="card" href="melange.html">
+  <span class="prev" style="background:#292522;color:#ece1d7">
+    <span style="display:block;padding:.55rem .75rem;font-weight:600">Ag &mdash; melange</span>
+    <span class="ramp" style="position:absolute;bottom:0;left:0;right:0"><i style="background:#34302c"></i><i style="background:#bd8183"></i><i style="background:#78997a"></i><i style="background:#ebc06d"></i><i style="background:#a3a9ce"></i><i style="background:#b380b0"></i><i style="background:#87a987"></i><i style="background:#c1a78e"></i><i style="background:#867462"></i><i style="background:#d47766"></i><i style="background:#85b695"></i><i style="background:#ecd28b"></i><i style="background:#a3a9ce"></i><i style="background:#cf9bc2"></i><i style="background:#89b3b6"></i><i style="background:#ece1d7"></i></span>
+  </span>
+  <span class="meta"><span class="nm">melange</span>
+  <span class="mode">dark</span></span>
+</a><a class="card" href="monokai.html">
+  <span class="prev" style="background:#272822;color:#f8f8f2">
+    <span style="display:block;padding:.55rem .75rem;font-weight:600">Ag &mdash; monokai</span>
+    <span class="ramp" style="position:absolute;bottom:0;left:0;right:0"><i style="background:#272822"></i><i style="background:#f92672"></i><i style="background:#a6e22e"></i><i style="background:#f4bf75"></i><i style="background:#66d9ef"></i><i style="background:#ae81ff"></i><i style="background:#a1efe4"></i><i style="background:#f8f8f2"></i><i style="background:#75715e"></i><i style="background:#f92672"></i><i style="background:#a6e22e"></i><i style="background:#f4bf75"></i><i style="background:#66d9ef"></i><i style="background:#ae81ff"></i><i style="background:#a1efe4"></i><i style="background:#f9f8f5"></i></span>
+  </span>
+  <span class="meta"><span class="nm">monokai</span>
+  <span class="mode">dark</span></span>
+</a><a class="card" href="monokai-pro.html">
+  <span class="prev" style="background:#2d2a2e;color:#fcfcfa">
+    <span style="display:block;padding:.55rem .75rem;font-weight:600">Ag &mdash; monokai-pro</span>
+    <span class="ramp" style="position:absolute;bottom:0;left:0;right:0"><i style="background:#2d2a2e"></i><i style="background:#ff6188"></i><i style="background:#a9dc76"></i><i style="background:#ffd866"></i><i style="background:#fc9867"></i><i style="background:#ab9df2"></i><i style="background:#78dce8"></i><i style="background:#fcfcfa"></i><i style="background:#727072"></i><i style="background:#ff6188"></i><i style="background:#a9dc76"></i><i style="background:#ffd866"></i><i style="background:#fc9867"></i><i style="background:#ab9df2"></i><i style="background:#78dce8"></i><i style="background:#fcfcfa"></i></span>
+  </span>
+  <span class="meta"><span class="nm">monokai-pro</span>
+  <span class="mode">dark</span></span>
+</a><a class="card" href="nord.html">
+  <span class="prev" style="background:#2e3440;color:#d8dee9">
+    <span style="display:block;padding:.55rem .75rem;font-weight:600">Ag &mdash; nord</span>
+    <span class="ramp" style="position:absolute;bottom:0;left:0;right:0"><i style="background:#3b4252"></i><i style="background:#bf616a"></i><i style="background:#a3be8c"></i><i style="background:#ebcb8b"></i><i style="background:#81a1c1"></i><i style="background:#b48ead"></i><i style="background:#88c0d0"></i><i style="background:#e5e9f0"></i><i style="background:#4c566a"></i><i style="background:#bf616a"></i><i style="background:#a3be8c"></i><i style="background:#ebcb8b"></i><i style="background:#81a1c1"></i><i style="background:#b48ead"></i><i style="background:#8fbcbb"></i><i style="background:#eceff4"></i></span>
+  </span>
+  <span class="meta"><span class="nm">nord</span>
+  <span class="mode">dark</span></span>
+</a><a class="card" href="nordfox.html">
+  <span class="prev" style="background:#2e3440;color:#cdcecf">
+    <span style="display:block;padding:.55rem .75rem;font-weight:600">Ag &mdash; nordfox</span>
+    <span class="ramp" style="position:absolute;bottom:0;left:0;right:0"><i style="background:#3b4252"></i><i style="background:#bf616a"></i><i style="background:#a3be8c"></i><i style="background:#ebcb8b"></i><i style="background:#81a1c1"></i><i style="background:#b48ead"></i><i style="background:#8fbcbb"></i><i style="background:#e5e9f0"></i><i style="background:#465780"></i><i style="background:#d06f79"></i><i style="background:#b1d196"></i><i style="background:#f0d399"></i><i style="background:#8cafd2"></i><i style="background:#c895bf"></i><i style="background:#93ccdc"></i><i style="background:#e7ecf4"></i></span>
+  </span>
+  <span class="meta"><span class="nm">nordfox</span>
+  <span class="mode">dark</span></span>
+</a><a class="card" href="onedark.html">
+  <span class="prev" style="background:#282c34;color:#abb2bf">
+    <span style="display:block;padding:.55rem .75rem;font-weight:600">Ag &mdash; onedark</span>
+    <span class="ramp" style="position:absolute;bottom:0;left:0;right:0"><i style="background:#282c34"></i><i style="background:#e06c75"></i><i style="background:#98c379"></i><i style="background:#e5c07b"></i><i style="background:#61afef"></i><i style="background:#c678dd"></i><i style="background:#56b6c2"></i><i style="background:#abb2bf"></i><i style="background:#545862"></i><i style="background:#e06c75"></i><i style="background:#98c379"></i><i style="background:#e5c07b"></i><i style="background:#61afef"></i><i style="background:#c678dd"></i><i style="background:#56b6c2"></i><i style="background:#c8ccd4"></i></span>
+  </span>
+  <span class="meta"><span class="nm">onedark</span>
+  <span class="mode">dark</span></span>
+</a><a class="card" href="oxocarbon.html">
+  <span class="prev" style="background:#161616;color:#f2f4f8">
+    <span style="display:block;padding:.55rem .75rem;font-weight:600">Ag &mdash; oxocarbon</span>
+    <span class="ramp" style="position:absolute;bottom:0;left:0;right:0"><i style="background:#161616"></i><i style="background:#ff7eb6"></i><i style="background:#42be65"></i><i style="background:#be95ff"></i><i style="background:#33b1ff"></i><i style="background:#ee5396"></i><i style="background:#3ddbd9"></i><i style="background:#dde1e6"></i><i style="background:#525252"></i><i style="background:#ff7eb6"></i><i style="background:#42be65"></i><i style="background:#be95ff"></i><i style="background:#33b1ff"></i><i style="background:#ee5396"></i><i style="background:#3ddbd9"></i><i style="background:#ffffff"></i></span>
+  </span>
+  <span class="meta"><span class="nm">oxocarbon</span>
+  <span class="mode">dark</span></span>
+</a><a class="card" href="palenight.html">
+  <span class="prev" style="background:#292d3e;color:#a6accd">
+    <span style="display:block;padding:.55rem .75rem;font-weight:600">Ag &mdash; palenight</span>
+    <span class="ramp" style="position:absolute;bottom:0;left:0;right:0"><i style="background:#292d3e"></i><i style="background:#f07178"></i><i style="background:#c3e88d"></i><i style="background:#ffcb6b"></i><i style="background:#82aaff"></i><i style="background:#c792ea"></i><i style="background:#89ddff"></i><i style="background:#d0d0d0"></i><i style="background:#434758"></i><i style="background:#ff8b92"></i><i style="background:#ddffa7"></i><i style="background:#ffe585"></i><i style="background:#9cc4ff"></i><i style="background:#e1acff"></i><i style="background:#a3f7ff"></i><i style="background:#ffffff"></i></span>
+  </span>
+  <span class="meta"><span class="nm">palenight</span>
+  <span class="mode">dark</span></span>
+</a><a class="card" href="rose-pine.html">
+  <span class="prev" style="background:#191724;color:#e0def4">
+    <span style="display:block;padding:.55rem .75rem;font-weight:600">Ag &mdash; rose-pine</span>
+    <span class="ramp" style="position:absolute;bottom:0;left:0;right:0"><i style="background:#26233a"></i><i style="background:#eb6f92"></i><i style="background:#31748f"></i><i style="background:#f6c177"></i><i style="background:#9ccfd8"></i><i style="background:#c4a7e7"></i><i style="background:#ebbcba"></i><i style="background:#e0def4"></i><i style="background:#6e6a86"></i><i style="background:#eb6f92"></i><i style="background:#31748f"></i><i style="background:#f6c177"></i><i style="background:#9ccfd8"></i><i style="background:#c4a7e7"></i><i style="background:#ebbcba"></i><i style="background:#e0def4"></i></span>
+  </span>
+  <span class="meta"><span class="nm">rose-pine</span>
+  <span class="mode">dark</span></span>
+</a><a class="card" href="rose-pine-moon.html">
+  <span class="prev" style="background:#232136;color:#e0def4">
+    <span style="display:block;padding:.55rem .75rem;font-weight:600">Ag &mdash; rose-pine-moon</span>
+    <span class="ramp" style="position:absolute;bottom:0;left:0;right:0"><i style="background:#393552"></i><i style="background:#eb6f92"></i><i style="background:#3e8fb0"></i><i style="background:#f6c177"></i><i style="background:#9ccfd8"></i><i style="background:#c4a7e7"></i><i style="background:#ea9a97"></i><i style="background:#e0def4"></i><i style="background:#6e6a86"></i><i style="background:#eb6f92"></i><i style="background:#3e8fb0"></i><i style="background:#f6c177"></i><i style="background:#9ccfd8"></i><i style="background:#c4a7e7"></i><i style="background:#ea9a97"></i><i style="background:#e0def4"></i></span>
+  </span>
+  <span class="meta"><span class="nm">rose-pine-moon</span>
+  <span class="mode">dark</span></span>
+</a><a class="card" href="solarized-dark.html">
+  <span class="prev" style="background:#002b36;color:#839496">
+    <span style="display:block;padding:.55rem .75rem;font-weight:600">Ag &mdash; solarized-dark</span>
+    <span class="ramp" style="position:absolute;bottom:0;left:0;right:0"><i style="background:#073642"></i><i style="background:#dc322f"></i><i style="background:#859900"></i><i style="background:#b58900"></i><i style="background:#268bd2"></i><i style="background:#d33682"></i><i style="background:#2aa198"></i><i style="background:#eee8d5"></i><i style="background:#586e75"></i><i style="background:#cb4b16"></i><i style="background:#859900"></i><i style="background:#b58900"></i><i style="background:#268bd2"></i><i style="background:#6c71c4"></i><i style="background:#93a1a1"></i><i style="background:#fdf6e3"></i></span>
+  </span>
+  <span class="meta"><span class="nm">solarized-dark</span>
+  <span class="mode">dark</span></span>
+</a><a class="card" href="terafox.html">
+  <span class="prev" style="background:#152528;color:#e6eaea">
+    <span style="display:block;padding:.55rem .75rem;font-weight:600">Ag &mdash; terafox</span>
+    <span class="ramp" style="position:absolute;bottom:0;left:0;right:0"><i style="background:#2f3239"></i><i style="background:#e85c51"></i><i style="background:#7aa4a1"></i><i style="background:#fda47f"></i><i style="background:#5a93aa"></i><i style="background:#ad5c7c"></i><i style="background:#a1cdd8"></i><i style="background:#eaeeee"></i><i style="background:#4e5157"></i><i style="background:#eb746b"></i><i style="background:#8eb2af"></i><i style="background:#ffa07a"></i><i style="background:#73a3b7"></i><i style="background:#c78ba0"></i><i style="background:#afdfeb"></i><i style="background:#fdf1ed"></i></span>
+  </span>
+  <span class="meta"><span class="nm">terafox</span>
+  <span class="mode">dark</span></span>
+</a><a class="card" href="tokyonight-moon.html">
+  <span class="prev" style="background:#222436;color:#c8d3f5">
+    <span style="display:block;padding:.55rem .75rem;font-weight:600">Ag &mdash; tokyonight-moon</span>
+    <span class="ramp" style="position:absolute;bottom:0;left:0;right:0"><i style="background:#1b1d2b"></i><i style="background:#ff757f"></i><i style="background:#c3e88d"></i><i style="background:#ffc777"></i><i style="background:#82aaff"></i><i style="background:#c099ff"></i><i style="background:#86e1fc"></i><i style="background:#828bb8"></i><i style="background:#444a73"></i><i style="background:#ff757f"></i><i style="background:#c3e88d"></i><i style="background:#ffc777"></i><i style="background:#82aaff"></i><i style="background:#c099ff"></i><i style="background:#86e1fc"></i><i style="background:#c8d3f5"></i></span>
+  </span>
+  <span class="meta"><span class="nm">tokyonight-moon</span>
+  <span class="mode">dark</span></span>
+</a><a class="card" href="tokyonight-night.html">
+  <span class="prev" style="background:#1a1b26;color:#c0caf5">
+    <span style="display:block;padding:.55rem .75rem;font-weight:600">Ag &mdash; tokyonight-night</span>
+    <span class="ramp" style="position:absolute;bottom:0;left:0;right:0"><i style="background:#15161e"></i><i style="background:#f7768e"></i><i style="background:#9ece6a"></i><i style="background:#e0af68"></i><i style="background:#7aa2f7"></i><i style="background:#bb9af7"></i><i style="background:#7dcfff"></i><i style="background:#a9b1d6"></i><i style="background:#414868"></i><i style="background:#f7768e"></i><i style="background:#9ece6a"></i><i style="background:#e0af68"></i><i style="background:#7aa2f7"></i><i style="background:#bb9af7"></i><i style="background:#7dcfff"></i><i style="background:#c0caf5"></i></span>
+  </span>
+  <span class="meta"><span class="nm">tokyonight-night</span>
+  <span class="mode">dark</span></span>
+</a><a class="card" href="tokyonight-storm.html">
+  <span class="prev" style="background:#24283b;color:#c0caf5">
+    <span style="display:block;padding:.55rem .75rem;font-weight:600">Ag &mdash; tokyonight-storm</span>
+    <span class="ramp" style="position:absolute;bottom:0;left:0;right:0"><i style="background:#1d202f"></i><i style="background:#f7768e"></i><i style="background:#9ece6a"></i><i style="background:#e0af68"></i><i style="background:#7aa2f7"></i><i style="background:#bb9af7"></i><i style="background:#7dcfff"></i><i style="background:#a9b1d6"></i><i style="background:#414868"></i><i style="background:#f7768e"></i><i style="background:#9ece6a"></i><i style="background:#e0af68"></i><i style="background:#7aa2f7"></i><i style="background:#bb9af7"></i><i style="background:#7dcfff"></i><i style="background:#c0caf5"></i></span>
+  </span>
+  <span class="meta"><span class="nm">tokyonight-storm</span>
+  <span class="mode">dark</span></span>
+</a><a class="card" href="zenburn.html">
+  <span class="prev" style="background:#3f3f3f;color:#dcdccc">
+    <span style="display:block;padding:.55rem .75rem;font-weight:600">Ag &mdash; zenburn</span>
+    <span class="ramp" style="position:absolute;bottom:0;left:0;right:0"><i style="background:#3f3f3f"></i><i style="background:#cc9393"></i><i style="background:#7f9f7f"></i><i style="background:#d0bf8f"></i><i style="background:#6ca0a3"></i><i style="background:#dc8cc3"></i><i style="background:#93e0e3"></i><i style="background:#dcdccc"></i><i style="background:#709080"></i><i style="background:#dca3a3"></i><i style="background:#bfebbf"></i><i style="background:#f0dfaf"></i><i style="background:#8cd0d3"></i><i style="background:#ec93d3"></i><i style="background:#93e0e3"></i><i style="background:#ffffff"></i></span>
+  </span>
+  <span class="meta"><span class="nm">zenburn</span>
+  <span class="mode">dark</span></span>
+</a></div>
+<h2>light (10)</h2>
+<div class="cards"><a class="card" href="ayu-light.html">
+  <span class="prev" style="background:#fcfcfc;color:#5c6166">
+    <span style="display:block;padding:.55rem .75rem;font-weight:600">Ag &mdash; ayu-light</span>
+    <span class="ramp" style="position:absolute;bottom:0;left:0;right:0"><i style="background:#e6e1cf"></i><i style="background:#f07171"></i><i style="background:#86b300"></i><i style="background:#f2ae49"></i><i style="background:#399ee6"></i><i style="background:#a37acc"></i><i style="background:#4cbf99"></i><i style="background:#5c6166"></i><i style="background:#8a9199"></i><i style="background:#f07171"></i><i style="background:#86b300"></i><i style="background:#f2ae49"></i><i style="background:#399ee6"></i><i style="background:#a37acc"></i><i style="background:#4cbf99"></i><i style="background:#5c6166"></i></span>
+  </span>
+  <span class="meta"><span class="nm">ayu-light</span>
+  <span class="mode">light</span></span>
+</a><a class="card" href="catppuccin-latte.html">
+  <span class="prev" style="background:#eff1f5;color:#4c4f69">
+    <span style="display:block;padding:.55rem .75rem;font-weight:600">Ag &mdash; catppuccin-latte</span>
+    <span class="ramp" style="position:absolute;bottom:0;left:0;right:0"><i style="background:#5c5f77"></i><i style="background:#d20f39"></i><i style="background:#40a02b"></i><i style="background:#df8e1d"></i><i style="background:#1e66f5"></i><i style="background:#ea76cb"></i><i style="background:#179299"></i><i style="background:#acb0be"></i><i style="background:#6c6f85"></i><i style="background:#d20f39"></i><i style="background:#40a02b"></i><i style="background:#df8e1d"></i><i style="background:#1e66f5"></i><i style="background:#ea76cb"></i><i style="background:#179299"></i><i style="background:#bcc0cc"></i></span>
+  </span>
+  <span class="meta"><span class="nm">catppuccin-latte</span>
+  <span class="mode">light</span></span>
+</a><a class="card" href="dawnfox.html">
+  <span class="prev" style="background:#faf4ed;color:#575279">
+    <span style="display:block;padding:.55rem .75rem;font-weight:600">Ag &mdash; dawnfox</span>
+    <span class="ramp" style="position:absolute;bottom:0;left:0;right:0"><i style="background:#f2e9e1"></i><i style="background:#a5222f"></i><i style="background:#396847"></i><i style="background:#ac5402"></i><i style="background:#286983"></i><i style="background:#6e33ce"></i><i style="background:#3f83a6"></i><i style="background:#575279"></i><i style="background:#938aa4"></i><i style="background:#b3434e"></i><i style="background:#4c8f5c"></i><i style="background:#c47b28"></i><i style="background:#4a9db8"></i><i style="background:#8452d5"></i><i style="background:#5c9dbb"></i><i style="background:#575279"></i></span>
+  </span>
+  <span class="meta"><span class="nm">dawnfox</span>
+  <span class="mode">light</span></span>
+</a><a class="card" href="everforest-light.html">
+  <span class="prev" style="background:#fdf6e3;color:#5c6a72">
+    <span style="display:block;padding:.55rem .75rem;font-weight:600">Ag &mdash; everforest-light</span>
+    <span class="ramp" style="position:absolute;bottom:0;left:0;right:0"><i style="background:#e6e2cc"></i><i style="background:#f85552"></i><i style="background:#8da101"></i><i style="background:#dfa000"></i><i style="background:#3a94c5"></i><i style="background:#df69ba"></i><i style="background:#35a77c"></i><i style="background:#5c6a72"></i><i style="background:#e6e2cc"></i><i style="background:#f85552"></i><i style="background:#8da101"></i><i style="background:#dfa000"></i><i style="background:#3a94c5"></i><i style="background:#df69ba"></i><i style="background:#35a77c"></i><i style="background:#5c6a72"></i></span>
+  </span>
+  <span class="meta"><span class="nm">everforest-light</span>
+  <span class="mode">light</span></span>
+</a><a class="card" href="github-light.html">
+  <span class="prev" style="background:#ffffff;color:#24292f">
+    <span style="display:block;padding:.55rem .75rem;font-weight:600">Ag &mdash; github-light</span>
+    <span class="ramp" style="position:absolute;bottom:0;left:0;right:0"><i style="background:#24292f"></i><i style="background:#cf222e"></i><i style="background:#116329"></i><i style="background:#4d2d00"></i><i style="background:#0969da"></i><i style="background:#8250df"></i><i style="background:#1b7c83"></i><i style="background:#6e7781"></i><i style="background:#57606a"></i><i style="background:#a40e26"></i><i style="background:#1a7f37"></i><i style="background:#633c01"></i><i style="background:#218bff"></i><i style="background:#a475f9"></i><i style="background:#3192aa"></i><i style="background:#8c959f"></i></span>
+  </span>
+  <span class="meta"><span class="nm">github-light</span>
+  <span class="mode">light</span></span>
+</a><a class="card" href="gruvbox-light.html">
+  <span class="prev" style="background:#fbf1c7;color:#3c3836">
+    <span style="display:block;padding:.55rem .75rem;font-weight:600">Ag &mdash; gruvbox-light</span>
+    <span class="ramp" style="position:absolute;bottom:0;left:0;right:0"><i style="background:#fbf1c7"></i><i style="background:#cc241d"></i><i style="background:#98971a"></i><i style="background:#d79921"></i><i style="background:#458588"></i><i style="background:#b16286"></i><i style="background:#689d6a"></i><i style="background:#7c6f64"></i><i style="background:#928374"></i><i style="background:#9d0006"></i><i style="background:#79740e"></i><i style="background:#b57614"></i><i style="background:#076678"></i><i style="background:#8f3f71"></i><i style="background:#427b58"></i><i style="background:#3c3836"></i></span>
+  </span>
+  <span class="meta"><span class="nm">gruvbox-light</span>
+  <span class="mode">light</span></span>
+</a><a class="card" href="kanagawa-lotus.html">
+  <span class="prev" style="background:#f2ecbc;color:#545464">
+    <span style="display:block;padding:.55rem .75rem;font-weight:600">Ag &mdash; kanagawa-lotus</span>
+    <span class="ramp" style="position:absolute;bottom:0;left:0;right:0"><i style="background:#1f1f28"></i><i style="background:#c84053"></i><i style="background:#6f894e"></i><i style="background:#77713f"></i><i style="background:#4d699b"></i><i style="background:#b35b79"></i><i style="background:#597b75"></i><i style="background:#545464"></i><i style="background:#8a8980"></i><i style="background:#d7474b"></i><i style="background:#6e915f"></i><i style="background:#836f4a"></i><i style="background:#6693bf"></i><i style="background:#624c83"></i><i style="background:#5e857a"></i><i style="background:#43436c"></i></span>
+  </span>
+  <span class="meta"><span class="nm">kanagawa-lotus</span>
+  <span class="mode">light</span></span>
+</a><a class="card" href="rose-pine-dawn.html">
+  <span class="prev" style="background:#faf4ed;color:#575279">
+    <span style="display:block;padding:.55rem .75rem;font-weight:600">Ag &mdash; rose-pine-dawn</span>
+    <span class="ramp" style="position:absolute;bottom:0;left:0;right:0"><i style="background:#f2e9e1"></i><i style="background:#b4637a"></i><i style="background:#286983"></i><i style="background:#ea9d34"></i><i style="background:#56949f"></i><i style="background:#907aa9"></i><i style="background:#d7827e"></i><i style="background:#575279"></i><i style="background:#9893a5"></i><i style="background:#b4637a"></i><i style="background:#286983"></i><i style="background:#ea9d34"></i><i style="background:#56949f"></i><i style="background:#907aa9"></i><i style="background:#d7827e"></i><i style="background:#575279"></i></span>
+  </span>
+  <span class="meta"><span class="nm">rose-pine-dawn</span>
+  <span class="mode">light</span></span>
+</a><a class="card" href="solarized-light.html">
+  <span class="prev" style="background:#fdf6e3;color:#657b83">
+    <span style="display:block;padding:.55rem .75rem;font-weight:600">Ag &mdash; solarized-light</span>
+    <span class="ramp" style="position:absolute;bottom:0;left:0;right:0"><i style="background:#073642"></i><i style="background:#dc322f"></i><i style="background:#859900"></i><i style="background:#b58900"></i><i style="background:#268bd2"></i><i style="background:#d33682"></i><i style="background:#2aa198"></i><i style="background:#eee8d5"></i><i style="background:#586e75"></i><i style="background:#cb4b16"></i><i style="background:#859900"></i><i style="background:#b58900"></i><i style="background:#268bd2"></i><i style="background:#6c71c4"></i><i style="background:#93a1a1"></i><i style="background:#fdf6e3"></i></span>
+  </span>
+  <span class="meta"><span class="nm">solarized-light</span>
+  <span class="mode">light</span></span>
+</a><a class="card" href="tokyonight-day.html">
+  <span class="prev" style="background:#e1e2e7;color:#3760bf">
+    <span style="display:block;padding:.55rem .75rem;font-weight:600">Ag &mdash; tokyonight-day</span>
+    <span class="ramp" style="position:absolute;bottom:0;left:0;right:0"><i style="background:#b4b5b9"></i><i style="background:#f52a65"></i><i style="background:#587539"></i><i style="background:#8c6c3e"></i><i style="background:#2e7de9"></i><i style="background:#9854f1"></i><i style="background:#007197"></i><i style="background:#6172b0"></i><i style="background:#a1a6c5"></i><i style="background:#f52a65"></i><i style="background:#587539"></i><i style="background:#8c6c3e"></i><i style="background:#2e7de9"></i><i style="background:#9854f1"></i><i style="background:#007197"></i><i style="background:#3760bf"></i></span>
+  </span>
+  <span class="meta"><span class="nm">tokyonight-day</span>
+  <span class="mode">light</span></span>
+</a></div>
+<p class="legend">Cards show each theme's own background and foreground,
+with its sixteen palette slots as the strip beneath. <code>themes/auto</code> is
+wallpaper-derived and machine-local, so it has no page.</p>
+</body></html>
