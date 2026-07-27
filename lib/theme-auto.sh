@@ -574,9 +574,61 @@ EOF
   # only the failures move. Active keeps its 15-point lead over occupied so the
   # ramp stays ordered. Empty stays fixed and deliberately faint -- an empty
   # workspace is chrome, and belongs below 3:1.
+  # The dots must read as LIT-NESS, not prominence: empty is the dimmest, active
+  # the brightest, whatever the surface. A dark dot means "nothing running here",
+  # like an unlit bulb, and that reading does not flip with the theme's polarity.
+  #
+  # The ramp above delivers that only by accident. It runs from the pill accent
+  # toward _dfa_contrast_fg(surface), so on a DARK surface the ink is near-white
+  # and the order comes out right, while on a LIGHT surface the ink is near-black
+  # and it runs backwards -- empty ends up the brightest dot and active nearly
+  # black. Measured over the shipped themes, 31 of 40 were inverted, 28 of them
+  # light-surface.
+  #
+  # Inverting the ramp on light surfaces would satisfy the ordering and wreck the
+  # legibility, because on a light surface brighter means LOWER contrast: the
+  # active dot would become the least visible one. Darkening the surface instead
+  # dissolves the conflict rather than trading one side of it away -- once the
+  # surface is dark, brightest and most-legible are the same dot, and both goals
+  # are served by one ramp.
+  #
+  # 110 is the cut _dfa_contrast_fg uses to choose its ink, so that is exactly
+  # the threshold that decides which way the ramp runs. Any surface already below
+  # it keeps its exact colour.
+  #
+  # Two things decide HOW to deepen, and neither is obvious:
+  #
+  # Deepen the minimum amount. On a dark theme the pill is squeezed -- it has to
+  # sit below the ink cut but stay distinguishable from a bar background that is
+  # itself dark -- so every step past the cut is separation given away. Stepping
+  # in 10s overshot and cost nord 17 points of _dfa_rgb_dist against its bar.
+  #
+  # There is no single best direction. Near-black keeps the accent's hue; the
+  # palette's own dark pole keeps it in the palette's language but on a dark
+  # theme that pole IS the bar background, so it walks the pill at the one colour
+  # it must not resemble. Which wins is per-palette and not predictable -- for
+  # nord the bar's relatively high blue means mixing toward it PRESERVES more
+  # blue separation than mixing toward black does. So try each and keep whichever
+  # lands furthest from the bar, measured as the filled shape it is.
   local ws_bg=$accent_ws
+  if (( $(_dfa_lum "$ws_bg") > 110 )); then
+    local ws_pole ws_cand ws_q ws_d ws_best="" ws_bestd=-1
+    for ws_pole in '#141414' "$bg" "$fg"; do
+      (( $(_dfa_lum "$ws_pole") > 110 )) && continue
+      ws_q=0
+      while (( ws_q < 95 )); do
+        ws_q=$(( ws_q + 5 ))
+        ws_cand=$(_df_theme_mix "$accent_ws" "$ws_pole" "$ws_q")
+        (( $(_dfa_lum "$ws_cand") > 110 )) && continue
+        ws_d=$(_dfa_rgb_dist "$ws_cand" "$bg")
+        (( ws_d > ws_bestd )) && { ws_bestd=$ws_d; ws_best=$ws_cand; }
+        break
+      done
+    done
+    [[ -n "$ws_best" ]] && ws_bg=$ws_best
+  fi
   local ws_ink ws_occupied ws_empty ws_active ws_stop ws_active_stop
-  ws_ink=$(_dfa_contrast_fg "$accent_ws")
+  ws_ink=$(_dfa_contrast_fg "$ws_bg")
   ws_empty=$(_df_theme_mix "$accent_pill" "$ws_ink" 25)
   ws_stop=55
   while (( ws_stop < 95 )) \

@@ -1,10 +1,10 @@
 /* github-dark waybar palette */
 @define-color bar-bg          #0d1117;
 @define-color bar-fg          #c9d1d9;
-@define-color ws-bg           #56d4dd;
-@define-color ws-fg           #46a350;
-@define-color ws-fg-occupied  #326a38;
-@define-color ws-fg-active    #1e3120;
+@define-color ws-bg           #387e83;
+@define-color ws-fg           #7dda87;
+@define-color ws-fg-occupied  #abe3b1;
+@define-color ws-fg-active    #d9ecdb;
 @define-color pill-brand-bg   #56d364;
 @define-color pill-brand-fg   #0d1117;
 @define-color pill-stats-bg   #56d364;
@@ -13,5 +13,5 @@
 @define-color pill-ctrl-fg    #0d1117;
 @define-color pill-theme-bg   #e3b341;
 @define-color pill-theme-fg   #0d1117;
-@define-color ws-glow          #1e3120;
-@define-color slider-fg       #56d4dd;
+@define-color ws-glow          #d9ecdb;
+@define-color slider-fg       #387e83;

@@ -1,10 +1,10 @@
 /* tokyonight-storm waybar palette */
 @define-color bar-bg          #24283b;
 @define-color bar-fg          #c0caf5;
-@define-color ws-bg           #9ece6a;
-@define-color ws-fg           #ad8853;
-@define-color ws-fg-occupied  #705a3a;
-@define-color ws-fg-active    #332b21;
+@define-color ws-bg           #617b53;
+@define-color ws-fg           #e4bf8a;
+@define-color ws-fg-occupied  #e9d3b3;
+@define-color ws-fg-active    #eee6dc;
 @define-color pill-brand-bg   #e0af68;
 @define-color pill-brand-fg   #24283b;
 @define-color pill-stats-bg   #e0af68;
@@ -13,5 +13,5 @@
 @define-color pill-ctrl-fg    #24283b;
 @define-color pill-theme-bg   #bb9af7;
 @define-color pill-theme-fg   #24283b;
-@define-color ws-glow          #332b21;
-@define-color slider-fg       #9ece6a;
+@define-color ws-glow          #eee6dc;
+@define-color slider-fg       #617b53;

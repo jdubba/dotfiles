@@ -1,10 +1,10 @@
 /* nordfox waybar palette */
 @define-color bar-bg          #2e3440;
 @define-color bar-fg          #cdcecf;
-@define-color ws-bg           #93ccdc;
-@define-color ws-fg           #8aa276;
-@define-color ws-fg-occupied  #5b694f;
-@define-color ws-fg-active    #2c3028;
+@define-color ws-bg           #56717e;
+@define-color ws-fg           #c1d9ad;
+@define-color ws-fg-occupied  #d4e2c8;
+@define-color ws-fg-active    #e7ebe3;
 @define-color pill-brand-bg   #b1d196;
 @define-color pill-brand-fg   #2e3440;
 @define-color pill-stats-bg   #b1d196;
@@ -13,5 +13,5 @@
 @define-color pill-ctrl-fg    #2e3440;
 @define-color pill-theme-bg   #f0d399;
 @define-color pill-theme-fg   #2e3440;
-@define-color ws-glow          #2c3028;
-@define-color slider-fg       #93ccdc;
+@define-color ws-glow          #e7ebe3;
+@define-color slider-fg       #56717e;

@@ -1,10 +1,10 @@
 /* rose-pine-moon waybar palette */
 @define-color bar-bg          #232136;
 @define-color bar-fg          #e0def4;
-@define-color ws-bg           #f6c177;
-@define-color ws-fg           #347089;
-@define-color ws-fg-occupied  #274b5a;
-@define-color ws-fg-active    #1a262b;
+@define-color ws-bg           #826953;
+@define-color ws-fg           #6ba7c0;
+@define-color ws-fg-occupied  #b2ceda;
+@define-color ws-fg-active    #d5e1e6;
 @define-color pill-brand-bg   #3e8fb0;
 @define-color pill-brand-fg   #141414;
 @define-color pill-stats-bg   #3e8fb0;
@@ -13,5 +13,5 @@
 @define-color pill-ctrl-fg    #141414;
 @define-color pill-theme-bg   #9ccfd8;
 @define-color pill-theme-fg   #232136;
-@define-color ws-glow          #1a262b;
-@define-color slider-fg       #f6c177;
+@define-color ws-glow          #d5e1e6;
+@define-color slider-fg       #826953;

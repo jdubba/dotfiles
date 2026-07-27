@@ -1,10 +1,10 @@
 /* terafox waybar palette */
 @define-color bar-bg          #152528;
 @define-color bar-fg          #e6eaea;
-@define-color ws-bg           #c78ba0;
-@define-color ws-fg           #88acb5;
-@define-color ws-fg-occupied  #3b474a;
-@define-color ws-fg-active    #24282a;
+@define-color ws-bg           #88616f;
+@define-color ws-fg           #bfe3ec;
+@define-color ws-fg-occupied  #d3e8ee;
+@define-color ws-fg-active    #e6edef;
 @define-color pill-brand-bg   #afdfeb;
 @define-color pill-brand-fg   #152528;
 @define-color pill-stats-bg   #afdfeb;
@@ -13,5 +13,5 @@
 @define-color pill-ctrl-fg    #152528;
 @define-color pill-theme-bg   #73a3b7;
 @define-color pill-theme-fg   #152528;
-@define-color ws-glow          #24282a;
-@define-color slider-fg       #c78ba0;
+@define-color ws-glow          #e6edef;
+@define-color slider-fg       #88616f;

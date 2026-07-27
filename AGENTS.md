@@ -649,6 +649,28 @@ way to check the result, and both are now measured rather than assumed:
   themes that already passed keep their exact colours; active keeps a 15-point
   lead to preserve the ordering, and empty stays fixed and faint because it is
   chrome.
+- **The dots encode lit-ness, not prominence — empty is the *dimmest*, active the
+  brightest, whatever the surface.** A dark dot means "nothing running here", and
+  that reading does not flip with polarity. The ramp delivered it only by
+  accident: it runs toward `_dfa_contrast_fg(surface)`, so a dark surface gets a
+  near-white ink and the right order, while a **light** surface gets a near-black
+  one and runs backwards — empty brightest, active nearly black. 31 of 40 shipped
+  themes were inverted, 28 of them light-surface.
+  Inverting the ramp on light surfaces is the wrong fix: brighter means *lower*
+  contrast there, so it buys the ordering by making the active dot the least
+  visible one. **The workspace surface is deepened below the ink cut instead**
+  (luminance 110, the value `_dfa_contrast_fg` switches on), which dissolves the
+  conflict rather than trading it — once the surface is dark, brightest and
+  most-legible are the same dot.
+  Two non-obvious constraints govern *how*. Deepen the **minimum** amount: on a
+  dark theme the pill is squeezed between the ink cut and a bar background that is
+  itself dark, so every step past the cut is separation given away (10% steps cost
+  nord 17 points of `_dfa_rgb_dist`). And there is **no single best direction** —
+  near-black keeps the accent's hue, but the palette's dark pole is the bar
+  background on a dark theme, and which one lands further from the bar is
+  per-palette (nord's bar has enough blue that mixing *toward* it preserves more
+  blue separation than mixing toward black). The emitter tries each pole at 5%
+  granularity and keeps whichever measures furthest from the bar.
 - **Terminal selection.** `selection_foreground = fg` over `selection_background =
   c8` left selected text under 4.5:1 in 26 of 40 themes (`solarized-light` 1.21:1
   — selecting text made it invisible). `c8` is kept, being the palette's own
