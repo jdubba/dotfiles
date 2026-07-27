@@ -4,7 +4,8 @@ A hands-on checklist to validate the theming deliverables on a live machine
 (reference host: **stationzebra**, Gentoo + Hyprland + hyprpaper). Work through
 the phases in order; each step lists the command(s) and what to expect.
 
-Related docs: `docs/auto-theming.md` (auto-theme internals + DE backlog),
+Related docs: `docs/theming-agent-guide.md` (running a polishing session),
+`docs/auto-theming.md` (auto-theme internals + DE backlog),
 AGENTS.md "Theming" section.
 
 ## Phase 0 — Deploy the new seams (one-time)

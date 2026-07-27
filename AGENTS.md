@@ -372,6 +372,14 @@ defaults.**
 
 ## Theming (durable)
 
+> **Polishing a theme with the user? Read
+> [`docs/theming-agent-guide.md`](docs/theming-agent-guide.md) first.** This
+> section is the *reference* — mechanisms, palette-slot traps, accumulated
+> gotchas. That guide is the *process*: the propose → measure → apply → render →
+> discuss → commit loop, the slot-name shorthand the user speaks in, what to ask
+> at each seam and in what order, the wallpaper workflow, and how to prove a
+> change actually rendered.
+
 The theme system coordinates colours across every visual tool via a **theme
 layer** (`themes/<name>/`, mirroring `$HOME`) injected between profiles and host
 (`lib/theme.sh`, `lib/identity.sh`). Active-theme resolution precedence:
@@ -490,6 +498,9 @@ layer provides, so switching themes is just a relink + reload. Seams (see
   theme is linked (e.g. `home/.config/hypr/current-theme.conf`).
 
 ### Polishing a theme (durable)
+
+*(Findings. For how to run the session itself — seam order, what to ask, the
+shorthand — see [`docs/theming-agent-guide.md`](docs/theming-agent-guide.md).)*
 
 **Measure, don't eyeball.** Compute WCAG contrast for every foreground/background
 pair before and after. The emitter assigns colours by *palette slot*, not by
