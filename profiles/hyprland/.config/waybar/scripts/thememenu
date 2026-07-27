@@ -2,10 +2,11 @@
 #
 # thememenu — Walker-based theme switcher for Waybar's custom/theme pill.
 #
-# Lists the predefined dotfiles themes (dotfiles theme list --plain) plus an
-# "Auto theme" entry that opens a Walker-driven image browser; picking an image
-# runs `dotfiles theme auto now <image>` (wallpaper-derived theme). Selecting a
-# named theme runs `dotfiles theme set <name>`. Both relink + live-reload.
+# Lists an "Auto theme" entry, a separator, then the predefined dotfiles themes
+# (dotfiles theme list --plain). Auto theme opens a Walker-driven image browser
+# and picking an image runs `dotfiles theme auto now <image>` (wallpaper-derived
+# theme); selecting a named theme runs `dotfiles theme set <name>`. Both relink
+# + live-reload.
 #
 # Bound from Waybar's custom/theme module on-click.
 
@@ -16,6 +17,22 @@ set -euo pipefail
 export PATH="$HOME/.local/bin:$HOME/.cargo/bin:/usr/local/bin:/usr/bin:/bin:${PATH:-}"
 
 AUTO_LABEL="󰋩  Auto theme — pick an image…"
+
+# Auto theme is pinned to the top: it is the one entry that is not a theme name
+# but an action, and it used to sit at the bottom of a 40-item list where it
+# scrolled off screen.
+#
+# Walker's dmenu has no separator primitive -- a list is lines of text -- so the
+# rule below is an ordinary entry and is therefore selectable. main() loops on
+# it rather than falling through, so a mis-click re-opens the menu instead of
+# silently dismissing it. It carries no letters, so it drops out of the list as
+# soon as the user types anything, which is exactly the wanted behaviour: it is
+# a divider for the unfiltered list and nothing else.
+#
+# U+2500 BOX DRAWINGS LIGHT HORIZONTAL, deliberately NOT a Nerd Font PUA glyph
+# -- those get hijacked by whichever installed font also covers the range (see
+# AGENTS.md, Fonts). Every font in the stack has this one.
+SEPARATOR="────────────────────────────────"
 
 # --- Walker picker (matches the other waybar menu scripts) -------------------
 # topright positions it just under Waybar's right side; -H hides the F1-F4
@@ -74,8 +91,12 @@ detached() {
 
 main() {
   local choice img
-  choice=$( { dotfiles theme list --plain; printf '%s\n' "$AUTO_LABEL"; } | menu "Theme" ) || exit 0
-  [[ -n "$choice" ]] || exit 0
+  while :; do
+    choice=$( { printf '%s\n%s\n' "$AUTO_LABEL" "$SEPARATOR"
+                dotfiles theme list --plain; } | menu "Theme" ) || exit 0
+    [[ -n "$choice" ]] || exit 0
+    [[ "$choice" == "$SEPARATOR" ]] || break
+  done
 
   if [[ "$choice" == "$AUTO_LABEL" ]]; then
     img=$(pick_image) || exit 0
