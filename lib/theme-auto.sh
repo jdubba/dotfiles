@@ -652,14 +652,40 @@ EOF
   # stylesheets reference must be defined here for every theme: an undefined
   # @colour makes GTK drop the whole rule, which silently removes the selection
   # background rather than erroring. tests/repo.bats asserts the pairing.
+  # The selected row drew alpha(c5, 0.25) -- a quarter-strength wash of one
+  # accent over the window background. That is a very quiet way to say "this is
+  # the row that will run", and every theme whose walker seam was hand-tuned
+  # replaced it with a solid accent: 6 of the 8 did, and all 6 then took a dark
+  # ink because a solid accent is the light element in the launcher.
+  #
+  # Emit that as the default, measured. The badge is the harder half: it sits
+  # INSIDE the selected row, so it has to separate from the selection rather
+  # than from the window, and it was emitted as the same alpha(c5, 0.25) that
+  # the selection had -- literally the same colour, drawn on itself. Pick a
+  # different drawn accent and check it as a filled shape against the selection.
+  local hl_bg hl_ink quick_bg quick_ink qcand qbest=0 qd
+  read -r hl_bg hl_ink <<<"$(_dfa_pair_for "$c5" "$fg" "$bg")"
+  quick_bg=$accent_theme
+  for qcand in "$accent_theme" "$accent_ws" "$accent_pill" "$c3" "$c6" "$c1"; do
+    qd=$(_dfa_rgb_dist "$qcand" "$hl_bg")
+    if (( qd >= 144 )); then quick_bg=$qcand; qbest=$qd; break; fi
+    (( qd > qbest )) && { qbest=$qd; quick_bg=$qcand; }
+  done
+  if (( qbest < 144 )); then
+    qcand=$quick_bg; qd=0
+    while (( qd < 70 )) && (( $(_dfa_rgb_dist "$quick_bg" "$hl_bg") < 144 )); do
+      qd=$(( qd + 10 )); quick_bg=$(_df_theme_mix "$qcand" "$bg" "$qd")
+    done
+  fi
+  read -r quick_bg quick_ink <<<"$(_dfa_pair_for "$quick_bg" "$fg" "$bg")"
   cat >"$dest/.config/walker/colors.css" <<EOF
 /* ${tag} walker palette */
 @define-color window_bg_color ${bg};
 @define-color accent_bg_color ${c5};
-@define-color highlight_bg_color alpha(${c5}, 0.25);
-@define-color highlight_fg_color ${fg};
-@define-color quick_bg_color  alpha(${c5}, 0.25);
-@define-color quick_fg_color  ${fg};
+@define-color highlight_bg_color ${hl_bg};
+@define-color highlight_fg_color ${hl_ink};
+@define-color quick_bg_color  ${quick_bg};
+@define-color quick_fg_color  ${quick_ink};
 @define-color theme_fg_color  ${fg};
 @define-color error_bg_color  ${c1};
 @define-color error_fg_color  ${bg};
@@ -679,17 +705,90 @@ EOF
   # older seam still holds its status-bg, and it would override every later
   # theme's status-style forever -- the bar would simply stop following the
   # theme. `set -gu` is idempotent, so this is harmless where they were never set.
+  #
+  # The bar drew bg=${bg} -- the terminal's own background -- so on all 40 themes
+  # it was not a bar at all, just a strip of terminal with text on it, and the
+  # active window was marked by nothing but a bold. Every theme whose tmux seam
+  # was hand-tuned gave it a surface of its own, and six of the nine put that
+  # surface clear across the background's polarity: rose-pine's rose bar,
+  # dracula's pink, dawnfox's plum on cream.
+  #
+  # Derive it rather than pick a slot. Mixing the background toward the
+  # foreground is the one formula that serves both polarities -- a light bar on a
+  # dark theme, a dark bar on a light one -- and it lands in the palette's own
+  # cast rather than a flat grey, because a palette's fg carries its tint
+  # (duskfox's #e0def4 gives a lavender bar, gruvbox-light's #3c3836 a warm brown
+  # one).
+  #
+  # The ink is the background in BOTH polarities -- that is the whole point of
+  # flipping the bar. A light bar on a dark theme wants dark text and a dark bar
+  # on a light theme wants light text, and the palette's own bg is exactly that
+  # colour either way.
+  #
+  # 78% is a floor, not the answer. A fixed mix lands mid-luminance on any
+  # palette whose fg and bg are not far apart, and mid-luminance is the one place
+  # no ink works: catppuccin-latte's #eff1f5/#4c4f69 gave a #707388 bar that
+  # measured 3.94:1 against every candidate ink there is. Walking further toward
+  # fg moves monotonically away from bg, so ramp until the background clears AA
+  # on it -- themes that already pass keep their exact 78% bar.
+  local tmux_bar tmux_ink
+  tmux_bar=$(_df_theme_mix "$bg" "$fg" 78)
+  tmux_bar=$(_dfa_ramp_to "$tmux_bar" "$fg" "$bg" 4500)
+  # Safety net for a palette whose own fg/bg pair cannot clear AA: pair_for will
+  # move the surface. On every shipped palette the ramp above already settles it
+  # and this returns the bar unchanged.
+  read -r tmux_bar tmux_ink <<<"$(_dfa_pair_for "$tmux_bar" "$bg" "$fg")"
+
+  # The active-pane chip has to read against the BAR, not against the terminal.
+  # Prefer the accent the waybar pills already use, so the two bars on screen
+  # agree; fall through the other drawn accents when that one sits too close to
+  # the bar to be seen.
+  #
+  # _dfa_rgb_dist is the instrument here, not _dfa_contrast: a chip on a bar is a
+  # filled shape against a filled shape. WCAG measures luminance only and would
+  # reject pairs that are unmistakable by hue -- the mistake AGENTS.md records
+  # against the starship separators.
+  # Take the first candidate that clears, so the preference order is honoured
+  # wherever it can be; otherwise take the best of them and deepen it toward the
+  # terminal background, which by construction is the far side of the bar.
+  # kanagawa-dragon needs that -- a #9fa29f bar with a palette of muted accents,
+  # where the best of the six only reaches 93.
+  local tmux_chip tmux_chip_ink cand best=0 d q=0
+  tmux_chip=$accent_pill
+  for cand in "$accent_pill" "$accent_theme" "$accent_ws" "$c1" "$c2" "$c8"; do
+    d=$(_dfa_rgb_dist "$cand" "$tmux_bar")
+    if (( d >= 144 )); then tmux_chip=$cand; best=$d; break; fi
+    (( d > best )) && { best=$d; tmux_chip=$cand; }
+  done
+  if (( best < 144 )); then
+    cand=$tmux_chip
+    while (( q < 70 )) && (( $(_dfa_rgb_dist "$tmux_chip" "$tmux_bar") < 144 )); do
+      q=$(( q + 10 )); tmux_chip=$(_df_theme_mix "$cand" "$bg" "$q")
+    done
+  fi
+  read -r tmux_chip tmux_chip_ink <<<"$(_dfa_pair_for "$tmux_chip" "$fg" "$bg")"
+
+  # The active pane's border takes the chip colour too: both say "this one is
+  # active", and saying it twice in two colours is noise.
+  #
+  # status-left/right were c6 and c3 against a bar that was the terminal
+  # background, and the clock was the raw fg -- which on the new surface is the
+  # one colour guaranteed to be close to it. All three are now measured, and
+  # ramped toward the bar's own ink only where they miss AA.
+  local tmux_sess tmux_meta
+  tmux_sess=$(_dfa_ramp_to "$c6" "$tmux_ink" "$tmux_bar" 4500)
+  tmux_meta=$(_dfa_ramp_to "$c3" "$tmux_ink" "$tmux_bar" 4500)
   cat >"$dest/.config/tmux/current-theme.conf" <<EOF
 # ${tag} tmux colors
 set -g pane-border-style fg=${c8}
-set -g pane-active-border-style fg=${c5}
+set -g pane-active-border-style fg=${tmux_chip}
 set -gu status-bg
 set -gu status-fg
-set -g status-style 'bg=${bg},fg=${fg}'
-set -g status-left '#[fg=${c6}]#S #[fg=${c3}]|'
-set -g status-right '#[fg=${c6}]%Y-%m-%d #[fg=${fg}]%H:%M #[fg=${c3}][#(whoami)]'
+set -g status-style 'bg=${tmux_bar},fg=${tmux_ink}'
+set -g status-left '#[fg=${tmux_ink},bold]#S #[fg=${tmux_meta}]|'
+set -g status-right '#[fg=${tmux_sess}]%Y-%m-%d #[fg=${tmux_ink},bold]%H:%M #[fg=${tmux_meta}][#(whoami)]'
 setw -g window-status-format '#I:#W'
-setw -g window-status-current-format '#[fg=${c7},bold]#I:#W#[default]'
+setw -g window-status-current-format '#[bg=${tmux_chip},fg=${tmux_chip_ink},bold] #I:#W #[default]'
 EOF
 
   # shell theme-env: fzf colors from palette; BAT_THEME per theme
