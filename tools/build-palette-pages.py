@@ -52,9 +52,20 @@ SLOT_NAMES = ["black", "red", "green", "yellow", "blue", "magenta", "cyan", "whi
 # into sixteen slots, so upstream's own kitty port duplicates all seven
 # normal/bright pairs and six roles never appear at all -- including `leaf`, a
 # whole accent hue, and a three-step highlight ramp that is exactly what a bar
-# wants for surfaces. Dracula is the same shape (#44475a, #ffb86c) and could be
-# added here; its overrides currently carry those by hand.
+# wants for surfaces.
+#
+# Dracula is the same shape but far milder: its spec is twelve colours and only
+# two of them miss out, because Dracula publishes a separate ANSI spec that maps
+# the rest cleanly. Both are already load-bearing in the theme's overrides --
+# #44475a is btop's meter_bg, div_line and inactive_fg and nvim's base02, and
+# #ffb86c is btop's temp/used/available midpoint and nvim's base09 -- so they
+# belong on the page for the same reason as Rose Pine's: they are speakable
+# names for colours a tuning session will otherwise have to quote as hex.
 OFF_SLOT = {
+    "dracula": [
+        ("current_line", "#44475a", "row highlight; the spec gives selection the same value"),
+        ("orange", "#ffb86c", "a seventh accent — the spec's own, with no ANSI slot"),
+    ],
     "rose-pine": [
         ("surface", "#1f1d2e", "panel ground, one step above base"),
         ("highlight_low", "#21202e", "subtlest row highlight"),

@@ -141,6 +141,22 @@
   <span class="sw-hex">#FFFFFF</span>
   <span class="sw-sub">bg 14.24 · fg 1.07</span>
 </div></div><p class="legend">Note: <code>fg</code>, <code>c7</code> are all <code>#f8f8f2</code>; <code>c0</code> (<code>#21222c</code>) is all but the background.</p>
+<h2>Beyond the ANSI slots</h2>
+<p class="note">Roles this theme's upstream spec defines that the sixteen
+  ANSI slots cannot carry. <strong>Usable in waybar, walker, hypr/hyprlock,
+  starship and tmux</strong> &mdash; GTK CSS, raw hex and truecolor escapes take any
+  colour. <strong>Not usable in kitty/ghostty</strong>, whose palette is the sixteen,
+  nor in bat/fzf, which follow it. Using one means hand-maintaining that seam:
+  the emitter derives only from the ANSI slots.</p>
+<div class="grid"><div class="sw" style="background:#44475a;color:#f0f0f0">
+  <span class="sw-label">current_line</span>
+  <span class="sw-hex">#44475A</span>
+  <span class="sw-sub">1.56 on bg</span>
+</div><div class="sw" style="background:#ffb86c;color:#141414">
+  <span class="sw-label">orange</span>
+  <span class="sw-hex">#FFB86C</span>
+  <span class="sw-sub">8.36 on bg</span>
+</div></div><div class="tablewrap"><table><tr><th>role</th><th>sample</th><th>hex</th><th>vs bg</th><th>&Delta;E</th><th>intent</th></tr><tr><td class="role">current_line</td><td><span class="chip" style="background:#44475a;color:#f8f8f2">&nbsp;Ag&nbsp;</span></td><td class="mono">#44475A</td><td class="ratio">1.56:1</td><td class="target">14</td><td>row highlight; the spec gives selection the same value</td></tr><tr><td class="role">orange</td><td><span class="chip" style="background:#ffb86c;color:#282a36">&nbsp;Ag&nbsp;</span></td><td class="mono">#FFB86C</td><td class="ratio">8.36:1</td><td class="target">86</td><td>a seventh accent — the spec&#x27;s own, with no ANSI slot</td></tr></table></div>
 <h2>Waybar seams</h2>
 
 <div class="grid"><div class="sw" style="background:#282a36;color:#f0f0f0">
