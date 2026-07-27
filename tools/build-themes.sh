@@ -166,7 +166,7 @@ build_theme material              base16               ansi                 syst
 build_theme oxocarbon             base16               ansi                 system                dark  161616 f2f4f8 161616 ff7eb6 42be65 be95ff 33b1ff ee5396 3ddbd9 dde1e6 525252 ff7eb6 42be65 be95ff 33b1ff ee5396 3ddbd9 ffffff
 
 # --- Nightfox family ---
-build_theme duskfox               base16               ansi                 system                dark  232136 e0def4 393552 eb6f92 a3be8c f6c177 569fba c4a7e7 9ccfd8 e0def4 47407d eb98b5 b1d196 f9cb8c 65b1cd d3b8f2 aadceb e2e0f7
+build_theme duskfox               base16               ansi                 system                dark  232136 e0def4 393552 eb6f92 a3be8c f6c177 569fba c4a7e7 9ccfd8 e0def4 47407d f083a2 b1d196 f9cb8c 65b1cd ccb1ed a6dae3 e2e0f7
 build_theme nordfox               base16               ansi                 system                dark  2e3440 cdcecf 3b4252 bf616a a3be8c ebcb8b 81a1c1 b48ead 8fbcbb e5e9f0 465780 d06f79 b1d196 f0d399 8cafd2 c895bf 93ccdc e7ecf4
 build_theme terafox               base16               ansi                 system                dark  152528 e6eaea 2f3239 e85c51 7aa4a1 fda47f 5a93aa ad5c7c a1cdd8 eaeeee 4e5157 eb746b 8eb2af ffa07a 73a3b7 c78ba0 afdfeb fdf1ed
 build_theme carbonfox             base16               ansi                 system                dark  161616 f2f4f8 282828 ee5396 25be6a 08bdba 78a9ff be95ff 33b1ff dfdfe0 484848 f16da6 46c880 3fc7c5 8cb6ff c8a5ff 52bdff f2f4f8
