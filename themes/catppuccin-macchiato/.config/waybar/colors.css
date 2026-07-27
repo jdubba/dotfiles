@@ -2,8 +2,8 @@
 @define-color bar-bg          #24273a;
 @define-color bar-fg          #cad3f5;
 @define-color ws-bg           #8aadf4;
-@define-color ws-fg           #b76a76;
-@define-color ws-fg-occupied  #76484f;
+@define-color ws-fg           #76484f;
+@define-color ws-fg-occupied  #b76a76;
 @define-color ws-fg-active    #c6a0f6;
 @define-color pill-brand-bg   #8bd5ca;
 @define-color pill-brand-fg   #141414;
