@@ -1,10 +1,10 @@
 /* catppuccin-latte walker palette */
 @define-color window_bg_color #eff1f5;
 @define-color accent_bg_color #ea76cb;
-@define-color highlight_bg_color alpha(#ea76cb, 0.25);
-@define-color highlight_fg_color #4c4f69;
-@define-color quick_bg_color  alpha(#ea76cb, 0.25);
-@define-color quick_fg_color  #4c4f69;
+@define-color highlight_bg_color #ea76cb;
+@define-color highlight_fg_color #141414;
+@define-color quick_bg_color  #40a02b;
+@define-color quick_fg_color  #141414;
 @define-color theme_fg_color  #4c4f69;
 @define-color error_bg_color  #d20f39;
 @define-color error_fg_color  #eff1f5;

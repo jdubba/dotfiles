@@ -1,10 +1,10 @@
 /* palenight walker palette */
 @define-color window_bg_color #292d3e;
 @define-color accent_bg_color #c792ea;
-@define-color highlight_bg_color alpha(#c792ea, 0.25);
-@define-color highlight_fg_color #a6accd;
-@define-color quick_bg_color  alpha(#c792ea, 0.25);
-@define-color quick_fg_color  #a6accd;
+@define-color highlight_bg_color #c792ea;
+@define-color highlight_fg_color #292d3e;
+@define-color quick_bg_color  #ffe585;
+@define-color quick_fg_color  #292d3e;
 @define-color theme_fg_color  #a6accd;
 @define-color error_bg_color  #f07178;
 @define-color error_fg_color  #292d3e;
