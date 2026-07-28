@@ -1,6 +1,6 @@
-# solarized-dark ghostty colors.
-background = #002b36
-foreground = #839496
+# solarized-light ghostty colors.
+background = #fdf6e3
+foreground = #657b83
 selection-background = #586e75
 selection-foreground = #fdf6e3
 palette = 0=#073642
@@ -19,5 +19,5 @@ palette = 12=#268bd2
 palette = 13=#6c71c4
 palette = 14=#93a1a1
 palette = 15=#fdf6e3
-cursor-color = #839496
-cursor-text = #002b36
+cursor-color = #657b83
+cursor-text = #fdf6e3
