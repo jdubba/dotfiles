@@ -1,0 +1,23 @@
+/* powermenu -- topright's look in a box sized for a short, fixed list.
+ *
+ * Used only by the battery pill's power panel (`walker -m menus:powerstate`).
+ * It exists because geometry lives in layout.xml, not in CSS, and the width
+ * could not be narrowed any other way: the box is floored by the
+ * GtkScrolledWindow's min-content-width, which is a GTK *property*, so neither
+ * walker's --width flag nor a CSS min-width can lower it (GTK takes the larger
+ * of the two). Verified: --width 1 and --width 320 both render at topright's
+ * full 500px content width.
+ *
+ * Narrowing topright itself was the alternative and is wrong -- it is shared
+ * with the wifi, tailscale and theme pickers, which need the width for SSIDs
+ * and long theme names.
+ *
+ * Only the geometry differs, so this imports topright's stylesheet whole
+ * rather than becoming a fourth near-copy of it -- the three existing walker
+ * layouts are already near-identical and drift between them is a standing
+ * hazard (see the walker-colour test in tests/repo.bats). GTK resolves
+ * @import relative to the file containing it, so topright's own
+ * `@import "../../colors.css"` still lands on the active theme's seam.
+ * @import must precede every rule.
+ */
+@import "../topright/style.css";
