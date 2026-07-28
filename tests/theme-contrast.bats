@@ -21,6 +21,12 @@ setup() { load test_helper; }
 
 _wb() { awk -v k="$2" '$2==k {gsub(/;/,"",$3); print $3}' "$1/.config/waybar/colors.css"; }
 _st() { awk -F"'" -v k="$2" '$1 ~ ("^"k" = ") {print $2}' "$1/.config/starship.toml"; }
+# walker seam. Only plain hex is emitted: several colours are alpha(<c>, a)
+# forms, which are not a single measurable value.
+_wk() {
+  awk -v k="$2" '$1=="@define-color" && $2==k && $3 ~ /^#/ {gsub(/;/,"",$3); print $3}' \
+    "$1/.config/walker/colors.css"
+}
 
 _load_emitter() {
   DF_REPO="$DF_SRC_REPO"
@@ -83,6 +89,44 @@ _check() {
     [[ -f "$d/.config/starship.toml" ]] || continue
     _check "$d" "root user" "$(_st "$d" color_root_fg)" "$(_st "$d" color_os_bg)" 4500
   done
+  [ ${#bad[@]} -eq 0 ] || { printf '%s\n' "${bad[@]}"; false; }
+}
+
+@test "every theme's power-menu glyph badge is legible" {
+  # The power panel's glyph badge (.menus-powerstate .item-image-text in
+  # profiles/hyprland/.config/walker/themes/*/style.css) is an opaque inverted
+  # chip: @theme_fg_color behind a @window_bg_color glyph. A glyph is large
+  # text, so the target is 3:1.
+  #
+  # Unlike the tests above, this one does NOT skip themes whose walker seam is
+  # pinned by tools/theme-overrides/. Those tests hold the *emitter* to a
+  # guarantee, and an override is outside its reach. This rule instead lives in
+  # the shared stylesheet every theme is rendered through, so an override that
+  # makes the badge unreadable is a real defect in the UI, not intentional
+  # divergence -- 10 of the 40 themes pin this seam.
+  #
+  # Opaque is load-bearing. The @quick_* pair looks like the obvious choice --
+  # it is the existing in-row badge pair -- but the emitter defaults it to
+  # alpha(<colour>, 0.25), so it composites against whichever row it lands on:
+  # measured over all 40 palettes that put the glyph at 2.72:1 on
+  # catppuccin-mocha's unselected rows and made the chip vanish into that
+  # theme's selected row entirely (rgb_dist 0).
+  _load_emitter
+  local bad=() d n checked=0
+  for d in "$DF_SRC_REPO"/themes/*/; do
+    n=$(basename "$d")
+    [[ $n == auto ]] && continue
+    [[ -f "$d/.config/walker/colors.css" ]] || continue
+    local ink chip
+    ink=$(_wk "$d" window_bg_color)
+    chip=$(_wk "$d" theme_fg_color)
+    [[ -n $ink && -n $chip ]] || continue
+    checked=$((checked + 1))
+    _check "$d" "power badge" "$ink" "$chip" 3000
+  done
+  # _wk skips alpha() forms, so guard against the loop silently measuring
+  # almost nothing and passing.
+  [ "$checked" -ge 35 ] || { echo "only measured $checked themes"; false; }
   [ ${#bad[@]} -eq 0 ] || { printf '%s\n' "${bad[@]}"; false; }
 }
 

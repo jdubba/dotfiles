@@ -79,6 +79,79 @@ setup() { load test_helper; }
   [ -z "$missing" ] || { echo "missing seams:$missing"; false; }
 }
 
+@test "the power menu ships a complete elephant menus definition" {
+  local m="$DF_SRC_REPO/profiles/hyprland/.config/elephant/menus/powerstate.toml"
+  [ -f "$m" ]
+  # `name` is what clients address: waybar opens it as `menus:powerstate`, so a
+  # rename here silently breaks the battery pill's on-click.
+  grep -qx 'name = "powerstate"' "$m"
+  local v
+  for v in poweroff reboot suspend; do grep -qx "value = \"$v\"" "$m"; done
+  # The single shared action MUST interpolate %VALUE%. Without that token
+  # elephant does not error -- it pipes the entry's value to the command's
+  # stdin instead, so all three entries would run a bare `systemctl`.
+  grep -qx 'action = "systemctl %VALUE%"' "$m"
+  # Declared order is deliberate (destructive first); alphabetical sorting
+  # would reorder these to Reboot / Shutdown / Suspend.
+  grep -qx 'fixed_order = true' "$m"
+  # menus is a compiled Go plugin, not part of the elephant binary, so a fresh
+  # machine has to build it -- providers.list is that manifest.
+  grep -qx 'menus' "$DF_SRC_REPO/profiles/hyprland/.config/elephant/providers.list"
+}
+
+@test "the power menu's icons are all glyphs, not icon-theme names" {
+  # walker routes an icon value to its font label -- the styleable badge --
+  # only when the value is non-ASCII and not an absolute path. An ASCII name
+  # like "system-shutdown" would silently become an icon-theme lookup instead,
+  # so the badge would draw a themed image (or a missing-image placeholder)
+  # rather than the glyph, and .item-image-text would style nothing.
+  local m="$DF_SRC_REPO/profiles/hyprland/.config/elephant/menus/powerstate.toml"
+  local total ascii
+  total=$(grep -c '^icon = ' "$m")
+  [ "$total" -eq 4 ]                     # menu default + one per entry
+  # [ -~] is the printable ASCII range under the C locale.
+  ascii=$(LC_ALL=C grep -c '^icon = "[ -~]*"$' "$m" || true)
+  [ "$ascii" -eq 0 ]
+}
+
+@test "every walker theme styles the power badge" {
+  # A theme missing the rule does not error: the glyph falls through to
+  # .item-image-text's bare 28px, i.e. no badge at all. powermenu carries it by
+  # importing topright's sheet whole rather than being a fourth copy of it, so
+  # follow one level of @import before failing.
+  local d name css rel
+  for d in "$DF_SRC_REPO"/profiles/hyprland/.config/walker/themes/*/; do
+    name=$(basename "$d")
+    css="$d/style.css"
+    [ -f "$css" ] || { echo "$name has no style.css"; false; }
+    grep -q '^\.menus-powerstate \.item-image-text {' "$css" && continue
+    # @import is resolved by GTK relative to the file containing it.
+    rel=$(sed -n 's/^@import "\([^"]*\)";.*/\1/p' "$css" | head -1)
+    [ -n "$rel" ] || { echo "no power badge rule in $name/style.css"; false; }
+    grep -q '^\.menus-powerstate \.item-image-text {' "$d/$rel" \
+      || { echo "no power badge rule reachable from $name/style.css"; false; }
+  done
+}
+
+@test "the power panel's theme sizes itself to its content" {
+  local l="$DF_SRC_REPO/profiles/hyprland/.config/walker/themes/powermenu/layout.xml"
+  [ -f "$l" ]
+  # The min-* floors must stay at 1 and natural propagation on. A hardcoded
+  # floor is exactly what pinned topright's box at 500px wide no matter what
+  # --width was passed, and a hand-fitted width clips instead of growing on a
+  # machine whose font metrics are wider.
+  grep -q '<property name="min-content-width">1</property>' "$l"
+  grep -q '<property name="propagate-natural-width">true</property>' "$l"
+  grep -q '<property name="propagate-natural-height">true</property>' "$l"
+}
+
+@test "waybar's battery pill opens the power menu in its own theme" {
+  # -t powermenu is load-bearing, not cosmetic: under the shared topright theme
+  # the three rows sit in a box reserved for scrolling pickers.
+  grep -q 'walker -m menus:powerstate -t powermenu' \
+    "$DF_SRC_REPO/profiles/hyprland/.config/waybar/config.jsonc"
+}
+
 @test "every colour walker's stylesheets use is defined by every theme" {
   # GTK drops a whole rule when it references an undefined @colour, so a missing
   # one does not error -- it silently removes whatever that rule drew (e.g. the
