@@ -202,6 +202,27 @@
     "on-click": "$HOME/.config/waybar/scripts/tailscalemenu",
     "tooltip": true
   },
+  /* The battery pill doubles as the power-state panel: clicking it opens the
+     elephant menu defined in elephant/menus/powerstate.toml (shutdown /
+     reboot / suspend). Invoked the same way custom/oslogo opens the app
+     launcher -- walker directly with -m -- rather than through a script in
+     scripts/, because this menu is declarative: the actions live in the TOML
+     and elephant runs them detached (setsid), so there is no multi-step logic
+     to script and nothing for a waybar reload to kill.
+     `walker` resolves under waybar.service's minimal PATH because it is
+     installed to /usr/local/bin (see AGENTS.md, Hyprland session launch).
+
+     Flags: -H hides the F1-F4 quick-activate buttons (as the other menus do)
+     and -n hides the search input, which earns nothing on a fixed three-item
+     list -- that also makes -p pointless, since a placeholder only ever shows
+     inside that input.
+     The panel is sized by its own walker theme rather than by flags. Both -t
+     powermenu and the sizing exist for the same reason: the shared topright
+     theme reserves a 600x570 box for the wifi and theme pickers' scrolling
+     lists, which left three rows floating in a 517x540 panel. Height could
+     have been fixed with --height, but width could not -- see the comment in
+     walker/themes/powermenu/layout.xml.
+     Add -N to drop the keybind hint row too, if that reads as noise here. */
   "battery": {
     "format": "{capacity}% {icon}",
     "format-icons": ["\uf244", "\uf243", "\uf242", "\uf241", "\uf240"],
@@ -212,6 +233,7 @@
       "orange": 39,
       "red": 19
     },
-    "interval": 60
+    "interval": 60,
+    "on-click": "walker -m menus:powerstate -t powermenu -H -n"
   }
 }
