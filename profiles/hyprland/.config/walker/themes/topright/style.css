@@ -136,6 +136,17 @@ row:selected .item-box {
   font-size: 28px;
 }
 
+/* The power panel's glyph badge -- see the default layout for why the glyph is
+   a separate widget, and why the chip is an opaque inversion of the theme's
+   text pair rather than the translucent quick_* pair. */
+.menus-powerstate .item-image-text {
+  font-size: 20px;
+  background: @theme_fg_color;
+  color: @window_bg_color;
+  border-radius: 8px;
+  padding: 4px 6px;
+}
+
 .preview {
   border: 1px solid alpha(@accent_bg_color, 0.25);
   /* padding: 10px; */

@@ -132,6 +132,57 @@ row:selected .item-box {
   font-size: 28px;
 }
 
+/* The power panel (elephant `menus:powerstate`, opened from Waybar's battery
+   pill) draws its glyph as a badge rather than as part of the label.
+
+   Its entries carry a literal Nerd Font glyph in `icon`, and walker routes an
+   icon value to the ItemImageFont label -- this class -- instead of an
+   icon-theme lookup whenever the value is non-ASCII and not an absolute path
+   (shared_image_transformer). That makes the glyph a separate widget from
+   .item-text, which is the whole reason the panel is a menus definition and
+   not another `walker -d` script: dmenu rows have no icon element at all --
+   walker's compiled-in item_dmenu.xml carries only ItemText and
+   QuickActivation -- so the wifi/tailscale/theme menus must inline their
+   glyphs into the label text and cannot style them apart from it.
+
+   Scoped to .menus-powerstate -- walker puts a per-provider class on the row,
+   with `menus:` rewritten to `menus-` -- because the symbols and calc
+   providers render their own glyphs through this very same label at 28px.
+
+   The colours are an INVERTED CHIP -- the palette's text ink as the chip, the
+   panel colour as the glyph -- built only from the nine variables every
+   theme's walker seam ships. A tenth would mean an emitter change plus
+   regenerating all 41 themes for a cosmetic.
+
+   The quick_* pair looks like the obvious choice here (it is the existing badge
+   pair) and is wrong: the emitter defaults it to alpha(<colour>, 0.25), a
+   translucent wash of the SAME hue as highlight_bg_color in several themes.
+   Measured over all 40 shipped palettes, that badge merges into the selected
+   row entirely on catppuccin-mocha (rgb_dist 0) and drops the glyph to 2.72:1
+   on an unselected one. A translucent chip also makes legibility depend on
+   which row you are looking at, because the ink is really being measured
+   against a composite. Keeping the chip OPAQUE is what makes the glyph's
+   contrast row-state independent.
+
+   fg-on-bg is the theme's own designed contrast pair, so inverting it is both
+   maximally legible and maximally far from the row by construction. Measured
+   across all 40: glyph ink worst 4.52:1 (tokyonight-day) with none under the
+   3:1 large-glyph target -- in fact none under 4.5 either -- and chip-vs-row
+   worst rgb_dist 258. Use _dfa_rgb_dist, not WCAG, for the chip-vs-row
+   question: that is shape-vs-shape, not text (see AGENTS.md, Theming).
+   Four palettes (solarized x2, tokyonight-night/storm) put the chip within
+   rgb_dist 30-55 of the *selected* row, so on those the chip reads as the
+   glyph sitting directly on the selection. That is left alone deliberately:
+   only one row is selected at a time, the selection is already the emphasis,
+   and the glyph itself stays >= 4.52:1 there because the chip is opaque. */
+.menus-powerstate .item-image-text {
+  font-size: 20px;
+  background: @theme_fg_color;
+  color: @window_bg_color;
+  border-radius: 8px;
+  padding: 4px 6px;
+}
+
 .preview {
   border: 1px solid alpha(@accent_bg_color, 0.25);
   /* padding: 10px; */
