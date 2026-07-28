@@ -116,8 +116,9 @@ container, so adopting genuinely general-purpose scripts there is fine too.
 
 - `profiles/hyprland/` — `waybar/` (config + style + `scripts/{wifimenu,
   tailscalemenu,tailscale-status,oslogo,cputemp,thememenu,theme-status}`);
-  `walker/themes/{default,topleft,topright}`;
-  `elephant/providers.list`; systemd `hyprland-session.target` + (guard-free)
+  `walker/themes/{default,topleft,topright,powermenu}`;
+  `elephant/providers.list` + `elephant/menus/powerstate.toml` (the battery
+  pill's power panel); systemd `hyprland-session.target` + (guard-free)
   `kanshi.service` + `dotfiles-autotheme.service`.
 - `hosts/stationzebra/` — `kanshi/` (config + `move-workspaces.sh` +
   `dock-{layout,monitor}.sh` for the LG TV dock: workspaces 1-3 left TV, 4-6
@@ -355,6 +356,76 @@ defaults.**
   `format-connected: "{icon}"` renders **empty** when a device connects. Use a
   literal glyph for `format-connected`/`-battery`; list devices in the tooltip
   via `{device_enumerate}`.
+- **Two ways to build a Waybar menu, and the glyph decides which.** The wifi,
+  tailscale and theme pills shell out to a script in `waybar/scripts/` that
+  pipes lines into `walker -d` (dmenu). The battery pill instead opens a
+  declarative **elephant `menus` definition**
+  (`profiles/hyprland/.config/elephant/menus/powerstate.toml`, opened as
+  `walker -m menus:powerstate`). The deciding constraint is not complexity:
+  **a dmenu row has no icon element at all.** Walker's compiled-in
+  `item_dmenu.xml` contains only `ItemText` and `QuickActivation`, so a dmenu
+  glyph must be inlined into the label text and can never be styled apart from
+  it. A menus entry has its own `icon` field, which walker renders into a
+  separate `ItemImageFont` label (`.item-image-text`) — the only way to get a
+  glyph badge. Reach for a script when there is multi-step logic (password
+  prompts, sub-menus, live `nmcli`/`tailscale` state); reach for a menus TOML
+  when the actions are static and you want per-entry icons.
+  - Walker treats an `icon` value as **text** iff it is non-ASCII **and** not
+    an absolute path (`shared_image_transformer`); anything else is an
+    icon-theme/file lookup. So a literal Nerd Font glyph lands in the font
+    label, while an ASCII name like `system-shutdown` silently becomes an image.
+  - Rows get a **per-provider CSS class**, with `menus:` rewritten to `menus-`
+    (`menus:powerstate` → `.menus-powerstate`). Scope per-menu styling with it;
+    `.item-image-text` is otherwise shared with the symbols and calc providers.
+  - Entries carry an optional `state` list, which walker also adds as a CSS
+    class — that is the hook if a menu ever needs per-entry styling.
+  - `%VALUE%` in the action is **not** optional sugar: without that token
+    elephant pipes the entry's `value` to the command's **stdin** instead of
+    interpolating it, so `action = "systemctl"` would run a bare `systemctl`
+    three times. Actions run via `sh -c` with `setsid`, so unlike a
+    waybar-child script they survive a waybar reload — no `setsid` dance
+    needed (contrast `thememenu`).
+  - Set `fixed_order = true` to keep the declared order; entries sort
+    alphabetically otherwise. `hide_from_providerlist = true` keeps the entries
+    out of the global launcher, which is what stops a bare "s" in walker from
+    surfacing Shutdown as a one-keystroke hit.
+  - **Walker box geometry lives in `layout.xml`, and the CLI can only shrink
+    half of it.** `--height`/`--width` override the wrapper's `*-request`, but
+    both are *minimums*: any value at or below the natural content size yields
+    the same content-fitted box (measured identical at 1, 230 and 270). Width
+    has a second, harder floor — the `GtkScrolledWindow`'s `min-content-width`
+    — which is a GTK **property**, so neither `--width` nor a CSS `min-width`
+    can lower it (GTK takes the larger of the two). Against `topright`'s 500px
+    floor, `--width 1` and `--width 320` both rendered full width. A menu that
+    needs a smaller box therefore needs its **own theme**, which is what
+    `themes/powermenu/` is: `topright`'s layout with the `min-*` floors dropped
+    to 1 so the already-present `propagate-natural-{width,height}` sizes the
+    box to its content. Prefer that to a hand-fitted number — it tracks edited
+    labels for free and **cannot clip**, whereas a fixed width can, since
+    Fedora and Gentoo ship different font stacks (at a fitted 280px the longest
+    subtext already reached the padding edge). Keep the `max-*` values as a cap
+    so a long future entry widens the panel instead of overflowing the monitor.
+  - **A theme dir can import another's stylesheet** (`@import
+    "../topright/style.css";`, which must precede all rules). GTK resolves
+    `@import` relative to the importing file, so the imported sheet's own
+    `@import "../../colors.css"` still lands on the active theme's seam. That
+    is how `powermenu` differs only in geometry without becoming a fourth
+    near-copy of a 225-line stylesheet. Walker also falls back **per file**, so
+    a theme may ship only the files it changes — but *not* `style.css`, whose
+    compiled-in default does not import the seam.
+  - **Walker's service enumerates themes once, at startup.** A newly added
+    `themes/<name>/` reports `theme not found. using default theme.` until
+    `walker --gapplication-service` is restarted — the symlink farm makes the
+    directory appear instantly, which makes this look like a broken theme
+    rather than a stale service.
+  - **`menus` is a compiled Go plugin, not part of the elephant binary.** It is
+    listed in `providers.list`, and a fresh machine must build it like the
+    others (`go build -buildmode=plugin` in
+    `elephant/internal/providers/menus`, then install the `.so` into
+    `~/.config/elephant/providers/`). Menu definitions themselves are read from
+    `~/.config/elephant/menus/`, which the loader walks with symlinks followed,
+    so the folded symlink the dotfiles farm creates there works fine. elephant
+    must be **restarted** to pick up a newly installed provider.
 - **Neovim `nvim-treesitter` is pinned `branch = "main"`** (the v1.x rewrite:
   `require("nvim-treesitter").setup()/install()/indentexpr()`). Upstream's default
   branch is the now-archived `master`, whose module has **no `.install`** (→
@@ -528,6 +599,23 @@ blanket "raise everything" is as wrong as leaving a failure in place.
   foreground. On a *saturated* surface only near-black/near-white inks are
   legible, so a vivid highlight and a legible one can be mutually exclusive — say
   so rather than silently picking one.
+- **Several walker seam colours are `alpha(<colour>, 0.25)`, not hex.** The
+  emitter defaults `quick_bg_color` and `highlight_bg_color` to a translucent
+  wash, so anything drawn from them composites against whatever it lands on
+  rather than having a colour of its own. Two consequences. Any sweep that
+  parses the seam must handle the `alpha()` form — naive hex parsing silently
+  scores garbage — and **a translucent surface cannot carry a legibility
+  guarantee**, because its ink is really being measured against a composite that
+  differs per row state. `quick_bg_color` is additionally a wash of the *same*
+  hue as `highlight_bg_color` in several themes, so a badge drawn from it
+  vanishes into the selected row entirely (`rgb_dist` 0 on catppuccin-mocha)
+  while sitting at 2.72:1 on an unselected one. Keep any chip that must stay
+  readable **opaque**: that alone makes its contrast row-state independent.
+  Inverting the theme's own text pair (`theme_fg_color` behind a
+  `window_bg_color` glyph) is the portable way to get one — it is a designed
+  contrast pair, so it is both maximally legible and maximally far from the row
+  by construction, and it measured worst 4.52:1 across all 40 palettes with no
+  light/dark branch. That is what the power menu's glyph badge uses.
 
 **Deriving colours generically.** `_df_theme_mix <base> <toward> <pct>` in
 `lib/theme-auto.sh` is pure bash integer maths (the core tool stays
