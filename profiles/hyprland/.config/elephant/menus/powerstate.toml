@@ -1,0 +1,63 @@
+# powerstate — power-state panel behind Waybar's battery pill.
+#
+# An elephant "menus" provider definition (walker's data backend loads every
+# *.toml under ~/.config/elephant/menus/). Opened by Waybar's battery module
+# on-click via:
+#
+#   walker -m menus:powerstate -t topright -H -p Power
+#
+# Why a menus definition rather than a `walker -d` script like wifimenu /
+# tailscalemenu / thememenu: dmenu rows have NO icon element at all (walker's
+# compiled-in item_dmenu.xml carries only ItemText + QuickActivation), so a
+# dmenu glyph has to be inlined into the label text and cannot be styled
+# apart from it. A menus entry has its own `icon` field, which walker renders
+# into a separate ItemImageFont label (.item-image-text) — that is what lets
+# the glyph be styled as an isolated badge. See the .menus-powerstate rules in
+# walker/themes/*/style.css.
+#
+# `icon` here is a literal Nerd Font glyph, not a GTK icon name. Walker treats
+# an icon value as text IFF it is non-ASCII and not an absolute path
+# (shared_image_transformer in src/providers/mod.rs), which is exactly true of
+# these, so they land in the font label instead of the icon-theme lookup.
+# Only nf-md-* codepoints are used, all verified present in JetBrainsMono Nerd
+# Font (see AGENTS.md, Fonts — FontAwesome 5/6 glyphs are in no Nerd Font).
+name = "powerstate"
+name_pretty = "Power"
+description = "Shut down, reboot or suspend this machine"
+icon = "󰐥"
+
+# One action for all three entries: the entry's `value` is substituted for
+# %VALUE% and the result is run as `sh -c` with setsid, so it survives the
+# caller exiting. systemctl handles these unprivileged for the local active
+# session via polkit — no sudo, and identical on Gentoo and Fedora.
+action = "systemctl %VALUE%"
+
+# Declared order (destructive → least destructive), not alphabetical, which
+# would otherwise reorder these to Reboot / Shutdown / Suspend.
+fixed_order = true
+
+# Reached deliberately from the battery pill. Keeping it out of the global
+# launcher means a bare "s" in walker can never surface Shutdown as a
+# one-keystroke hit.
+hide_from_providerlist = true
+
+[[entries]]
+text = "Shutdown"
+subtext = "Power off the machine"
+icon = "󰐥"
+value = "poweroff"
+keywords = ["shutdown", "power off", "halt"]
+
+[[entries]]
+text = "Reboot"
+subtext = "Restart the machine"
+icon = "󰜉"
+value = "reboot"
+keywords = ["reboot", "restart"]
+
+[[entries]]
+text = "Suspend"
+subtext = "Sleep, keeping the session in memory"
+icon = "󰒲"
+value = "suspend"
+keywords = ["suspend", "sleep", "standby"]
