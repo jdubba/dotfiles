@@ -116,6 +116,29 @@ apply_layout_when_ready() {
         echo "dock-monitor: layout did not remain applied; retrying" >&2
     done
 
+    # A long-running kanshi can retain stale output-management state after a
+    # dock swap even though no profile matches. Restart it only after ordinary
+    # retries fail, then make one final attempt with a fresh connection.
+    if systemctl --user is-active --quiet kanshi.service; then
+        echo "dock-monitor: restarting kanshi after repeated layout failures" >&2
+        if systemctl --user restart kanshi.service; then
+            sleep "$VERIFY_SECONDS"
+            count=$(lg_count)
+            if [[ "$count" -ge 2 ]]; then
+                connector_key=$(lg_connector_key)
+                echo "dock-monitor: applying dock layout after kanshi restart"
+                if "$SCRIPT_DIR/dock-layout.sh"; then
+                    sleep "$VERIFY_SECONDS"
+                    if layout_is_applied; then
+                        layout_applied_for="$connector_key"
+                        echo "dock-monitor: dock layout verified after kanshi restart"
+                        return 0
+                    fi
+                fi
+            fi
+        fi
+    fi
+
     echo "dock-monitor: dock layout failed verification after ${MAX_APPLY_ATTEMPTS} attempts" >&2
     return 1
 }
