@@ -12,14 +12,24 @@ It replaced an earlier GNU Stow-based system. Stow is no longer used.
 
 ## Environment & scope
 
-- **Linux only.** Target distros are **Gentoo** and **Fedora**; desktops are
-  **Hyprland** and **GNOME**. No macOS/Windows/WSL support is maintained.
+- **Linux only.** Target distros are **Gentoo**, **Fedora** and **Amazon Linux
+  2023**; desktops are **Hyprland** and **GNOME**, and one host is headless. No
+  macOS/Windows/WSL support is maintained.
 - Primary machine: **`stationzebra`** (Gentoo, Hyprland, laptop + dual external
   displays via a dock; **AMD** CPU → hwmon `k10temp`).
 - Second machine: **`fedora`** (Fedora 43 Workstation, **Intel** Lunar Lake/Arc →
   hwmon `coretemp`). GNOME
   is the default DE with **Hyprland added alongside it** — both selectable at
   **GDM**; single internal display (`eDP-1`). GNOME is never modified.
+- **`ai-workstation`** is the first **headless** host: an EC2 box on Amazon Linux
+  2023 (`ID=amzn`, `ID_LIKE=fedora`), reached over SSH, no desktop at all. Two
+  consequences worth remembering: `$XDG_CURRENT_DESKTOP` is empty so **no profile
+  auto-activates** (there is no `profiles/fedora`, and `hyprland` must never be
+  enabled here), and the whole desktop half of `home/` is linked but inert —
+  which is the expected, harmless outcome the layering already assumes. AWS
+  credentials come from the **instance role via IMDS**, so there is no `~/.aws`
+  and `AWS_PROFILE` is `@skip` rather than a value: exporting `default` makes the
+  CLI fail with "The config profile (default) could not be found".
 - **No secrets in the repo.** Machine-specific private values stay in untracked
   local includes (e.g. `~/.gitsigning` referenced from `.gitconfig`). Do not add
   encryption or commit credentials.
@@ -139,6 +149,12 @@ container, so adopting genuinely general-purpose scripts there is fine too.
   `systemd/user/*.service.d/hyprland-only.conf` guards; `shell/machine-env`;
   `opencode/opencode.jsonc` (work MCP servers: internal msgraph endpoint +
   AWS-docs server keyed off `AWS_PROFILE`).
+- `hosts/ai-workstation/` — headless EC2 (Amazon Linux 2023), so **no** kanshi,
+  hypr or systemd content at all: `git/identity` (work address);
+  `shell/machine-env` (`AWS_PROFILE=@skip` — instance role, no `~/.aws`);
+  `opencode/opencode.jsonc` (the `amazon-bedrock` provider + model discovery —
+  host layer because the region and provider choice are per-machine, and no MCP
+  servers are configured here).
 - `hyprland.conf` and the rest of `~/.config` still live in `home/`. Only waybar
   was relocated to `profiles/hyprland`; moving `hypr/` there too is a reasonable
   future cleanup.
@@ -235,6 +251,18 @@ and zsh rather than duplicated:
   **guarded** per-distro script paths (`/usr/share/fzf/` on Gentoo/Arch,
   `/usr/share/fzf/shell/` on Fedora, `/usr/share/doc/fzf/examples/` on Debian).
   Never source a fixed distro path unguarded.
+- **Third-party installers append to the rc files, and that lands in the repo.**
+  `.bashrc`/`.zshrc`/`.zshenv`/`.profile`/`.bash_profile` are symlinks into
+  `home/`, so rustup (`. "$HOME/.cargo/env"`), the opencode installer (a
+  hardcoded `export PATH=/home/<user>/.opencode/bin:$PATH`) and nvm all write
+  *through* them and show up as modifications to tracked files. Expect this after
+  installing anything on a new machine, and **revert rather than commit**: those
+  three PATH entries are already in `path.d/00-core.sh` via `_pathadd`, so the
+  appends are redundant, non-idempotent and often user-specific. When an append
+  reveals a real gap, fix it at the proper seam instead — nvm's XDG install
+  (`$XDG_CONFIG_HOME/nvm`, what you get when `NVM_DIR` is exported at install
+  time) is why `interactive.sh` probes `$NVM_DIR` → `~/.nvm` → `$XDG_CONFIG_HOME/nvm`
+  rather than only the default location.
 
 ### Monitors / desktop specifics
 
@@ -950,3 +978,10 @@ BATS (Bash Automated Testing System). `./test.sh` bootstraps `bats-core` locally
 if it isn't already installed, then runs `tests/*.bats`. `tests/repo.bats`
 syntax-checks shipped config in all three dialects — `bash -n`, `sh -n`, and
 `zsh -n` (the zsh checks skip when zsh isn't installed).
+
+**The sandbox blanks `XDG_CURRENT_DESKTOP`.** Profiles auto-activate on a name
+match against the detected desktop, so a leaked value silently activates a
+sandbox profile the test never enabled — which made `theme.bats`' layer-order
+test pass on a Hyprland box and fail on the headless `ai-workstation`. Profile
+activation in tests must always be explicit (`dotfiles profile enable <name>`);
+do not reintroduce a dependency on the developer's live DE.
