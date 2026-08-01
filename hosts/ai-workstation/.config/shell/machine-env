@@ -1,0 +1,8 @@
+# Machine-specific env values for ai-workstation.
+# KEY=VALUE, one per line; @skip = not relevant here. Managed by 'dotfiles env'.
+
+# EC2 instance: credentials come from the attached instance role via IMDS, so
+# there is no ~/.aws and no named profile to select. Exporting AWS_PROFILE here
+# would be worse than useless -- the CLI fails outright with "The config profile
+# (default) could not be found" -- hence @skip rather than a value.
+AWS_PROFILE=@skip
