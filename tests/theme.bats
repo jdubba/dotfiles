@@ -59,6 +59,10 @@ teardown() { teardown_sandbox; }
   mk_profile hyprland ".config/app/profile-only"
   mk_host ".config/app/host-only"
   mk_theme_default catppuccin-mocha
+  # Enable it explicitly: the sandbox blanks XDG_CURRENT_DESKTOP, so nothing
+  # auto-activates and this asserts layer ORDER, not profile detection.
+  run "$DOTFILES" profile enable hyprland
+  [ "$status" -eq 0 ]
   run "$DOTFILES" info
   [ "$status" -eq 0 ]
   # Verify all layers are present

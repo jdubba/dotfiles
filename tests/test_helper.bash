@@ -29,6 +29,11 @@ setup_sandbox() {
   export DF_TARGET="$DF_TEST_TARGET"
   export XDG_STATE_HOME="$DF_TEST_TARGET/.local/state"
   export NO_COLOR=1
+  # Profiles auto-activate on a name match against the detected desktop, so a
+  # leaked XDG_CURRENT_DESKTOP would silently activate a sandbox profile that
+  # the test never enabled -- passing on a Hyprland box and failing on a
+  # headless one. Blank it so profile activation is only ever explicit here.
+  export XDG_CURRENT_DESKTOP=""
   # The sandbox deliberately sets DF_TARGET==HOME, which would otherwise let
   # theme reloads fire against the developer's live desktop. Suppress them.
   export DF_NO_RELOAD=1
