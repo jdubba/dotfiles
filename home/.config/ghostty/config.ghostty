@@ -1,4 +1,5 @@
 font-family = DaddyTimeMono Nerd Font
 background-opacity = 0.85
+clipboard-write = allow
 config-file = themes/current
 window-decoration = none

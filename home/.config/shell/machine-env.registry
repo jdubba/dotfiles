@@ -10,3 +10,4 @@
 #
 # Format:  VARNAME: human-readable description
 AWS_PROFILE: default AWS profile (SSO/CLI) for this machine
+LANG: default locale for this machine
