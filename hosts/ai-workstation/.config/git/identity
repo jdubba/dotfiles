@@ -1,4 +1,4 @@
-# Git identity for ai-workstation (work EC2 dev box).
+# Git identity and commit signing for ai-workstation (work EC2 dev box).
 #
 # Included from the shared ~/.gitconfig; see the [include] block there. Work
 # machine, so commits default to the corporate address -- except in the dotfiles
@@ -6,3 +6,26 @@
 [user]
 	name = Justin Williams
 	email = justin.williams@cgic.com
+
+# Signing key for the work identity above (uid: Justin Williams
+# <justin.williams@cgic.com>). Selected by full fingerprint rather than a short
+# or long key id, so it can never resolve ambiguously. A fingerprint identifies
+# a PUBLIC key and is not a secret, which is why this is committed rather than
+# hidden in the untracked ~/.gitsigning.
+#
+# gpg.format is stated explicitly: openpgp is the default today, but saying so
+# means a future switch to SSH signing elsewhere cannot silently reinterpret
+# this fingerprint as an SSH key path.
+[user]
+	signingkey = AE10C414F1124162DE209CB7872F6E255FFDBE63
+
+[gpg]
+	format = openpgp
+
+# The key on this host has no passphrase, so signing needs no pinentry and works
+# in a headless SSH session (and from non-interactive git invocations).
+[commit]
+	gpgsign = true
+
+[tag]
+	gpgsign = true

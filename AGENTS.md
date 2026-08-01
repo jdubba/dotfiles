@@ -31,8 +31,10 @@ It replaced an earlier GNU Stow-based system. Stow is no longer used.
   and `AWS_PROFILE` is `@skip` rather than a value: exporting `default` makes the
   CLI fail with "The config profile (default) could not be found".
 - **No secrets in the repo.** Machine-specific private values stay in untracked
-  local includes (e.g. `~/.gitsigning` referenced from `.gitconfig`). Do not add
-  encryption or commit credentials.
+  local includes (`~/.gitsigning`, referenced from `.gitconfig`). Do not add
+  encryption or commit credentials. Note a GPG **signing key is selected by
+  public fingerprint**, which is not a secret and *is* committed per host — see
+  the git identity note below; `~/.gitsigning` is the escape hatch for the rest.
 - `.opencode/` is agent tooling and is **gitignored** — never commit it.
 
 ## Architecture
@@ -78,16 +80,39 @@ in `home/` or a profile; keep only the varying data per host:
   lines) delegates to **kanshi** — whose *service* is shared
   (`profiles/hyprland`) and whose *config* is per-host (`hosts/<host>/.config/kanshi/`).
 - machine-env: registry in `home/`, values in `hosts/<host>/`.
-- **git identity**: all of `.gitconfig` is shared in `home/` except `[user]`,
-  which is a per-host include (`hosts/<host>/.config/git/identity`) — work
-  machines commit as the corporate address, personal ones as `jdubba`. Include
-  order in `.gitconfig` is load-bearing: `~/.gitsigning` (untracked signing key)
-  first, then the host identity, then an
+- **git identity + signing**: all of `.gitconfig` is shared in `home/` except the
+  per-machine parts, which are a per-host include
+  (`hosts/<host>/.config/git/identity`) — work machines commit as the corporate
+  address, personal ones as `jdubba`. Include order in `.gitconfig` is
+  load-bearing: `~/.gitsigning` (untracked, machine-local) first, then the host
+  identity, then an
   `includeIf "gitdir:~/source/dotfiles/"` → `~/.config/git/identity-dotfiles`
   that pins **this public repo** to `jdubba` on every machine so a work address
   can't leak into its history. Last include wins. `identity-dotfiles` lives in
   `home/` precisely because it must be identical everywhere. Adding a host means
   adding its `identity` file, or git falls back to guessing.
+  **Commit signing is per-host and committed**, alongside the identity it signs
+  for (`user.signingkey` by full fingerprint, `gpg.format`, `commit.gpgsign`,
+  `tag.gpgsign`) — a fingerprint names a *public* key, so tracking it leaks
+  nothing and keeps the host reproducible instead of depending on a hand-made
+  local file. `~/.gitsigning` is still honoured and is still the mechanism on
+  hosts that track nothing; the host layer wins because it is included after it.
+  Two traps on a work machine:
+  - **A signature leaks the identity the `includeIf` exists to hide.** The
+    signature embeds the key id, whose uid carries the corporate address, so
+    enabling signing globally would sign public `jdubba`-authored commits with
+    the work key (and show *Unverified*, the key not being on that account).
+    Where a host has only a work key, exclude this repo — `ai-workstation` does
+    it machine-locally, `git config --local commit.gpgsign false` in
+    `~/source/dotfiles`. That is deliberately **not** committed: putting it in
+    `identity-dotfiles` would disable signing for this repo on *every* machine,
+    including ones with a personal key. The cost is that it does not survive a
+    fresh clone — re-apply it there.
+  - **A passphrase-protected key needs a pinentry**, which a headless SSH host
+    has no usable one for; `env.sh` exports `GPG_TTY` only when there is a real
+    tty. `ai-workstation`'s key has no passphrase, so signing works
+    non-interactively (verify with `gpg --batch --pinentry-mode error
+    --detach-sign`, which fails iff a passphrase is required).
 
 **Co-locate app-support scripts with the app** when they exist only to serve it
 (waybar's helpers live in `waybar/scripts/`, referenced by absolute path from
@@ -150,8 +175,10 @@ container, so adopting genuinely general-purpose scripts there is fine too.
   `opencode/opencode.jsonc` (work MCP servers: internal msgraph endpoint +
   AWS-docs server keyed off `AWS_PROFILE`).
 - `hosts/ai-workstation/` — headless EC2 (Amazon Linux 2023), so **no** kanshi,
-  hypr or systemd content at all: `git/identity` (work address);
-  `shell/machine-env` (`AWS_PROFILE=@skip` — instance role, no `~/.aws`);
+  hypr or systemd content at all: `git/identity` (work address **+ the only
+  committed signing config so far**: fingerprint, `gpg.format`, commit/tag
+  `gpgsign`); `shell/machine-env` (`AWS_PROFILE=@skip` — instance role, no
+  `~/.aws`; `LANG=C.UTF8` because sshd forwards the client's otherwise);
   `opencode/opencode.jsonc` (the `amazon-bedrock` provider + model discovery —
   host layer because the region and provider choice are per-machine, and no MCP
   servers are configured here).

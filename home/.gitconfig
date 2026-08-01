@@ -15,13 +15,17 @@
 [include]
     path=~/.gitsigning
 
-# Identity is the only per-machine part of this file, so it lives in the host
-# layer: hosts/<host>/.config/git/identity supplies [user] name/email (work
-# address on work machines, personal elsewhere). Listed AFTER ~/.gitsigning so
-# the host identity wins over any name/email that file also happens to set;
-# .gitsigning remains the (untracked) home of the signing key.
-# A missing include is not an error in git, so a host without the file simply
-# falls through to whatever git can infer.
+# Identity and commit signing are the per-machine parts of this file, so they
+# live in the host layer: hosts/<host>/.config/git/identity supplies [user]
+# name/email (work address on work machines, personal elsewhere) and, where the
+# machine has a key, the signing key plus commit/tag.gpgsign. A signing key is
+# selected by public fingerprint, which is not a secret, so it is committed --
+# that keeps a host reproducible instead of depending on a hand-made local file.
+# Listed AFTER ~/.gitsigning so the host layer wins over anything that file also
+# sets; ~/.gitsigning remains the untracked escape hatch for values that must
+# not be committed, and is still the mechanism on hosts with nothing tracked.
+# A missing include is not an error in git, so a host without either file simply
+# falls through to whatever git can infer, unsigned.
 [include]
     path=~/.config/git/identity
 
