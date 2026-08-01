@@ -1,0 +1,18 @@
+{
+  // Amazon Bedrock is this host's model provider: it is an EC2 box whose
+  // attached instance role already grants bedrock access, so no MCP servers or
+  // credentials are configured here -- only the provider itself. Host layer
+  // because both the region and the provider choice are machine-specific.
+  "$schema": "https://opencode.ai/config.json",
+  "provider": {
+    "amazon-bedrock": {
+      "options": {
+        "region": "us-east-1",
+        "profile": "default"
+      },
+      "discovery": {
+        "enabled": true
+      }
+    }
+  }
+}
