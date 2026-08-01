@@ -1,5 +1,5 @@
 [core]
-    editor = /usr/bin/nvim
+    editor = nvim
 
 [alias]
     st = status
@@ -43,7 +43,7 @@
     tool = nvim
 
 [difftool "nvim"]
-    cmd = "/usr/bin/nvim -d \"$LOCAL\" \"$REMOTE\""
+    cmd = "nvim -d \"$LOCAL\" \"$REMOTE\""
 
 [merge]
     tool = nvim
