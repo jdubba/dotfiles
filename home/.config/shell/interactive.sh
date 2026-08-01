@@ -22,14 +22,29 @@ fi
 # this file and zsh had none at all. It belongs in an interactive-only file --
 # nvm.sh defines ~20 functions and prepends to PATH, which env.sh must not do
 # because .zshenv sources it for EVERY zsh, including scripts.
-# Prefer the distro-packaged init; otherwise use the standard ~/.nvm layout.
+# Prefer the distro-packaged init; otherwise probe the layouts nvm's own
+# installer produces. An install can live anywhere, so a pre-set $NVM_DIR wins,
+# then the default ~/.nvm, then $XDG_CONFIG_HOME/nvm (what you get when NVM_DIR
+# was exported at install time -- ai-workstation is set up that way). Probing
+# here is what keeps the installer from appending its own block to .bashrc and
+# .zshrc, which lands in this repo through the symlink farm.
 if [ -f /usr/share/nvm/init-nvm.sh ]; then
     # shellcheck source=/dev/null
     . /usr/share/nvm/init-nvm.sh
-elif [ -d "$HOME/.nvm" ]; then
-    export NVM_DIR="$HOME/.nvm"
-    # shellcheck source=/dev/null
-    [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+else
+    for _df_nvm_dir in \
+        "${NVM_DIR-}" \
+        "$HOME/.nvm" \
+        "${XDG_CONFIG_HOME:-$HOME/.config}/nvm"
+    do
+        if [ -n "$_df_nvm_dir" ] && [ -s "$_df_nvm_dir/nvm.sh" ]; then
+            export NVM_DIR="$_df_nvm_dir"
+            # shellcheck source=/dev/null
+            . "$NVM_DIR/nvm.sh"
+            break
+        fi
+    done
+    unset _df_nvm_dir
 fi
 
 # OpenCode copies selections with OSC 52. Inside tmux it wraps the sequence in
