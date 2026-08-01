@@ -6,3 +6,9 @@
 # would be worse than useless -- the CLI fails outright with "The config profile
 # (default) could not be found" -- hence @skip rather than a value.
 AWS_PROFILE=@skip
+
+# Headless host, so a real value rather than @skip: nothing configures a locale
+# locally (/etc/locale.conf is systemd's fallback stub and a non-SSH shell gets
+# an empty LANG), and sshd's default AcceptEnv forwards the CLIENT's LANG -- so
+# without this the locale depends on which machine you connect from.
+LANG=C.UTF8
