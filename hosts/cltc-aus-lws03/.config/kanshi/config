@@ -38,9 +38,10 @@ profile docked {
         scale 1
     }
 
-    # Workspace->monitor placement is enforced rigidly by persistent `workspace`
-    # rules in hosts/cltc-aus-lws03/.config/hypr/local.conf (not moved here at
-    # runtime). kanshi owns only output geometry for this profile.
+    # The TV dock overwrites workspace 1-6 with its live connector names. Restore
+    # the static Dell EDID rules after this profile is applied so a later office
+    # redock cannot retain stale TV connectors.
+    exec /usr/bin/hyprctl reload
 }
 
 # Profile 2: Laptop-only (no externals connected).
