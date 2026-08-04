@@ -96,37 +96,44 @@ That also means none of the Gentoo work above has a Fedora analogue — no
 keywording, no USE flags, and no granite QA problem, because the distro built
 it already.
 
-**Not verified — expected to be needed, confirm on the box:**
+**The dual-session guard is shipped** for both Fedora hosts —
+`hosts/{fedora,cltc-aus-lws03}/.config/systemd/user/swaync.service.d/hyprland-only.conf`,
+the same shape and reason as their existing `kanshi`/`waybar`/`dotfiles-autotheme`
+guards. It has **not** been exercised on a live Fedora session (no access from
+here), so treat it as reasoned rather than proven.
 
-1. **A dual-session guard is almost certainly required**, and this is the one
-   thing likely to bite. On Fedora hosts GNOME and Hyprland are both selectable
-   at GDM and both reach `graphical-session.target`, which is exactly why
-   `kanshi` and `waybar` carry
-   `ConditionEnvironment=XDG_CURRENT_DESKTOP=Hyprland` drop-ins there. The
-   shipped `swaync.service` is `WantedBy=graphical-session.target` and guards
-   only on `ExecCondition=[ -n "$WAYLAND_DISPLAY" ]` — which **GNOME also
-   satisfies**, GNOME being Wayland. Worse, GNOME provides
-   `org.freedesktop.Notifications` itself, so an unguarded swaync would fight
-   GNOME's own daemon for the bus name. Expect to need:
+Why it matters more than the other guards: GNOME and Hyprland are both
+selectable at GDM and both reach `graphical-session.target`. The packaged
+`swaync.service` is `WantedBy=graphical-session.target` and guards only on
+`ExecCondition=[ -n "$WAYLAND_DISPLAY" ]` — which **GNOME also satisfies**,
+GNOME being Wayland. And GNOME provides `org.freedesktop.Notifications` itself,
+so an unguarded swaync would not merely run pointlessly under GNOME, it would
+**race GNOME's own daemon for the bus name**. The guard depends on the session
+env reaching `systemd --user`, which each host's
+`hypr/local.conf` does via `dbus-update-activation-environment`.
 
-   ```ini
-   # hosts/<fedora-host>/.config/systemd/user/swaync.service.d/hyprland-only.conf
-   [Unit]
-   ConditionEnvironment=XDG_CURRENT_DESKTOP=Hyprland
-   ```
+Note this makes `swaync.service.d` the **first drop-in directory in the repo
+owned by two layers** — `profiles/hyprland` contributes the generated-config
+`-c` override, the host adds the guard. Every other `*.service.d` has a single
+owner and is therefore folded into one symlink. `tests/swaync.bats` pins that
+both children link and the directory stays real, because a fold here would
+silently drop one layer's drop-in and swaync would lose either its `-c` or its
+guard.
 
-   Same shape and same reason as the existing `kanshi`/`waybar` drop-ins. Keep
-   the guard in the **host** layer, not in a shared profile.
-2. **Install paths are assumed standard** (`/usr/lib/systemd/user/swaync.service`,
+**Not verified — confirm on the box:**
+
+1. **Install paths are assumed standard** (`/usr/lib/systemd/user/swaync.service`,
    `/etc/xdg/swaync/{config.json,style.css,configSchema.json}`) but were **not**
    confirmed — Fedora's spec file could not be read (bot protection on
    src.fedoraproject.org). The user stylesheet path is resolved from
    `Environment.get_user_config_dir()` in swaync's own source, so
    `~/.config/swaync/style.css` is portable regardless.
-3. **The monitor pin is stationzebra-specific.** `dock-layout.sh` rewrites it
-   for the twin-LG dock; a single-display Fedora host wants the pin set to its
-   own connector (`eDP-1`) or left out entirely.
-4. `notify-send` on Fedora comes from `libnotify`, which GNOME already pulls in.
+2. **The monitor pin is stationzebra-specific.** `dock-layout.sh` writes it for
+   the twin-LG dock. A single-display Fedora host needs nothing: with no
+   `$XDG_STATE_HOME/dotfiles/swaync/output`, the generator renders an empty pin
+   and the compositor picks the only monitor there is. Set the pin only if a
+   Fedora host grows a multi-monitor setup.
+3. `notify-send` on Fedora comes from `libnotify`, which GNOME already pulls in.
 
 ## Amazon Linux / headless
 

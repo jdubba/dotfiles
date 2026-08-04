@@ -166,7 +166,7 @@ container, so adopting genuinely general-purpose scripts there is fine too.
 - `hosts/fedora/` — `kanshi/config` (single `eDP-1`); `hypr/local.conf` (GDM
   session glue); `hypr/hyprlock-local.conf` (per-host hyprlock auth seam —
   fingerprint stub, no sensor confirmed);
-  `systemd/user/{kanshi,waybar}.service.d/hyprland-only.conf`
+  `systemd/user/{kanshi,waybar,dotfiles-autotheme,swaync}.service.d/hyprland-only.conf`
   (dual-session guards); `shell/machine-env`.
 - `hosts/cltc-aus-lws03/` — Fedora laptop (GNOME + Hyprland from GDM); `kanshi/`;
   `hypr/local.conf` (GDM session glue + rigid workspace→monitor binding);
@@ -353,8 +353,8 @@ Durable rules that follow from it:
      --all` (import the Wayland session env so units/guards see
      `WAYLAND_DISPLAY`/`XDG_CURRENT_DESKTOP`), plus `hyprpaper` + `hyprpolkitagent`
      autostarts (stationzebra gets these by other means).
-   - `.config/systemd/user/{kanshi,waybar}.service.d/hyprland-only.conf` — the
-     dual-session guard (see next point).
+   - `.config/systemd/user/{kanshi,waybar,dotfiles-autotheme,swaync}.service.d/hyprland-only.conf`
+     — the dual-session guard (see next point).
 4. **Dual-session (GNOME + Hyprland via GDM):** both DEs reach
    `graphical-session.target`, so a `WantedBy=graphical-session.target` user
    service would start under **both**. Keep shared units **guard-free**
@@ -362,6 +362,16 @@ Durable rules that follow from it:
    `ConditionEnvironment=XDG_CURRENT_DESKTOP=Hyprland` in the Fedora host drop-ins.
    Under Hyprland the units start; under GNOME the condition fails and they stay
    dormant. (`waybar.service` is the Fedora-packaged unit; the drop-in narrows it.)
+   **`swaync` is the case where this stops being tidiness and becomes a
+   conflict:** GNOME provides `org.freedesktop.Notifications` itself, so an
+   unguarded swaync would *race GNOME's own daemon for the bus name* rather than
+   merely run pointlessly — and the packaged unit's own
+   `ExecCondition=[ -n "$WAYLAND_DISPLAY" ]` is no help, because GNOME satisfies
+   it too. `swaync.service.d` is also the **first drop-in dir owned by two
+   layers** (`profiles/hyprland` for the generated-config `-c` override, the host
+   for the guard); every other `*.service.d` is single-owner and therefore
+   folded, so `tests/swaync.bats` pins that both children link and the directory
+   stays real — a fold would silently drop one of them.
 5. **Packaging:** compositor + ecosystem from the **`lionheartp/Hyprland` COPR**
    (`solopasha/hyprland` is unmaintained for F43); waybar/kanshi/etc. from Fedora
    repos. **walker is Rust/GTK4** (v2, not Go): build needs `cargo` +
