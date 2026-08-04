@@ -493,12 +493,27 @@ EOF
   #
   # Treat it as a pill instead, and assign the bar's accents like this:
   #
-  #   both left pills + the primary right pill   one shared accent
+  #   every pill except battery                  one shared accent
+  #     (both left pills, the primary right
+  #      pill, the theme switcher, the
+  #      notification bell)
   #   workspaces                                 its own accent
-  #   theme switcher                             its own accent
   #   battery                                    not themed at all -- the fixed
   #                                              red-to-green traffic-light
   #                                              palette in style.css
+  #
+  # The theme switcher used to take a third accent of its own, "so it stays
+  # findable". With the notification bell added alongside it that made four
+  # different colours across one bar, which reads as busy rather than as
+  # deliberate, so both now default to the primary accent and the bar carries
+  # two accents instead of four. A theme is still free to give either one its
+  # own hue -- @pill-theme-* and @pill-notify-* are separate seams precisely so
+  # an override can, and several polished themes already pin @pill-theme-*.
+  #
+  # Workspaces deliberately keeps its own accent: it is the bar's centrepiece,
+  # and collapsing it too would make the dot ramp start from the same hue as
+  # the surface it is drawn on, turning the dots into a tonal wash of their own
+  # pill -- the exact failure the ramp below was rewritten to avoid.
   #
   # Which hue lands where is drawn per theme instead of being the fixed
   # c5/c4/c6/c3 order every theme used to share, which made the bars recognisably
@@ -552,8 +567,15 @@ EOF
   # back over accent_pill/accent_theme so everything downstream -- including the
   # workspace-dot ramp, which uses the pill accent as its hue source -- sees the
   # colour the bar will actually show.
+  #
+  # accent_theme no longer reaches the bar (the theme switcher takes the primary
+  # accent now), but it is still the third drawn hue and walker's quick-activation
+  # badge is keyed off it below, so it keeps being corrected here -- dropping the
+  # call would change walker's seam in every theme. theme_ink is genuinely unused
+  # as a result; it stays only to consume the pair's second field.
   local pill_ink theme_ink
   read -r accent_pill pill_ink <<<"$(_dfa_pair_for "$accent_pill" "$fg" "$bg")"
+  # shellcheck disable=SC2034  # theme_ink: see note above
   read -r accent_theme theme_ink <<<"$(_dfa_pair_for "$accent_theme" "$fg" "$bg")"
 
   # The workspace dots ramp the *pill* accent toward the ink of the workspace
@@ -671,8 +693,10 @@ EOF
 @define-color pill-stats-fg   ${pill_ink};
 @define-color pill-ctrl-bg    ${accent_pill};
 @define-color pill-ctrl-fg    ${pill_ink};
-@define-color pill-theme-bg   ${accent_theme};
-@define-color pill-theme-fg   ${theme_ink};
+@define-color pill-theme-bg   ${accent_pill};
+@define-color pill-theme-fg   ${pill_ink};
+@define-color pill-notify-bg  ${accent_pill};
+@define-color pill-notify-fg  ${pill_ink};
 @define-color ws-glow          ${ws_active};
 @define-color slider-fg       ${ws_bg};
 EOF

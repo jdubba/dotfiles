@@ -27,6 +27,9 @@
    here only because it is a background: #d79921 as text on #fbf1c7 is 2.19:1. */
 @define-color pill-theme-bg   #d79921;
 @define-color pill-theme-fg   #141414;
+/* the bell follows this theme's primary accent; retune here to diverge */
+@define-color pill-notify-bg  #076678;
+@define-color pill-notify-fg  #fbf1c7;
 /* Unused: battery is deliberately un-themed (see style.css batt-* palette).
    Kept because the emitter emits the full pill set for every theme. */
 @define-color pill-batt-bg    #98971a;

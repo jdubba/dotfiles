@@ -11,7 +11,9 @@
 @define-color pill-stats-fg   #2e3440;
 @define-color pill-ctrl-bg    #ebcb8b;
 @define-color pill-ctrl-fg    #2e3440;
-@define-color pill-theme-bg   #88c0d0;
+@define-color pill-theme-bg   #ebcb8b;
 @define-color pill-theme-fg   #2e3440;
+@define-color pill-notify-bg  #ebcb8b;
+@define-color pill-notify-fg  #2e3440;
 @define-color ws-glow          #efeae1;
 @define-color slider-fg       #637262;

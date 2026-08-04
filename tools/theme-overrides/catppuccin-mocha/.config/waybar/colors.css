@@ -50,6 +50,9 @@
 /* Theme switcher keeps its own accent so it stays findable against the pills. */
 @define-color pill-theme-bg   #89b4fa;
 @define-color pill-theme-fg   #141414;
+/* the bell follows this theme's primary accent; retune here to diverge */
+@define-color pill-notify-bg  #f5c2e7;
+@define-color pill-notify-fg  #141414;
 /* Active dot's halo: bg, the darkest core slot, 11.03:1 against the surface.
    It outlines the low-contrast active dot so it still reads as deliberate. */
 @define-color ws-glow          #1e1e2e;

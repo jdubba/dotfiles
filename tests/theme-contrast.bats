@@ -55,7 +55,7 @@ _check() {
     [[ -f "$DF_SRC_REPO/tools/theme-overrides/$n/.config/waybar/colors.css" ]] && continue
     [[ -f "$d/.config/waybar/colors.css" ]] || continue
     local p
-    for p in brand stats ctrl theme; do
+    for p in brand stats ctrl theme notify; do
       _check "$d" "pill-$p" "$(_wb "$d" "pill-$p-fg")" "$(_wb "$d" "pill-$p-bg")" 4500
     done
   done

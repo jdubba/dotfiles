@@ -13,5 +13,8 @@
 @define-color pill-ctrl-fg    #e0def4;
 @define-color pill-theme-bg   #c4a7e7;
 @define-color pill-theme-fg   #191724;
+/* the bell follows this theme's primary accent; retune here to diverge */
+@define-color pill-notify-bg  #31748f;
+@define-color pill-notify-fg  #e0def4;
 @define-color ws-glow          #26233a;
 @define-color slider-fg       #9ccfd8;

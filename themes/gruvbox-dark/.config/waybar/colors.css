@@ -23,6 +23,9 @@
 /* Theme switcher keeps its own accent so it stays distinguishable. */
 @define-color pill-theme-bg   #d79921;
 @define-color pill-theme-fg   #141414;
+/* the bell follows this theme's primary accent; retune here to diverge */
+@define-color pill-notify-bg  #458588;
+@define-color pill-notify-fg  #fbf1c7;
 /* Unused: battery is deliberately un-themed (see style.css batt-* palette).
    Kept because the emitter emits the full pill set for every theme. */
 @define-color pill-batt-bg    #98971a;

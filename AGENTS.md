@@ -584,9 +584,11 @@ palette slot, not by luminance, so on some palettes it produces pairs that simpl
 cannot be read (gruvbox-dark's generated starship put the repo-root name at
 1.33:1). Measure with WCAG contrast before and after when tuning for this.
 An override is a whole file mirroring its path under `themes/<name>/`, overlaid
-after emission by `apply_overrides`. Currently the 9 "polished" themes
-(`ayu-{dark,light,mirage}`, `carbonfox`, `catppuccin-{frappe,latte}`, `dracula`,
-`gruvbox-{dark,light}`) carry 36 between them. Adding one is a decision to
+after emission by `apply_overrides`. Currently **16** "polished" themes
+(`ayu-{dark,light,mirage}`, `carbonfox`, `catppuccin-{frappe,latte,macchiato,mocha}`,
+`dawnfox`, `dracula`, `duskfox`, `gruvbox-{dark,light}`, `rose-pine`,
+`solarized-{dark,light}`) carry **96** files between them, 15 of which are waybar
+palettes. Adding one is a decision to
 maintain that file by hand — it stops tracking palette and seam-format changes —
 so add one deliberately rather than by habit.
 
@@ -689,9 +691,19 @@ light/dark branch entirely:
   variables came from achromatic slots (`c0`/`c7`/`c8`/`fg`/`fg`) while every hue
   went to pills, so the bar's centrepiece was the one module with no colour in
   any theme.
-- **Accent assignment is drawn per theme, not fixed.** Both left pills and the
-  primary right pill share one accent; workspaces and the theme switcher each get
-  their own, distinct from it and each other; the battery is not themed at all.
+- **Accent assignment is drawn per theme, not fixed.** **Every pill except the
+  battery shares one accent** — both left pills, the primary right pill, the
+  theme switcher and the notification bell; **workspaces gets its own**, distinct
+  from it; the battery is not themed at all. The theme switcher used to take a
+  third accent "so it stays findable", but once the bell landed beside it that
+  was four colours across one bar, which reads as busy rather than deliberate —
+  so both default to the primary accent now and the bar carries two. They remain
+  **separate seams** (`@pill-theme-*`, `@pill-notify-*`) precisely so a theme can
+  still give either its own hue, and 15 polished themes already pin
+  `@pill-theme-*`. Workspaces stays independent deliberately: collapsing it too
+  would make the dot ramp start from the same hue as the surface it is drawn on,
+  turning the dots into a tonal wash of their own pill — the exact failure the
+  ramp was rewritten to avoid.
   Which hue lands where comes from a **deterministic** draw — a Fisher-Yates
   shuffle over the five non-red hue families, seeded by `_df_theme_hash` over the
   theme name plus its hues. It must stay deterministic: `build-themes.sh` has to
