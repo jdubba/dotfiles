@@ -174,3 +174,33 @@ setup() { load test_helper; }
   done
   [ -z "$missing" ] || { echo "undefined walker colours:$missing"; false; }
 }
+
+@test "every colour waybar's stylesheet uses is defined by every theme" {
+  # Same hazard as the walker test above, and the reason it exists: GTK silently
+  # drops a rule that references an undefined @colour, so adding a seam to the
+  # emitter breaks exactly the themes whose whole colors.css is pinned by an
+  # override -- with no error, just a module that stops being coloured. That is
+  # how @pill-notify-* would have hit the 15 hand-tuned waybar palettes.
+  # style.css defines the battery traffic-light palette itself (deliberately
+  # un-themed), so subtract anything it declares locally from the references.
+  local css refs local_defs d name colour missing=""
+  css="$DF_SRC_REPO/profiles/hyprland/.config/waybar/style.css"
+  local_defs=$(grep -o '^@define-color[[:space:]]\+[a-z0-9-]*' "$css" \
+               | awk '{print $2}' | sort -u)
+  # CSS at-rules share the @ sigil with colour references; waybar's sheet uses
+  # @keyframes for the urgent-workspace pulse, so filter the at-rule keywords
+  # rather than just @import the way the walker test can get away with.
+  refs=$(grep -ho '@[a-z0-9-]*' "$css" | sed 's/^@//' \
+         | grep -vxE 'import|define-color|keyframes|media|supports|charset|namespace|font-face' \
+         | sort -u | grep -vxF "$local_defs" || true)
+  [ -n "$refs" ] || { echo "found no @colour references in waybar stylesheet"; false; }
+  for d in "$DF_SRC_REPO"/themes/*/; do
+    name=$(basename -- "$d")
+    [ "$name" = "auto" ] && continue          # generated at runtime, gitignored
+    for colour in $refs; do
+      grep -q "^@define-color[[:space:]]\+$colour[[:space:]]" \
+        "$d/.config/waybar/colors.css" || missing+=" $name:$colour"
+    done
+  done
+  [ -z "$missing" ] || { echo "undefined waybar colours:$missing"; false; }
+}
