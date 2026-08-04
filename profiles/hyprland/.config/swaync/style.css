@@ -1,0 +1,250 @@
+/* swaync stylesheet (shared -- swaync is Hyprland-only on these machines).
+ *
+ * User CSS is ADDITIVE: functions.vala load_css() loads the packaged sheet
+ * as its own provider first, then this file as a second provider at equal
+ * priority. Everything untouched keeps the upstream styling, so nothing needs
+ * vendoring and there is no need to @import the system sheet (that would only
+ * parse it twice). Note ties do NOT go to this file, though: a
+ * same-specificity override of a shipped rule loses, so overrides here have to
+ * out-specify it.
+ *
+ * The import below is the theming seam. swaync rides the EXISTING waybar
+ * colors.css that every theme (including generated `auto`) already ships, so
+ * theming it needs no emitter change and no per-theme file -- the same trick
+ * _df_theme_brave_apply uses to read the accent back out of waybar's seam.
+ *
+ * The path is RELATIVE on purpose: GTK resolves @import against the importing
+ * file's own path, so this reaches ~/.config/waybar/colors.css without
+ * hardcoding a home directory (this file is a symlink into the repo, and an
+ * absolute path here would not survive another machine or another user).
+ *
+ * @import must precede all rules. */
+@import url("../waybar/colors.css");
+
+/* ---- (A) geometry: soft corners, hairline border, real breathing room --- */
+:root {
+  /* The shipped sheet hardcodes --text-color to white and uses it in places
+     this file does not enumerate (e.g. `.widget-dnd label`), which is
+     invisible on any light theme. Repoint it at the seam ink. */
+  --text-color: @bar-fg;
+  --text-color-disabled: alpha(@bar-fg, 0.55);
+  --border-radius: 16px;
+  --border: 1px solid alpha(@bar-fg, 0.22);
+  --font-size-summary: 15px;
+  --font-size-body: 14px;
+  --notification-icon-size: 48px;
+  --notification-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.35),
+    0 6px 18px rgba(0, 0, 0, 0.45);
+}
+
+/* The popup stack. Padding here is what lifts the toasts off the screen
+   edge -- there is no notification-window-margin-* in the config schema,
+   only control-center-margin-*, so this has to be done in CSS. */
+.floating-notifications.background .notification-row {
+  padding: 6px 10px;
+}
+.floating-notifications.background .notification-row:first-child {
+  margin-top: 10px;
+}
+
+/* ---- colour, drawn entirely from the waybar seam ------------------------ */
+
+/* Toasts + panel rows.
+   First attempt used alpha(@ws-glow, .96) as a "lifted" surface. Measured:
+   body text @bar-fg fell to 4.11:1, under the 4.5 content target -- @ws-glow
+   is the workspaces glow tone and carries no legibility guarantee, which is
+   exactly the assign-by-palette-slot trap.
+   Lifting bar-bg TOWARD bar-fg is worse (moves the surface at the ink): on
+   solarized-dark @bar-fg is only 4.75:1 on @bar-bg to start with, so a 6%
+   lift already fails. DEEPENING instead buys both separation and contrast --
+   at ~20% body measures 5.26:1 with rgb_dist 20 from the bar background.
+   KNOWN LIMITATION: shade() is not polarity-aware, so this deepen is correct
+   on dark themes and backwards on light ones. It is cosmetic rather than a
+   legibility bug -- body still measured 5.55:1 on gruvbox-light -- because the
+   ink is @bar-fg, which is legible against @bar-bg in both polarities. The
+   generic fix is a measured surface computed by the emitter (the pattern the
+   workspaces dots use) rather than a fixed shade factor, which would mean a
+   new seam and regenerating every theme. */
+.notification-row .notification-background .notification {
+  background: alpha(shade(@bar-bg, 0.8), 0.97);
+  border: 1px solid alpha(@bar-fg, 0.22);
+  border-radius: 16px;
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.35),
+    0 6px 18px rgba(0, 0, 0, 0.45);
+}
+
+/* keyboard-shortcuts:true focuses the first row when the panel opens, and the
+   shipped sheet paints a flat grey box behind it, wider than the notification
+   (rgba(68,68,68,.6) -- identified by pixel arithmetic against the composite).
+   TWO rules use --noti-bg-focus, and the one that actually fires is
+   .notification-group:focus: swaync still wraps every notification in a
+   .notification-group even with notification-grouping:false, so overriding
+   .notification-row:focus alone changes nothing (verified with a sentinel
+   colour -- it never rendered). Kill both. */
+.notification-row:focus,
+.notification-row:hover,
+.notification-group:focus {
+  background: transparent;
+  box-shadow: none;
+}
+
+/* Critical borrows @ws-fg-active because the waybar seam carries NO semantic
+   red -- the battery's traffic-light palette is defined in waybar's own
+   style.css, not in colors.css, so there is nothing themed to reach for. On
+   most palettes ws-fg-active is far enough from the pill accents to read as an
+   alert; on some light ones (gruvbox-light) it is barely distinct from a normal
+   row. Giving urgency a real seam would mean an emitter change. */
+.notification-row .notification-background .notification.critical {
+  border: 1px solid @ws-fg-active;
+}
+.notification-row .notification-background .notification.low {
+  border: 1px solid alpha(@bar-fg, 0.14);
+}
+
+.notification-row .notification-background .notification
+  .notification-default-action:hover {
+  background: alpha(@pill-brand-bg, 0.18);
+}
+
+/* Text. Summary was @slider-fg + bold, on the assumption that slot is the
+   palette's brightest ink. It is not -- it is the SLIDER FILL seam, and on
+   gruvbox-light it is #d79921, which measured 1.19:1 on the toast surface
+   (2.18:1 even undeepened, so the ink was wrong, not the surface). Another
+   assign-by-slot failure, and invisible while only a dark theme was active.
+   @bar-fg is the one ink guaranteed legible against @bar-bg in BOTH
+   polarities, so summary and body share it and the hierarchy comes from
+   weight and size instead of colour. Measured on the toast surface:
+   dark solarized 5.26:1, light gruvbox 5.55:1.
+   The timestamp is chrome and is allowed under AA deliberately. */
+.notification-row .notification-background .notification
+  .notification-default-action .notification-content .text-box .summary {
+  color: @bar-fg;
+  font-weight: 700;
+}
+.notification-row .notification-background .notification
+  .notification-default-action .notification-content .text-box .body {
+  color: @bar-fg;
+  font-weight: 400;
+}
+.notification-row .notification-background .notification
+  .notification-default-action .notification-content .text-box .time {
+  color: alpha(@bar-fg, 0.65);
+}
+
+/* Per-notification close button -- the "clear one at a time" affordance. */
+.notification-row .notification-background .close-button {
+  background: alpha(@bar-fg, 0.14);
+  color: @bar-fg;
+  border-radius: 100%;
+  margin: 6px;
+  padding: 2px;
+}
+.notification-row .notification-background .close-button:hover {
+  background: @pill-brand-bg;
+  color: @pill-brand-fg;
+}
+
+/* ---- the control center panel ------------------------------------------ */
+.control-center {
+  background: alpha(@bar-bg, 0.90);
+  border: 1px solid alpha(@bar-fg, 0.22);
+  border-radius: 18px;
+  box-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.35),
+    0 10px 30px rgba(0, 0, 0, 0.50);
+  padding: 10px;
+}
+
+.control-center .control-center-list {
+  background: transparent;
+}
+
+.control-center .control-center-list-placeholder {
+  color: alpha(@bar-fg, 0.55);
+}
+
+/* Panel title row + "Clear all".
+   @bar-fg, not @slider-fg -- same polarity trap as the summary above. */
+.widget-title {
+  color: @bar-fg;
+  font-size: 15px;
+  font-weight: 600;
+  margin: 4px 6px 10px 6px;
+}
+.widget-title > button {
+  background: alpha(@bar-fg, 0.12);
+  color: @bar-fg;
+  border: none;
+  border-radius: 10px;
+  padding: 3px 12px;
+  font-size: 13px;
+  font-weight: 500;
+}
+.widget-title > button:hover {
+  background: @pill-brand-bg;
+  color: @pill-brand-fg;
+}
+
+/* Do-not-disturb toggle. Drawn from @pill-theme-bg, which the emitter now
+   defaults to the same value as @pill-brand-bg -- so by default the switch
+   matches the buttons, and it only reads as a distinct control on a theme whose
+   override pins the theme-switcher hue separately. That is the intended
+   behaviour of the unified-accent default, not an oversight. */
+.widget-dnd {
+  font-size: 14px;
+  margin: 4px 6px 8px 6px;
+}
+/* Explicit, because `.widget-dnd label` out-specifies `.widget-dnd` and the
+   --text-color override above is belt-and-braces rather than guaranteed. */
+.widget-dnd label {
+  color: @bar-fg;
+}
+.widget-dnd > switch {
+  background: alpha(@bar-fg, 0.20);
+  border: none;
+  border-radius: 100px;
+  box-shadow: none;
+}
+.widget-dnd > switch:checked {
+  background: @pill-theme-bg;
+}
+.widget-dnd > switch > slider {
+  background: @slider-fg;
+  border-radius: 100%;
+  margin: 2px;
+  min-width: 18px;
+  min-height: 18px;
+}
+
+/* Grouped notifications (notification-grouping is on) */
+.notification-group .notification-group-headers {
+  color: @bar-fg;
+  font-weight: 600;
+  margin: 2px 8px;
+}
+.notification-group .notification-group-buttons > button {
+  background: alpha(@bar-fg, 0.12);
+  color: @bar-fg;
+  border: none;
+  border-radius: 10px;
+}
+.notification-group .notification-group-buttons > button:hover {
+  background: @pill-brand-bg;
+  color: @pill-brand-fg;
+}
+
+/* Inline action buttons on a notification */
+.notification-action {
+  background: alpha(@bar-fg, 0.12);
+  color: @bar-fg;
+  border: none;
+  border-radius: 10px;
+  margin: 4px;
+  padding: 4px 10px;
+}
+.notification-action:hover {
+  background: @pill-brand-bg;
+  color: @pill-brand-fg;
+}

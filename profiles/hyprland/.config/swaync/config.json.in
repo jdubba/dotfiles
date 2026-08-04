@@ -1,0 +1,101 @@
+{
+  "$schema": "/etc/xdg/swaync/configSchema.json",
+
+  /* TEMPLATE -- not read by swaync directly.
+     `swaync-config.sh` substitutes @DF_NOTIFY_OUTPUT@ and writes the result to
+     $XDG_STATE_HOME/dotfiles/swaync/config.json, which the swaync.service
+     drop-in passes via `-c`. The generated file is machine-local so a redock
+     rewriting the preferred output causes no repo churn.
+     A host that needs different settings shadows this file at
+     hosts/<host>/.config/swaync/config.json.in -- normal layering, since the
+     generator reads ~/.config/swaync/config.json.in. */
+
+  "ignore-gtk-theme": true,
+  "cssPriority": "user",
+
+  /* Which monitor popups and the panel appear on.
+     An UNSET value is not "follow focus": swaync's try_get_monitor() returns
+     null, the compositor picks once, and notificationWindow.vala then caches
+     that connector in a static and reuses it -- consistent but arbitrary. So
+     pin it where the host can say something meaningful.
+     Substituted at generation time because on a dock the answer is only known
+     at runtime: identical-EDID displays can be told apart solely by their live
+     connector names. An empty substitution is valid and means "let the
+     compositor pick", which is the right answer for a single-display host. */
+  "notification-window-preferred-output": "@DF_NOTIFY_OUTPUT@",
+  "control-center-preferred-output": "@DF_NOTIFY_OUTPUT@",
+
+  "positionX": "right",
+  "positionY": "top",
+  "layer": "overlay",
+  "control-center-layer": "top",
+  "layer-shell": true,
+  "layer-shell-cover-screen": true,
+
+  /* Float the panel off the screen edge, and stay narrower than the 500px
+     default. control-center-height -1 fits the content: a fixed height left a
+     large dead area below the rows. */
+  "control-center-margin-top": 10,
+  "control-center-margin-right": 10,
+  "control-center-margin-bottom": 10,
+  "control-center-margin-left": 0,
+  "control-center-width": 440,
+  "control-center-height": -1,
+  "notification-window-width": 420,
+  "fit-to-screen": true,
+
+  /* Brief toasts, then review in the panel. */
+  "timeout": 6,
+  "timeout-low": 4,
+  "timeout-critical": 0,
+
+  /* Off deliberately: grouping collapsed every notification from one app into
+     a single stacked row with only the newest legible, which fights reviewing
+     them one at a time. Flip to true if per-app stacking earns its extra click. */
+  "notification-grouping": false,
+
+  "relative-timestamps": true,
+  "hide-on-clear": true,
+  "hide-on-action": true,
+  "image-visibility": "when-available",
+  "transition-time": 200,
+  "keyboard-shortcuts": true,
+  "text-empty": "Nothing unread",
+
+  /* Brave's web notifications arrive as Urgency: Critical, and the freedesktop
+     spec says critical never expires -- which is why they used to sit on screen
+     until acked. timeout-critical cannot make them expire, so match them and
+     rewrite the urgency; the 6s "timeout" then applies and they fall through to
+     the panel for later review.
+     `urgency` here is the MATCHER (it defaults to Normal, so it has to be
+     stated explicitly to catch Critical); `override-urgency` is the rewrite. */
+  "notification-visibility": {
+    "brave-web-critical": {
+      "state": "enabled",
+      "desktop-entry": "brave-browser",
+      "urgency": "Critical",
+      "override-urgency": "normal"
+    }
+  },
+
+  "widgets": [
+    "title",
+    "dnd",
+    "notifications"
+  ],
+  "widget-config": {
+    "title": {
+      "text": "Notifications",
+      "clear-all-button": true,
+      "button-text": "Clear all"
+    },
+    "dnd": {
+      "text": "Do not disturb"
+    },
+    "notifications": {
+      /* false, or the list stretches to fill and control-center-height:-1
+         cannot collapse to the content. */
+      "vexpand": false
+    }
+  }
+}

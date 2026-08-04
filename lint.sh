@@ -45,7 +45,8 @@ for f in \
     home/.config/shell/*.sh \
     home/.config/shell/path.d/*.sh \
     home/.config/shell/completions/*.bash \
-    home/.config/bash/*.bash; do
+    home/.config/bash/*.bash \
+    profiles/hyprland/.config/swaync/*.sh; do
   [ -f "$f" ] || continue
   echo "  $f"
   shellcheck -x -e SC1090,SC1091,SC2148 "$f" || true
