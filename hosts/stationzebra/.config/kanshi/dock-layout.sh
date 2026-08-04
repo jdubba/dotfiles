@@ -65,6 +65,40 @@ pin_workspaces() {
 pin_workspaces "$left"  "${LEFT_WORKSPACES[@]}"
 pin_workspaces "$right" "${RIGHT_WORKSPACES[@]}"
 
+# --- pin notifications to the left TV (the primary screen for this dock) ---
+# swaync has no runtime output command and no include/override mechanism, so
+# the preferred output lives in its config and has to be patched here. This
+# cannot be a static config value for the same reason the workspace pins
+# above cannot: both TVs ship one EDID with a placeholder serial, so only the
+# live connector name can name them.
+# Patched with sed rather than a JSON parser because the config carries
+# comments (swaync tolerates them, python's json module does not), and
+# because the core tooling here stays dependency-free.
+# swaync-client -R resets the cached monitor: notificationWindow.vala nulls
+# its static monitor_name whenever the preferred output changes.
+pin_notifications() {
+    local target="$1"
+    local cfg="${XDG_CONFIG_HOME:-$HOME/.config}/swaync/config.json"
+
+    command -v swaync-client >/dev/null 2>&1 || return 0
+    [[ -f $cfg ]] || return 0
+
+    local key changed=0
+    for key in notification-window-preferred-output \
+               control-center-preferred-output; do
+        grep -q "\"${key}\"" "$cfg" || continue
+        sed -i -E "s|(\"${key}\"[[:space:]]*:[[:space:]]*\")[^\"]*(\")|\1${target}\2|" "$cfg"
+        changed=1
+    done
+
+    if (( changed )); then
+        echo "dock-layout: notifications pinned to $target"
+        swaync-client -R -sw >/dev/null 2>&1 || true
+    fi
+}
+
+pin_notifications "$left"
+
 # --- and relocate any that already exist elsewhere ---
 "$(dirname "$0")/move-workspaces.sh" "$left"  "${LEFT_WORKSPACES[@]}"
 "$(dirname "$0")/move-workspaces.sh" "$right" "${RIGHT_WORKSPACES[@]}"
