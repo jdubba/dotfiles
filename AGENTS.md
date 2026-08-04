@@ -154,7 +154,9 @@ container, so adopting genuinely general-purpose scripts there is fine too.
   `walker/themes/{default,topleft,topright,powermenu}`;
   `elephant/providers.list` + `elephant/menus/powerstate.toml` (the battery
   pill's power panel); systemd `hyprland-session.target` + (guard-free)
-  `kanshi.service` + `dotfiles-autotheme.service`.
+  `kanshi.service` + `dotfiles-autotheme.service`. The waybar bell pill
+  (`custom/notifications`) lives in the shared `config.jsonc`/`style.css`;
+  swaync's own config is not yet adopted — see `docs/notifications.md`.
 - `hosts/stationzebra/` — `kanshi/` (config + `move-workspaces.sh` +
   `dock-{layout,monitor}.sh` for the LG TV dock: workspaces 1-3 left TV, 4-6
   middle TV, 7-10 eDP-1 at the far right); systemd `dock-monitor.service` +
@@ -372,6 +374,29 @@ Durable rules that follow from it:
    daemon-reload`** — the `post-merge` hook re-links but does not reload, so new
    unit drop-ins won't take effect until reload (or next login, where
    `systemd --user` starts fresh).
+
+## Notifications
+
+The notification daemon is **swaync** (SwayNotificationCenter), which replaced
+an unmanaged mako whose palette was hardcoded to Catppuccin Mocha. The deciding
+requirement was a reviewable **notification centre** — brief toasts that leave
+on their own plus a panel to clear them individually or all at once — which mako
+structurally cannot provide (a history *buffer* and a most-recent-only
+`makoctl restore`, no panel, no restore-by-id).
+
+Managed here: the waybar bell pill (`custom/notifications`, styled from the
+`@pill-notify-*` seam) and `dock-layout.sh`'s runtime output pin. swaync's own
+`config.json`/`style.css` are **not yet adopted** — still machine-local.
+
+**Dependency footprint, the per-distro install (Gentoo needs a keyword, a
+`gtk4-layer-shell` USE change and a granite QA relaxation; Fedora is a plain
+`dnf install` but almost certainly needs a dual-session drop-in), and the
+behavioural traps live in [`docs/notifications.md`](docs/notifications.md).**
+Read it before installing on a new host. Two that bite hardest: critical
+notifications **cannot** be made to expire via `timeout-critical` (use a
+`notification-visibility` rule with `override-urgency`), and an unset
+`notification-window-preferred-output` is *not* follow-focus — the compositor
+picks once and swaync caches that connector in a static.
 
 ## Fonts, Waybar & app configs (durable)
 
