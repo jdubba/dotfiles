@@ -108,6 +108,50 @@ teardown() {
   ! grep -qE '^[[:space:]]*ConditionEnvironment=' "$d"
 }
 
+@test "a .service.d owned by both a profile and the host links both children" {
+  # swaync.service.d is the first drop-in directory in this repo owned by two
+  # layers: profiles/hyprland contributes the generated-config -c override and
+  # the Fedora hosts add the dual-session guard. Every other *.service.d has a
+  # single owner and is therefore FOLDED into one symlink -- so this combination
+  # has no precedent here and is worth pinning: if it folded, one layer's
+  # drop-in would silently disappear and swaync would either lose its -c or lose
+  # its guard.
+  setup_sandbox
+  mk_repo_conf 'DF_CONTAINER_DIRS+=(".config/systemd" ".config/systemd/user")'
+  mk_profile hypr-test .config/systemd/user/swaync.service.d/dotfiles-config.conf 'x'
+  mk_host .config/systemd/user/swaync.service.d/hyprland-only.conf 'y'
+  run "$DOTFILES" profile enable hypr-test
+  [ "$status" -eq 0 ]
+  run "$DOTFILES" link
+  [ "$status" -eq 0 ]
+
+  local d="$DF_TEST_TARGET/.config/systemd/user/swaync.service.d"
+  # The directory must stay real, not become a symlink into either layer.
+  [ -d "$d" ]
+  [ ! -L "$d" ]
+  # ...and BOTH drop-ins must be present.
+  [ -L "$d/dotfiles-config.conf" ]
+  [ -L "$d/hyprland-only.conf" ]
+  [ "$(cat "$d/dotfiles-config.conf")" = "x" ]
+  [ "$(cat "$d/hyprland-only.conf")" = "y" ]
+  teardown_sandbox
+}
+
+@test "both Fedora hosts guard swaync to the Hyprland session" {
+  # GNOME provides org.freedesktop.Notifications itself, so an unguarded swaync
+  # on a dual-session box races GNOME's daemon for the bus name. The packaged
+  # unit's ExecCondition only checks WAYLAND_DISPLAY, which GNOME satisfies too.
+  local h g
+  for h in fedora cltc-aus-lws03; do
+    g="$DF_SRC_REPO/hosts/$h/.config/systemd/user/swaync.service.d/hyprland-only.conf"
+    [ -f "$g" ] || { echo "missing swaync guard for host $h"; false; }
+    grep -qE '^[[:space:]]*ConditionEnvironment=XDG_CURRENT_DESKTOP=Hyprland' "$g"
+  done
+  # The shared drop-in must NOT carry the guard -- stationzebra has no GNOME.
+  ! grep -qE '^[[:space:]]*ConditionEnvironment=' \
+    "$DF_SRC_REPO/profiles/hyprland/.config/systemd/user/swaync.service.d/dotfiles-config.conf"
+}
+
 @test "swaync's stylesheet imports the waybar seam relatively" {
   # An absolute path here would embed one machine's home directory. GTK resolves
   # @import against the importing file's own path, and it does NOT canonicalise
