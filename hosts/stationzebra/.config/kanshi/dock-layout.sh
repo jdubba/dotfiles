@@ -44,12 +44,11 @@ right="${lg_monitors[1]}"
 echo "dock-layout: left=$left  right=$right"
 
 # --- apply monitor geometry (eDP-1 sits to the right of both TVs) ---
-# Order matters: every `keyword monitor` re-resolves the `auto` positions still
-# in effect from local.conf, so the two explicit TV positions have to land before
-# eDP-1 is nailed down at the far right edge (3840 + 3840).
-hyprctl keyword monitor "$left,3840x2160@30,0x0,1"
-hyprctl keyword monitor "$right,3840x2160@30,3840x0,1"
-hyprctl keyword monitor "eDP-1,2560x1600@180,7680x0,1"
+# Hyprland currently keeps eDP-1 anchored at 0x0 despite accepting a positive
+# runtime position.  Anchor the equivalent layout there and place the TVs left
+# of it instead.
+hyprctl keyword monitor "$left,3840x2160@30,-7680x0,1"
+hyprctl keyword monitor "$right,3840x2160@30,-3840x0,1"
 
 # --- pin the TV workspaces (mirrors the persistent rules local.conf uses for
 #     eDP-1; the TVs need the runtime connector names, see header) ---

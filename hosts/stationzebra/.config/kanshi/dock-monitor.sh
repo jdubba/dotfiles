@@ -60,10 +60,10 @@ internal = next((m for m in mons if m.get('name') == 'eDP-1'), None)
 
 ok = (
     len(lg) == 2
-    and (lg[0].get('x'), lg[0].get('y')) == (0, 0)
-    and (lg[1].get('x'), lg[1].get('y')) == (3840, 0)
+    and (lg[0].get('x'), lg[0].get('y')) == (-7680, 0)
+    and (lg[1].get('x'), lg[1].get('y')) == (-3840, 0)
     and internal is not None
-    and (internal.get('x'), internal.get('y')) == (7680, 0)
+    and (internal.get('x'), internal.get('y')) == (0, 0)
 )
 sys.exit(0 if ok else 1)
 " >/dev/null 2>&1
