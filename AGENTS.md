@@ -168,7 +168,11 @@ container, so adopting genuinely general-purpose scripts there is fine too.
   fingerprint stub, no sensor confirmed);
   `systemd/user/{kanshi,waybar,dotfiles-autotheme,swaync}.service.d/hyprland-only.conf`
   (dual-session guards); `shell/machine-env`.
-- `hosts/cltc-aus-lws03/` — Fedora laptop (GNOME + Hyprland from GDM); `kanshi/`;
+- `hosts/cltc-aus-lws03/` — Fedora laptop (GNOME + Hyprland from GDM); `kanshi/`
+  (config + `dock-{layout,monitor}.sh` + `move-workspaces.sh` for the LG TV dock,
+  plus `office-notifications.sh` — the Dell dock pins notifications to its
+  **middle** monitor, resolved by EDID serial, while both TV docks pin their
+  **left** TV; see `docs/notifications.md`);
   `hypr/local.conf` (GDM session glue + rigid workspace→monitor binding);
   `hypr/hyprlock-local.conf` (per-host hyprlock auth seam — **native fingerprint
   enabled**: Goodix MOC + enrolled print; requires the password-only
@@ -404,10 +408,19 @@ runtime — so something has to rewrite it on every redock. A symlinked config
 would make that tracked-file churn. Instead `swaync-config.sh` renders
 `~/.config/swaync/config.json.in` into
 `$XDG_STATE_HOME/dotfiles/swaync/config.json`, which the `swaync.service`
-drop-in passes via `-c`; `dock-layout.sh` writes the pin to
-`$XDG_STATE_HOME/dotfiles/swaync/output` and re-renders. **A host customises by
-shadowing the template**, not the generated file. `.config/swaync` is a container
-dir so it is never folded into the repo.
+drop-in passes via `-c`. **A host customises by shadowing the template**, not the
+generated file. `.config/swaync` is a container dir so it is never folded into
+the repo.
+
+`swaync-pin.sh <connector>|--clear` is the generic pin half (write state,
+re-render, reload); **which** monitor is per-host data, because "primary" is a
+per-dock decision — both LG TV docks pin their *left* TV (sorted by connector,
+since the TVs share one EDID), cltc's Dell dock pins its *middle* monitor
+(resolved by EDID serial, since connector names renumber), `laptop-only` clears
+it, and single-display `fedora` needs nothing because an empty pin resolves to
+its only output. Do **not** hand swaync a descriptor to identify same-model
+panels: it composes `manufacturer model description` from GDK, not kanshi's
+`make model serial`, so two identical Dells would collide.
 
 **Dependency footprint, the per-distro install (Gentoo needs a keyword, a
 `gtk4-layer-shell` USE change and a granite QA relaxation; Fedora is a plain

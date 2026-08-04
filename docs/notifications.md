@@ -200,7 +200,8 @@ state:
 | `~/.config/swaync/config.json.in` | template, tracked in `profiles/hyprland` |
 | `~/.config/swaync/style.css` | stylesheet, tracked (read directly, no generation) |
 | `~/.config/swaync/swaync-config.sh` | the renderer |
-| `$XDG_STATE_HOME/dotfiles/swaync/output` | the pin, written by `dock-layout.sh` |
+| `~/.config/swaync/swaync-pin.sh` | sets the pin + re-renders + reloads |
+| `$XDG_STATE_HOME/dotfiles/swaync/output` | the pin, written by `swaync-pin.sh` |
 | `$XDG_STATE_HOME/dotfiles/swaync/config.json` | generated; what swaync runs from |
 
 `swaync.service.d/dotfiles-config.conf` renders on start (`ExecStartPre`) and
@@ -214,7 +215,44 @@ Notes on that drop-in:
 - It is **guard-free**, like the shared `kanshi.service`. A Fedora host adds its
   own `ConditionEnvironment=XDG_CURRENT_DESKTOP=Hyprland` drop-in.
 
-Consequences worth knowing:
+### Who pins what
+
+`swaync-pin.sh <connector>` (or `--clear`) is the generic half: record the pin,
+re-render, reload. **Which** monitor is per-host data and belongs to the caller,
+because "primary" is a per-dock decision:
+
+| host / dock | pinned to | applied by |
+|---|---|---|
+| stationzebra, TV dock | left LG TV | `dock-layout.sh` |
+| cltc-aus-lws03, TV dock | left LG TV | `dock-layout.sh` |
+| cltc-aus-lws03, office dock | **middle** Dell (`JQ5X7M3`) | `office-notifications.sh`, from the kanshi `docked` profile |
+| cltc-aus-lws03, laptop-only | nothing (`--clear`) | kanshi `laptop-only` profile |
+| fedora | nothing | — single display, empty pin resolves to `eDP-1` |
+
+Two different identification strategies, for a real reason:
+
+- **The LG TVs are sorted by connector name.** Both ship one EDID with the
+  placeholder serial `0x01010101`, so nothing else can order them. Verified on
+  stationzebra: `DP-10` and `DP-11` both report `serial='0x01010101'`.
+- **The Dells are matched by EDID serial**, which is unique per panel and is
+  already what their kanshi profile trusts — connector names renumber across
+  redocks, so they cannot be hardcoded.
+
+Note the Dells are matched *to a connector* rather than handed to swaync as a
+descriptor. swaync's `try_get_monitor()` composes `manufacturer model
+description` from GDK, which is **not** kanshi's `make model serial` and is not
+known to carry the serial — two identical P2422H panels would very likely collide
+and swaync would silently take whichever came first. Resolving to a connector
+sidesteps the question. (That last part is inference about GDK, not tested on
+those panels.)
+
+`exec` in a kanshi profile runs via `/bin/sh -c`, so `~` **is** expanded — unlike
+hyprland's `source=`, which expands neither `~` nor `$HOME`. kanshi(5) also warns
+that execs run asynchronously in unspecified order, which is fine here: the pin
+only reads monitor serials and writes swaync state, so it does not depend on the
+`hyprctl reload` beside it.
+
+### Other consequences worth knowing
 
 - **A host overrides settings by shadowing the template**, not the config:
   `hosts/<host>/.config/swaync/config.json.in`. Normal layering, because the
