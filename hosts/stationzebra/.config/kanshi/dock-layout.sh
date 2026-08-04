@@ -66,35 +66,14 @@ pin_workspaces "$left"  "${LEFT_WORKSPACES[@]}"
 pin_workspaces "$right" "${RIGHT_WORKSPACES[@]}"
 
 # --- pin notifications to the left TV (the primary screen for this dock) ---
-# swaync has no runtime output command and no include mechanism, so the
-# preferred output lives in its config file. This cannot be a static config
-# value for the same reason the workspace pins above cannot: both TVs ship one
-# EDID with a placeholder serial, so only the live connector name can name them.
-#
-# Write the connector to machine-local state and let swaync-config.sh render the
-# tracked template over it, rather than editing a config in place. The config
-# swaync actually reads lives under $XDG_STATE_HOME, so a redock never touches
-# the repo -- which it would if the config were a symlink into it.
-#
-# swaync-client -R is enough to pick it up: notificationWindow.vala nulls its
-# cached static monitor_name whenever the preferred output changes.
-pin_notifications() {
-    local target="$1"
-    local state_dir="${XDG_STATE_HOME:-$HOME/.local/state}/dotfiles/swaync"
-    local generator="${XDG_CONFIG_HOME:-$HOME/.config}/swaync/swaync-config.sh"
-
-    command -v swaync-client >/dev/null 2>&1 || return 0
-    [[ -x $generator ]] || return 0
-
-    mkdir -p "$state_dir"
-    printf '%s\n' "$target" >"$state_dir/output"
-
-    "$generator" || return 0
-    echo "dock-layout: notifications pinned to $target"
-    swaync-client -R -sw >/dev/null 2>&1 || true
-}
-
-pin_notifications "$left"
+# The generic half (write the pin, re-render swaync's config from the tracked
+# template, reload) lives in profiles/hyprland/.config/swaync/swaync-pin.sh;
+# only the choice of monitor is per-host. It has to happen here rather than
+# being a static config value for the same reason the workspace pins above do:
+# both TVs ship one EDID with a placeholder serial, so only the live connector
+# name can name them.
+pin="${XDG_CONFIG_HOME:-$HOME/.config}/swaync/swaync-pin.sh"
+[[ -x $pin ]] && "$pin" "$left" || true
 
 # --- and relocate any that already exist elsewhere ---
 "$(dirname "$0")/move-workspaces.sh" "$left"  "${LEFT_WORKSPACES[@]}"
