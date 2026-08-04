@@ -52,6 +52,15 @@ hyprctl --batch "keyword workspace 1, monitor:$left, persistent:true; keyword wo
 "$(dirname "$0")/move-workspaces.sh" "$left" "${LEFT_WORKSPACES[@]}"
 "$(dirname "$0")/move-workspaces.sh" "$right" "${RIGHT_WORKSPACES[@]}"
 
+# Pin notifications to the left TV, the primary screen for this dock. Must
+# happen at runtime, like the workspace pins above: both TVs ship one EDID with
+# a placeholder serial, so only the live connector name can name them. The
+# generic half lives in profiles/hyprland/.config/swaync/swaync-pin.sh.
+# The office (Dell) dock pins its MIDDLE monitor instead -- see
+# office-notifications.sh, run from the kanshi `docked` profile.
+pin="${XDG_CONFIG_HOME:-$HOME/.config}/swaync/swaync-pin.sh"
+[[ -x $pin ]] && "$pin" "$left" || true
+
 echo "dock-layout: done"
 
 { sleep 1 && systemctl --user restart waybar.service; } &

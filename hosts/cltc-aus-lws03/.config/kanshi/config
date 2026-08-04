@@ -13,6 +13,13 @@
 # two LG TVs have identical descriptions/serials, and the DP-N names can vary by
 # dock enumeration. dock-monitor.sh/dock-layout.sh sort the LG connectors at
 # runtime and apply that layout via hyprctl instead.
+#
+# Two things about `exec` here. kanshi runs each command via `/bin/sh -c`, so `~`
+# IS expanded (unlike hyprland's `source=`, which expands neither ~ nor $HOME).
+# And per kanshi(5) the commands run asynchronously in unspecified order, so
+# nothing below may depend on another exec having finished — the notification pin
+# only reads monitor serials and writes swaync state, so it is independent of the
+# `hyprctl reload` beside it.
 
 # Profile 1: Office dock - internal panel + both Dell externals side by side.
 profile docked {
@@ -42,6 +49,11 @@ profile docked {
     # the static Dell EDID rules after this profile is applied so a later office
     # redock cannot retain stale TV connectors.
     exec /usr/bin/hyprctl reload
+
+    # Notifications go to the MIDDLE screen on this dock (the TV dock pins its
+    # left TV instead). Resolves the Dell serial to a live connector, because
+    # swaync cannot tell two identical P2422H panels apart by description.
+    exec ~/.config/kanshi/office-notifications.sh
 }
 
 # Profile 2: Laptop-only (no externals connected).
@@ -56,4 +68,9 @@ profile laptop-only {
     # their persistent workspaces onto eDP-1 automatically (and restores them to
     # the externals on reconnect). Placement is owned by the `workspace` rules in
     # hosts/cltc-aus-lws03/.config/hypr/local.conf.
+
+    # Drop the notification pin left behind by whichever dock was last attached.
+    # A stale pin naming a now-disconnected connector already degrades to
+    # "compositor picks", so this is for honest state rather than correctness.
+    exec ~/.config/swaync/swaync-pin.sh --clear
 }

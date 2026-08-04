@@ -108,6 +108,103 @@ teardown() {
   ! grep -qE '^[[:space:]]*ConditionEnvironment=' "$d"
 }
 
+PIN() { printf '%s' "$DF_SRC_REPO/profiles/hyprland/.config/swaync/swaync-pin.sh"; }
+
+# swaync-pin.sh deliberately no-ops when swaync-client is absent, so a host that
+# has not installed swaync does not fail its dock script. CI has no swaync, so
+# stub the client (and put the real generator + template where it expects them).
+_pin_env() {
+  _gen_env
+  cp "$(GEN)" "$XDG_CONFIG_HOME/swaync/swaync-config.sh"
+  chmod +x "$XDG_CONFIG_HOME/swaync/swaync-config.sh"
+  mkdir -p "$DF_TMP/bin"
+  printf '#!/bin/sh\nexit 0\n' >"$DF_TMP/bin/swaync-client"
+  chmod +x "$DF_TMP/bin/swaync-client"
+  export PATH="$DF_TMP/bin:$PATH"
+}
+
+@test "swaync-pin.sh records a connector and renders the config" {
+  _pin_env
+  run "$(PIN)" DP-6
+  [ "$status" -eq 0 ]
+  [ "$(cat "$XDG_STATE_HOME/dotfiles/swaync/output")" = "DP-6" ]
+  grep -q '"notification-window-preferred-output": "DP-6"' \
+    "$XDG_STATE_HOME/dotfiles/swaync/config.json"
+}
+
+@test "swaync-pin.sh --clear unsets the pin" {
+  _pin_env
+  "$(PIN)" DP-6
+  run "$(PIN)" --clear
+  [ "$status" -eq 0 ]
+  grep -q '"notification-window-preferred-output": ""' \
+    "$XDG_STATE_HOME/dotfiles/swaync/config.json"
+}
+
+@test "swaync-pin.sh rejects a descriptor or empty target loudly" {
+  # A caller passing a description ("Dell Inc. DELL P2422H ...") or an unset
+  # variable should fail visibly, not silently leave notifications unpinned.
+  _pin_env
+  run "$(PIN)" "Dell Inc. DELL P2422H JQ5X7M3"
+  [ "$status" -ne 0 ]
+  [[ $output == *"implausible connector"* ]]
+  run "$(PIN)"
+  [ "$status" -ne 0 ]
+  [[ $output == *"usage"* ]]
+}
+
+@test "swaync-pin.sh is a silent no-op where swaync is not installed" {
+  # A host that has not installed swaync must not fail its dock script.
+  # This has to be a HERMETIC path: simply prepending an empty dir and keeping
+  # /usr/bin still finds the real swaync-client on a machine that has it (which
+  # is exactly how this test first passed for the wrong reason). Populate a
+  # sandbox bin with only the tools the script needs.
+  _gen_env
+  cp "$(GEN)" "$XDG_CONFIG_HOME/swaync/swaync-config.sh"
+  chmod +x "$XDG_CONFIG_HOME/swaync/swaync-config.sh"
+  mkdir -p "$DF_TMP/bin"
+  local t
+  # bash included because the shebang is `#!/usr/bin/env bash`.
+  for t in bash sh mkdir sed mktemp mv rm cat env; do
+    ln -sf "$(command -v "$t")" "$DF_TMP/bin/$t"
+  done
+  [ ! -e "$DF_TMP/bin/swaync-client" ]
+
+  PATH="$DF_TMP/bin" run "$(PIN)" DP-6
+  [ "$status" -eq 0 ]
+  [ ! -e "$XDG_STATE_HOME/dotfiles/swaync/output" ]
+}
+
+@test "every dock path pins notifications through the shared helper" {
+  # The pin logic must not be duplicated per host: three callers need it
+  # (stationzebra's TV dock, cltc's TV dock, cltc's office kanshi profile).
+  local f
+  for f in "$DF_SRC_REPO/hosts/stationzebra/.config/kanshi/dock-layout.sh" \
+           "$DF_SRC_REPO/hosts/cltc-aus-lws03/.config/kanshi/dock-layout.sh"; do
+    grep -q 'swaync/swaync-pin.sh' "$f" || { echo "$f does not use the helper"; false; }
+    # and must not have re-grown an inline copy
+    ! grep -q 'dotfiles/swaync/output' "$f"
+  done
+}
+
+@test "cltc's office dock pins the middle Dell by serial, not by description" {
+  # swaync composes its descriptor from GDK as "manufacturer model description",
+  # which is not kanshi's "make model serial" and is not known to carry the
+  # serial -- two identical P2422H panels would collide and try_get_monitor would
+  # return whichever came first. Resolve the serial to a connector instead.
+  local s="$DF_SRC_REPO/hosts/cltc-aus-lws03/.config/kanshi/office-notifications.sh"
+  local k="$DF_SRC_REPO/hosts/cltc-aus-lws03/.config/kanshi/config"
+  [ -x "$s" ]
+  bash -n "$s"
+  # the middle external's serial, per the kanshi profile's own comments
+  grep -q 'MIDDLE_SERIAL="JQ5X7M3"' "$s"
+  grep -q "m.get('serial')" "$s"
+  grep -q 'swaync/swaync-pin.sh' "$s"
+  # wired into the office profile, and the laptop-only profile clears the pin
+  grep -q 'exec ~/.config/kanshi/office-notifications.sh' "$k"
+  grep -q 'exec ~/.config/swaync/swaync-pin.sh --clear' "$k"
+}
+
 @test "a .service.d owned by both a profile and the host links both children" {
   # swaync.service.d is the first drop-in directory in this repo owned by two
   # layers: profiles/hyprland contributes the generated-config -c override and
