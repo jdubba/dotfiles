@@ -50,6 +50,7 @@ window#waybar.hidden {
 #custom-tailscale,
 #language,
 #custom-theme,
+#custom-notifications,
 #battery {
   background: @bar-bg;
   color: @bar-fg;
@@ -145,6 +146,30 @@ window#waybar.hidden {
   margin-right: 4px;
   border-radius: 15px;
   padding: 0 12px;
+}
+
+/* Notification bell: standalone pill between the theme switcher and battery.
+   Has its own seam (@pill-notify-bg/-fg) so a theme can give it a hue of its
+   own, but the emitter defaults it to the primary pill accent -- same as the
+   theme switcher -- because a bar carrying a different colour per module reads
+   as busy rather than deliberate.
+   Unread is therefore signalled by the GLYPH, not by a second colour: the
+   module swaps nf-md-bell for nf-md-bell_badge (the bell with a dot) via
+   format-icons. DND is the one state that recolours, receding to the bar's own
+   background so a muted bell visibly stops being an accent at all. */
+#custom-notifications {
+  background: @pill-notify-bg;
+  color: @pill-notify-fg;
+  margin-left: 4px;
+  margin-right: 4px;
+  border-radius: 15px;
+  padding: 0 12px;
+}
+
+#custom-notifications.dnd-none,
+#custom-notifications.dnd-notification {
+  background: @bar-bg;
+  color: alpha(@bar-fg, 0.7);
 }
 
 /* Battery isn't part of a group -- it's a standalone, single-module pill. It is

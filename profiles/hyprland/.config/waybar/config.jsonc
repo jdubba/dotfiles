@@ -17,6 +17,7 @@
   "modules-right": [
     "group/right-controls",
     "custom/theme",
+    "custom/notifications",
     "battery"
   ],
   /* === section groups ===
@@ -119,6 +120,34 @@
     "interval": "once",
     "format": "{}",
     "on-click": "$HOME/.config/waybar/scripts/thememenu",
+    "tooltip": true
+  },
+  "custom/notifications": {
+    // PROTOTYPE (swaync eval). Bell pill: opens the notification centre so
+    // toasts can auto-expire and still be reviewed/cleared later.
+    // swaync-client -swb emits waybar JSON (text/alt/tooltip/class) and stays
+    // subscribed, so the count updates on add/close without polling.
+    // Glyphs are Nerd Font md-* (verified present in JetBrainsMono Nerd Font):
+    //   idle      nf-md-bell            U+F009A
+    //   unread    nf-md-bell_badge      U+F116B
+    //   dnd       nf-md-bell_off        U+F009B
+    //   dnd+unread nf-md-bell_sleep     U+F00A0
+    "exec": "swaync-client -swb",
+    "return-type": "json",
+    "format": "{icon}",
+    "format-icons": {
+      "none": "󰂚",
+      "notification": "󱅫",
+      "dnd-none": "󰂛",
+      "dnd-notification": "󰂠",
+      "inhibited-none": "󰂚",
+      "inhibited-notification": "󱅫",
+      "dnd-inhibited-none": "󰂛",
+      "dnd-inhibited-notification": "󰂠"
+    },
+    "escape": true,
+    "on-click": "swaync-client -t -sw",
+    "on-click-right": "swaync-client -d -sw",
     "tooltip": true
   },
   "idle_inhibitor": {
