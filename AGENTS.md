@@ -384,9 +384,20 @@ on their own plus a panel to clear them individually or all at once — which ma
 structurally cannot provide (a history *buffer* and a most-recent-only
 `makoctl restore`, no panel, no restore-by-id).
 
-Managed here: the waybar bell pill (`custom/notifications`, styled from the
-`@pill-notify-*` seam) and `dock-layout.sh`'s runtime output pin. swaync's own
-`config.json`/`style.css` are **not yet adopted** — still machine-local.
+Managed in `profiles/hyprland/.config/swaync/`: the waybar bell pill
+(`custom/notifications`, styled from the `@pill-notify-*` seam), `style.css`, and
+a **config template** — swaync's real config is *generated*, not symlinked.
+
+swaync has no include mechanism and no runtime output command, so its monitor pin
+must live in the config file, and on the dock that value is only knowable at
+runtime — so something has to rewrite it on every redock. A symlinked config
+would make that tracked-file churn. Instead `swaync-config.sh` renders
+`~/.config/swaync/config.json.in` into
+`$XDG_STATE_HOME/dotfiles/swaync/config.json`, which the `swaync.service`
+drop-in passes via `-c`; `dock-layout.sh` writes the pin to
+`$XDG_STATE_HOME/dotfiles/swaync/output` and re-renders. **A host customises by
+shadowing the template**, not the generated file. `.config/swaync` is a container
+dir so it is never folded into the repo.
 
 **Dependency footprint, the per-distro install (Gentoo needs a keyword, a
 `gtk4-layer-shell` USE change and a granite QA relaxation; Fedora is a plain

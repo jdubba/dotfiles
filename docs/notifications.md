@@ -174,16 +174,71 @@ source rather than inferred:
   (`rgba(68,68,68,.6)` over `#002b36` = `srgb(41,58,62)`) when reading the
   stylesheet had produced the wrong answer twice.
 
-## Status
+## The generated-config seam
 
-The daemon, the waybar bell pill (`custom/notifications` +
-`@pill-notify-bg/-fg`) and the `dock-layout.sh` output pin are in the repo.
-**swaync's own `config.json` and `style.css` are not yet adopted** — they are
-still machine-local under `~/.config/swaync/`.
+swaync's config is **generated**, not symlinked, and this is the one piece of
+the setup whose shape is non-obvious.
 
-One thing to resolve when they are adopted: `dock-layout.sh`'s
-`pin_notifications()` writes to `~/.config/swaync/config.json`, which is fine
-while that file is untracked, but once it is a symlink into the repo every
-redock becomes tracked-file churn. The clean shape is a repo-tracked template
-plus a generated machine-local config passed to swaync via `-c` (a
-`swaync.service` drop-in).
+The problem: swaync has no include mechanism and no runtime command to change
+its preferred output, so the monitor pin has to live in the config file — and on
+the dock that value is only knowable at runtime. Something must rewrite the
+config on every redock. If the config were a symlink into the repo, each redock
+would be tracked-file churn.
+
+So the repo ships a **template** and renders the real file into machine-local
+state:
+
+| path | what it is |
+|---|---|
+| `~/.config/swaync/config.json.in` | template, tracked in `profiles/hyprland` |
+| `~/.config/swaync/style.css` | stylesheet, tracked (read directly, no generation) |
+| `~/.config/swaync/swaync-config.sh` | the renderer |
+| `$XDG_STATE_HOME/dotfiles/swaync/output` | the pin, written by `dock-layout.sh` |
+| `$XDG_STATE_HOME/dotfiles/swaync/config.json` | generated; what swaync runs from |
+
+`swaync.service.d/dotfiles-config.conf` renders on start (`ExecStartPre`) and
+points swaync at the generated file with `-c %S/dotfiles/swaync/config.json`.
+Notes on that drop-in:
+
+- **`ExecStart=` must be cleared before being reset.** systemd appends
+  otherwise, and a `Type=dbus` unit with two `ExecStart` lines refuses to start.
+- `ExecStartPre` is prefixed `-` so a missing template (half-linked fresh
+  machine) does not fail the unit.
+- It is **guard-free**, like the shared `kanshi.service`. A Fedora host adds its
+  own `ConditionEnvironment=XDG_CURRENT_DESKTOP=Hyprland` drop-in.
+
+Consequences worth knowing:
+
+- **A host overrides settings by shadowing the template**, not the config:
+  `hosts/<host>/.config/swaync/config.json.in`. Normal layering, because the
+  generator reads `~/.config/swaync/config.json.in`.
+- **An empty pin is valid** and means "let the compositor pick" — the right
+  answer for a single-display host, and what a fresh machine gets before any
+  dock script runs.
+- The generator **rejects an implausible output value** rather than
+  interpolating it, since the value lands in both JSON and a `sed` replacement.
+- `.config/swaync` is a **container dir** in `dotfiles.conf`, so it stays a real
+  directory and is never folded into a single symlink into the repo.
+- **`style.css` imports the waybar seam relatively** —
+  `@import url("../waybar/colors.css")`. GTK resolves `@import` against the
+  importing file's own path and does **not** canonicalise the symlink, so this
+  reaches `~/.config/waybar/colors.css` without embedding a home directory.
+  Verified by rendering, not assumed: the toast surface samples as the themed
+  `srgb(4,32,39)` rather than swaync's default `srgb(38,38,38)` grey.
+
+`tests/swaync.bats` pins all of the above, including that the template still
+carries its `@DF_NOTIFY_OUTPUT@` placeholder — a hardcoded connector there would
+silently defeat the whole design.
+
+## Still open
+
+- **Critical urgency has no themed colour.** The `.critical` border borrows
+  `@ws-fg-active`, because the waybar seam carries no semantic red (the
+  battery's traffic-light palette lives in waybar's own `style.css`, not in
+  `colors.css`). It reads as an alert on most palettes and is barely distinct on
+  some light ones. A real fix means an emitter change.
+- **The toast surface deepen is not polarity-aware.** `shade(@bar-bg, 0.8)` is
+  correct on dark themes and backwards on light ones. Cosmetic rather than a
+  legibility bug — the ink is `@bar-fg`, which clears AA in both polarities
+  (5.26:1 dark, 5.55:1 light) — but the generic fix is a measured surface from
+  the emitter, the way the workspace dots are done.
