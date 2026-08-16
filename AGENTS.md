@@ -154,7 +154,9 @@ container, so adopting genuinely general-purpose scripts there is fine too.
   `walker/themes/{default,topleft,topright,powermenu}`;
   `elephant/providers.list` + `elephant/menus/powerstate.toml` (the battery
   pill's power panel); systemd `hyprland-session.target` + (guard-free)
-  `kanshi.service` + `dotfiles-autotheme.service`. The waybar bell pill
+  `kanshi.service` + `dotfiles-autotheme.service` + (guard-free)
+  `{hyprpaper,waybar}.service.d/dotfiles-restart.conf` (survive a compositor
+  restart — see "Session services must outlive a compositor restart"). The waybar bell pill
   (`custom/notifications`) lives in the shared `config.jsonc`/`style.css`;
   swaync's own config is not yet adopted — see `docs/notifications.md`.
 - `hosts/stationzebra/` — `kanshi/` (config + `move-workspaces.sh` +
@@ -371,11 +373,14 @@ Durable rules that follow from it:
    unguarded swaync would *race GNOME's own daemon for the bus name* rather than
    merely run pointlessly — and the packaged unit's own
    `ExecCondition=[ -n "$WAYLAND_DISPLAY" ]` is no help, because GNOME satisfies
-   it too. `swaync.service.d` is also the **first drop-in dir owned by two
+   it too. `swaync.service.d` was also the **first drop-in dir owned by two
    layers** (`profiles/hyprland` for the generated-config `-c` override, the host
-   for the guard); every other `*.service.d` is single-owner and therefore
-   folded, so `tests/swaync.bats` pins that both children link and the directory
-   stays real — a fold would silently drop one of them.
+   for the guard), and `waybar.service.d` is now the second (`profiles/hyprland`
+   for the restart pacing, the host for the guard). A single-owner `*.service.d`
+   is folded into one symlink, so a two-owner dir must stay a **real** directory
+   with both children linked — a fold would silently drop one of them, costing
+   swaync its `-c` or either unit its guard. `tests/swaync.bats` pins the
+   mechanism and both real cases.
 5. **Packaging:** compositor + ecosystem from the **`lionheartp/Hyprland` COPR**
    (`solopasha/hyprland` is unmaintained for F43); waybar/kanshi/etc. from Fedora
    repos. **walker is Rust/GTK4** (v2, not Go): build needs `cargo` +
@@ -967,6 +972,25 @@ instead of erroring.
   exec-once (Fedora) setups. Persistence is via `hyprpaper.conf`'s `path=` (read
   on start); there is no config-reload IPC, so only a structural `hyprpaper.conf`
   change needs `systemctl --user restart hyprpaper.service`.
+- **Session services must outlive a compositor restart** — the packaged units do
+  not. When Hyprland restarts mid-session the old Wayland socket vanishes and
+  every `graphical-session.target` member is retried during the gap before the
+  new socket exists, which the shipped `Restart=on-failure` handles badly in two
+  opposite ways. **hyprpaper exits 0** when `wl_display_connect` fails, so
+  `on-failure` reads the failed start as success and never retries — it sat
+  `inactive(dead)` for three days on stationzebra with nothing in
+  `systemctl --user --failed` to show for it. **waybar** does exit non-zero, but
+  at systemd's 100ms default it burned 7 restarts in a second, hit the default
+  5-per-10s limit, and was abandoned as `start-limit-hit`. Hence
+  `profiles/hyprland/.config/systemd/user/{hyprpaper,waybar}.service.d/dotfiles-restart.conf`:
+  `Restart=always`+`RestartSec=5` for hyprpaper (the exit status carries no
+  information, so only `always` covers it), `RestartSec=2` for waybar, and
+  `StartLimitIntervalSec=0` for both so a multi-minute compositor gap is
+  survivable. Both are **guard-free**, per the dual-session rule above. Note the
+  Fedora hosts start hyprpaper from `local.conf`'s `exec-once`, not the unit, so
+  the hyprpaper drop-in is inert there. The root cause — `hyprland-session.target`
+  staying active across a compositor restart, so `PartOf=` never bounces its
+  members — is unfixed; `uwsm` rebuilds the target properly and is the real fix.
 - **`fit_mode = fill` means STRETCH in hyprpaper, not "fill the screen".** Its
   parser is `if (sv.starts_with("fill")) return IMAGE_FIT_MODE_STRETCH;`
   (`src/ui/UI.cpp`), and the accepted set is `contain` / `cover` / `tile` /

@@ -206,13 +206,13 @@ _pin_env() {
 }
 
 @test "a .service.d owned by both a profile and the host links both children" {
-  # swaync.service.d is the first drop-in directory in this repo owned by two
+  # swaync.service.d was the first drop-in directory in this repo owned by two
   # layers: profiles/hyprland contributes the generated-config -c override and
-  # the Fedora hosts add the dual-session guard. Every other *.service.d has a
-  # single owner and is therefore FOLDED into one symlink -- so this combination
-  # has no precedent here and is worth pinning: if it folded, one layer's
-  # drop-in would silently disappear and swaync would either lose its -c or lose
-  # its guard.
+  # the Fedora hosts add the dual-session guard. waybar.service.d is now the
+  # second (profile restart pacing + host guard). A single-owner *.service.d is
+  # FOLDED into one symlink, so the two-owner case is the one worth pinning: if
+  # it folded, one layer's drop-in would silently disappear and the unit would
+  # lose either its override or its guard.
   setup_sandbox
   mk_repo_conf 'DF_CONTAINER_DIRS+=(".config/systemd" ".config/systemd/user")'
   mk_profile hypr-test .config/systemd/user/swaync.service.d/dotfiles-config.conf 'x'
@@ -247,6 +247,42 @@ _pin_env() {
   # The shared drop-in must NOT carry the guard -- stationzebra has no GNOME.
   ! grep -qE '^[[:space:]]*ConditionEnvironment=' \
     "$DF_SRC_REPO/profiles/hyprland/.config/systemd/user/swaync.service.d/dotfiles-config.conf"
+}
+
+@test "the restart drop-ins keep session services alive across a compositor restart" {
+  # hyprpaper exits 0 when wl_display_connect fails, so Restart=on-failure reads
+  # a failed start as success and never retries; waybar exits non-zero but at the
+  # 100ms default spends the 5-per-10s budget in about a second and is abandoned
+  # as start-limit-hit. Both leave a dead unit after a mid-session Hyprland
+  # restart, so both need pacing AND the limiter off -- pacing alone still ends
+  # in start-limit-hit, and the limiter alone still gives up on hyprpaper's
+  # zero exit.
+  local d="$DF_SRC_REPO/profiles/hyprland/.config/systemd/user"
+
+  grep -qE '^[[:space:]]*Restart=always' "$d/hyprpaper.service.d/dotfiles-restart.conf"
+  grep -qE '^[[:space:]]*RestartSec=' "$d/hyprpaper.service.d/dotfiles-restart.conf"
+  grep -qE '^[[:space:]]*RestartSec=' "$d/waybar.service.d/dotfiles-restart.conf"
+
+  local f
+  for f in hyprpaper waybar; do
+    grep -qE '^[[:space:]]*StartLimitIntervalSec=0' "$d/$f.service.d/dotfiles-restart.conf"
+    # StartLimitIntervalSec is a [Unit] option; in [Service] systemd ignores it
+    # and the limiter silently stays on -- the exact failure being fixed.
+    grep -qE '^\[Unit\]' "$d/$f.service.d/dotfiles-restart.conf"
+    # Guard-free, like the shared kanshi.service: stationzebra has no GNOME.
+    ! grep -qE '^[[:space:]]*ConditionEnvironment=' "$d/$f.service.d/dotfiles-restart.conf"
+  done
+}
+
+@test "waybar.service.d is the second two-layer drop-in dir" {
+  # Both Fedora hosts guard waybar, and the profile now contributes the restart
+  # pacing, so waybar.service.d must not be treated as single-owner/foldable.
+  local h
+  for h in fedora cltc-aus-lws03; do
+    [ -f "$DF_SRC_REPO/hosts/$h/.config/systemd/user/waybar.service.d/hyprland-only.conf" ] \
+      || { echo "missing waybar guard for host $h"; false; }
+  done
+  [ -f "$DF_SRC_REPO/profiles/hyprland/.config/systemd/user/waybar.service.d/dotfiles-restart.conf" ]
 }
 
 @test "swaync's stylesheet imports the waybar seam relatively" {
